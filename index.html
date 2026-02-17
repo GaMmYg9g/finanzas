@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas App</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#111b21" media="(prefers-color-scheme: dark)">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Menú hamburguesa lateral -->
+        <div class="menu-overlay" id="menuOverlay"></div>
+        <div class="side-menu" id="sideMenu">
+            <div class="menu-header">
+                <h2>Finanzas</h2>
+                <button class="close-menu" id="closeMenu">&times;</button>
+            </div>
+            <nav class="menu-nav">
+                <a href="#" class="menu-item active" data-view="dashboard">Resumen</a>
+                <a href="#" class="menu-item" data-view="alcancia">Alcancía</a>
+                <a href="#" class="menu-item" data-view="monedero">Monedero</a>
+                <a href="#" class="menu-item" data-view="ingresos">Ingresos</a>
+                <a href="#" class="menu-item" data-view="gastos">Gastos</a>
+            </nav>
+            <div class="menu-footer">
+                <button class="theme-toggle" id="themeToggle">Modo Oscuro</button>
+            </div>
+        </div>
+
+        <!-- Header principal -->
+        <header class="header">
+            <button class="menu-toggle" id="menuToggle">☰</button>
+            <h1 class="header-title" id="headerTitle">Resumen</h1>
+            <div class="header-actions">
+                <span class="total-general" id="totalGeneral">0.00 €</span>
+            </div>
+        </header>
+
+        <!-- Contenido principal -->
+        <main class="main-content" id="mainContent">
+            <!-- Aquí se cargará cada vista dinámicamente -->
+        </main>
+    </div>
+
+    <!-- Modal personalizado para entradas -->
+    <div class="modal" id="customModal" style="display: none;">
+        <div class="modal-content">
+            <h3 class="modal-title" id="modalTitle">Ingresar datos</h3>
+            <input type="text" class="modal-input" id="modalInput" placeholder="Escribe aquí...">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="modalCancel">Cancelar</button>
+                <button class="modal-btn confirm" id="modalConfirm">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts modulares -->
+    <script src="js/components/alcancia.js"></script>
+    <script src="js/components/monedero.js"></script>
+    <script src="js/components/ingresos.js"></script>
+    <script src="js/components/gastos.js"></script>
+    <script src="js/components/dashboard.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Inicialización -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (typeof FinanzasApp !== 'undefined' && FinanzasApp) {
+                    FinanzasApp.init();
+                } else {
+                    console.error('FinanzasApp no está definido');
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
