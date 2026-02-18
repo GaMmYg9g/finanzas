@@ -16,7 +16,13 @@ const Gastos = {
                     <form id="formGasto">
                         <div class="form-group">
                             <label class="form-label">Fecha</label>
-                            <input type="date" class="form-input" id="gastoFecha" required>
+                            <div class="fecha-selector">
+                                <button type="button" class="fecha-btn" id="btnFecha">
+                                    <span class="fecha-icono">📅</span>
+                                    <span class="fecha-texto" id="fechaTexto">Seleccionar fecha</span>
+                                </button>
+                                <input type="hidden" id="fechaValor" required>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Cantidad</label>
@@ -50,7 +56,7 @@ const Gastos = {
                                 <input type="radio" name="origenGasto" id="origenMonedero" value="monedero" class="destino-radio">
                                 <label for="origenMonedero" class="destino-label">Monedero</label>
                                 <select class="destino-select" id="gastoMonedero" disabled>
-                                    <option value="">Seleccionar</option>
+                                    <option value="">Seleccionar monedero</option>
                                     ${FinanzasApp.data.monederos.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')}
                                 </select>
                             </div>
@@ -59,7 +65,7 @@ const Gastos = {
                                 <input type="radio" name="origenGasto" id="origenTarjeta" value="tarjeta" class="destino-radio">
                                 <label for="origenTarjeta" class="destino-label">Tarjeta</label>
                                 <select class="destino-select" id="gastoTarjeta" disabled>
-                                    <option value="">Seleccionar</option>
+                                    <option value="">Seleccionar tarjeta</option>
                                     ${FinanzasApp.data.tarjetas.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('')}
                                 </select>
                             </div>
@@ -68,7 +74,7 @@ const Gastos = {
                                 <input type="radio" name="origenGasto" id="origenAlcancia" value="alcancia" class="destino-radio">
                                 <label for="origenAlcancia" class="destino-label">Alcancía</label>
                                 <select class="destino-select" id="gastoAlcancia" disabled>
-                                    <option value="">Seleccionar</option>
+                                    <option value="">Seleccionar alcancía</option>
                                     ${FinanzasApp.data.alcancias.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('')}
                                 </select>
                             </div>
@@ -122,7 +128,9 @@ const Gastos = {
                     </div>
                     
                     <div class="calendar-legend">
-                        <span><span class="legend-dot negative"></span> Días con gastos</span>
+                        <span class="legend-item">
+                            <span class="legend-dot negative"></span> Días con gastos
+                        </span>
                     </div>
                 </div>
 
@@ -150,6 +158,24 @@ const Gastos = {
             this.registrarGasto();
         });
 
+        document.getElementById('btnFecha').addEventListener('click', async () => {
+    const fecha = await FinanzasApp.mostrarSelectorFecha();
+    if (fecha) {
+        document.getElementById('fechaValor').value = fecha;
+        const fechaTexto = document.getElementById('fechaTexto');
+        
+        // Mostrar la fecha en formato local sin alteración de zona horaria
+        const [año, mes, dia] = fecha.split('-');
+        const fechaLocal = new Date(año, mes-1, dia);
+        fechaTexto.textContent = fechaLocal.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+        fechaTexto.classList.add('seleccionada');
+    }
+});
+
         document.getElementById('gastoTipo').addEventListener('change', (e) => {
             if (e.target.value === 'nuevo') {
                 this.agregarNuevoTipo();
@@ -162,7 +188,6 @@ const Gastos = {
             }
         });
 
-        // Event listeners para los radio buttons
         document.querySelectorAll('input[name="origenGasto"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 this.actualizarOrigenes(e.target.value);
@@ -178,19 +203,14 @@ const Gastos = {
             this.currentDate.setMonth(this.currentDate.getMonth() + 1);
             this.actualizarVista();
         });
-        
-        const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('gastoFecha').value = hoy;
     },
 
     actualizarOrigenes(seleccion) {
-        // Deshabilitar todos los selects
         document.querySelectorAll('.destino-select').forEach(select => {
             select.disabled = true;
             select.style.opacity = '0.5';
         });
         
-        // Habilitar el select correspondiente
         if (seleccion === 'monedero') {
             document.getElementById('gastoMonedero').disabled = false;
             document.getElementById('gastoMonedero').style.opacity = '1';
@@ -271,62 +291,60 @@ const Gastos = {
         }
     },
 
-async mostrarGastosDia(dateStr) {
-    const gastos = this.getGastosDelDia(dateStr);
-    const fecha = new Date(dateStr + 'T12:00:00');
-    const titulo = fecha.toLocaleDateString('es-ES', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    });
-    
-    document.getElementById('diaSeleccionado').textContent = titulo;
-    
-    if (gastos.length === 0) {
-        document.getElementById('listaGastosDia').innerHTML = `
-            <p class="empty-state">No hay gastos este día</p>
-        `;
-    } else {
-        document.getElementById('listaGastosDia').innerHTML = `
-            <ul class="movimientos-list">
-                ${gastos.map(g => `
-                    <li class="movimiento-item">
-                        <div class="movimiento-icon gasto">G</div>
-                        <div class="movimiento-info">
-                            <div class="movimiento-concepto">${g.tipo} - ${g.descripcion || 'Sin descripción'}</div>
-                            <div class="movimiento-detalles">
-                                <span class="movimiento-fecha">${FinanzasApp.formatDate(g.fecha)}</span>
-                                <span class="movimiento-metodo">${g.metodo || 'Efectivo'}</span>
+    async mostrarGastosDia(dateStr) {
+        const gastos = this.getGastosDelDia(dateStr);
+        const titulo = FinanzasApp.formatDateLong(dateStr);
+        
+        document.getElementById('diaSeleccionado').textContent = titulo;
+        
+        if (gastos.length === 0) {
+            document.getElementById('listaGastosDia').innerHTML = `
+                <p class="empty-state">No hay gastos este día</p>
+            `;
+        } else {
+            document.getElementById('listaGastosDia').innerHTML = `
+                <ul class="movimientos-list">
+                    ${gastos.map(g => `
+                        <li class="movimiento-item">
+                            <div class="movimiento-icon gasto">G</div>
+                            <div class="movimiento-info">
+                                <div class="movimiento-concepto">${g.tipo} - ${g.descripcion || 'Sin descripción'}</div>
+                                <div class="movimiento-detalles">
+                                    <span class="movimiento-fecha">${FinanzasApp.formatDate(g.fecha)}</span>
+                                    <span class="movimiento-metodo">${g.metodo || 'Efectivo'}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="movimiento-cantidad gasto">- ${FinanzasApp.formatCurrency(g.cantidad)}</div>
-                        <div class="movimiento-actions">
-                            <button class="btn-icon" onclick="Gastos.editarGasto('${g.id}')">Editar</button>
-                            <button class="btn-icon" onclick="Gastos.eliminarGasto('${g.id}')">Eliminar</button>
-                        </div>
-                    </li>
-                `).join('')}
-            </ul>
-        `;
-    }
-    
-    document.getElementById('detalleDia').style.display = 'block';
-},
+                            <div class="movimiento-cantidad gasto">- ${FinanzasApp.formatCurrency(g.cantidad)}</div>
+                            <div class="movimiento-actions">
+                                <button class="btn-icon" onclick="Gastos.editarGasto('${g.id}')">Editar</button>
+                                <button class="btn-icon" onclick="Gastos.eliminarGasto('${g.id}')">Eliminar</button>
+                            </div>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+        
+        document.getElementById('detalleDia').style.display = 'block';
+    },
 
     cerrarDetalle() {
         document.getElementById('detalleDia').style.display = 'none';
     },
 
     registrarGasto() {
-        const fecha = document.getElementById('gastoFecha').value;
+        const fecha = document.getElementById('fechaValor').value;
         const cantidad = parseFloat(document.getElementById('gastoCantidad').value);
         const tipo = document.getElementById('gastoTipo').value;
         const metodo = document.getElementById('gastoMetodo').value;
         const descripcion = document.getElementById('gastoDescripcion').value;
         const frecuencia = document.getElementById('gastoFrecuencia').value;
         
-        // Validar tipo y método
+        if (!fecha) {
+            FinanzasApp.showMessage('Error', 'Selecciona una fecha', 'error');
+            return;
+        }
+        
         if (!tipo) {
             FinanzasApp.showMessage('Error', 'Selecciona un tipo de gasto', 'error');
             return;
@@ -337,11 +355,10 @@ async mostrarGastosDia(dateStr) {
             return;
         }
         
-        // Determinar qué origen está seleccionado
         const origenSeleccionado = document.querySelector('input[name="origenGasto"]:checked')?.value;
         
-        if (!fecha || !cantidad) {
-            FinanzasApp.showMessage('Error', 'Completa los campos obligatorios', 'error');
+        if (!cantidad) {
+            FinanzasApp.showMessage('Error', 'Ingresa una cantidad', 'error');
             return;
         }
 
@@ -360,7 +377,6 @@ async mostrarGastosDia(dateStr) {
             frecuencia: frecuencia
         };
 
-        // Verificar saldo y aplicar el gasto al origen seleccionado
         if (origenSeleccionado === 'monedero') {
             const monederoId = document.getElementById('gastoMonedero').value;
             if (!monederoId) {
@@ -416,12 +432,11 @@ async mostrarGastosDia(dateStr) {
         this.actualizarVista();
         document.getElementById('formGasto').reset();
         
-        // Resetear radio buttons
+        document.getElementById('fechaTexto').textContent = 'Seleccionar fecha';
+        document.getElementById('fechaTexto').classList.remove('seleccionada');
+        
         document.querySelectorAll('input[name="origenGasto"]').forEach(r => r.checked = false);
         this.actualizarOrigenes(null);
-        
-        const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('gastoFecha').value = hoy;
         
         FinanzasApp.showMessage('Gasto registrado', 'El gasto se ha guardado correctamente', 'success');
     },
@@ -434,7 +449,6 @@ async mostrarGastosDia(dateStr) {
         if (nuevaCantidad) {
             const cantidad = parseFloat(nuevaCantidad);
             if (cantidad > 0) {
-                // Devolver cantidad anterior
                 if (gasto.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
                     if (monedero) monedero.saldo += gasto.cantidad;
@@ -448,7 +462,6 @@ async mostrarGastosDia(dateStr) {
                     if (alcancia) alcancia.saldo += gasto.cantidad;
                 }
                 
-                // Verificar saldo para la nueva cantidad
                 let saldoSuficiente = true;
                 if (gasto.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
@@ -464,7 +477,6 @@ async mostrarGastosDia(dateStr) {
                 }
                 
                 if (saldoSuficiente) {
-                    // Restar nueva cantidad
                     if (gasto.monederoId) {
                         const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
                         if (monedero) monedero.saldo -= cantidad;
@@ -483,7 +495,6 @@ async mostrarGastosDia(dateStr) {
                     this.actualizarVista();
                     FinanzasApp.showMessage('Gasto actualizado', 'La cantidad se ha modificado correctamente', 'success');
                 } else {
-                    // Revertir devolución
                     if (gasto.monederoId) {
                         const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
                         if (monedero) monedero.saldo -= gasto.cantidad;
@@ -507,7 +518,6 @@ async mostrarGastosDia(dateStr) {
         if (confirmar) {
             const gasto = FinanzasApp.data.gastos.find(g => g.id === id);
             if (gasto) {
-                // Devolver dinero
                 if (gasto.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
                     if (monedero) monedero.saldo += gasto.cantidad;
