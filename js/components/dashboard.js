@@ -35,6 +35,13 @@ const Dashboard = {
                 </div>
 
                 <div class="card">
+                    <h3 class="section-title">Distribución por método</h3>
+                    <div id="resumenMetodos">
+                        ${this.renderResumenMetodos()}
+                    </div>
+                </div>
+
+                <div class="card">
                     <div class="chart-container">
                         <canvas id="dashboardChart"></canvas>
                     </div>
@@ -69,7 +76,7 @@ const Dashboard = {
                                         <span class="day-number">${day}</span>
                                         ${balance !== 0 ? `
                                             <div class="day-balance ${balance > 0 ? 'positive' : 'negative'}">
-                                                ${balance > 0 ? '+' : ''}${balance.toFixed(0)}$
+                                                ${balance > 0 ? '+' : ''}${Math.abs(balance).toFixed(0)}$
                                             </div>
                                         ` : ''}
                                     </div>
@@ -122,6 +129,36 @@ const Dashboard = {
         this.setupCalendarNav();
         this.updateResumen();
         this.initChart();
+    },
+
+    renderResumenMetodos() {
+        const metodos = {};
+        
+        // Inicializar métodos
+        FinanzasApp.data.config.metodosPago.forEach(m => metodos[m] = 0);
+        
+        // Sumar ingresos por método
+        FinanzasApp.data.ingresos.forEach(i => {
+            const metodo = i.metodo || 'Efectivo';
+            if (!metodos[metodo]) metodos[metodo] = 0;
+            metodos[metodo] += i.cantidad;
+        });
+        
+        // Restar gastos por método
+        FinanzasApp.data.gastos.forEach(g => {
+            const metodo = g.metodo || 'Efectivo';
+            if (!metodos[metodo]) metodos[metodo] = 0;
+            metodos[metodo] -= g.cantidad;
+        });
+        
+        return Object.entries(metodos).map(([metodo, total]) => `
+            <div class="metodo-item">
+                <div class="metodo-header">
+                    <span class="metodo-nombre">${metodo}</span>
+                    <span class="metodo-total ${total >= 0 ? 'positive' : 'negative'}">${FinanzasApp.formatCurrency(total)}</span>
+                </div>
+            </div>
+        `).join('');
     },
 
     setupPeriodButtons() {
@@ -221,8 +258,8 @@ const Dashboard = {
                     ${m.tipo === 'ingreso' ? 'I' : 'G'}
                 </div>
                 <div class="movimiento-info">
-                    <div class="movimiento-concepto">${m.descripcion || (m.tipo === 'ingreso' ? 'Ingreso' : m.tipo === 'gasto' ? 'Gasto' : m.tipo)}</div>
-                    <div class="movimiento-fecha">${FinanzasApp.formatDate(m.fecha)}</div>
+                    <div class="movimiento-concepto">${m.descripcion || (m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')}</div>
+                    <div class="movimiento-fecha">${FinanzasApp.formatDate(m.fecha)} · ${m.metodo || 'Efectivo'}</div>
                 </div>
                 <div class="movimiento-cantidad ${m.tipo}">
                     ${m.tipo === 'ingreso' ? '+' : '-'} ${FinanzasApp.formatCurrency(m.cantidad)}
@@ -395,6 +432,7 @@ const Dashboard = {
         document.getElementById('totalGastos').textContent = FinanzasApp.formatCurrency(gastos);
         document.getElementById('totalBalance').textContent = FinanzasApp.formatCurrency(ingresos - gastos);
         
+        document.getElementById('resumenMetodos').innerHTML = this.renderResumenMetodos();
         this.initChart();
     },
 
@@ -446,8 +484,8 @@ const Dashboard = {
                     ${m.tipo === 'ingreso' ? 'I' : 'G'}
                 </div>
                 <div class="movimiento-info">
-                    <div class="movimiento-concepto">${m.descripcion || (m.tipo === 'ingreso' ? 'Ingreso' : m.tipo === 'gasto' ? 'Gasto' : m.tipo)}</div>
-                    <div class="movimiento-fecha">${FinanzasApp.formatDate(m.fecha)}</div>
+                    <div class="movimiento-concepto">${m.descripcion || (m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')}</div>
+                    <div class="movimiento-fecha">${FinanzasApp.formatDate(m.fecha)} · ${m.metodo || 'Efectivo'}</div>
                 </div>
                 <div class="movimiento-cantidad ${m.tipo}">
                     ${m.tipo === 'ingreso' ? '+' : '-'} ${FinanzasApp.formatCurrency(m.cantidad)}
