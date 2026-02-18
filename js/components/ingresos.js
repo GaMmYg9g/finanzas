@@ -85,7 +85,7 @@ const Ingresos = {
                                     <span class="day-number">${day}</span>
                                     ${total > 0 ? `
                                         <div class="day-total positive">
-                                            ${total.toFixed(0)}€
+                                            ${total.toFixed(0)}$
                                         </div>
                                     ` : ''}
                                 </div>
