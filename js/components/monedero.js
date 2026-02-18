@@ -42,8 +42,7 @@ const Monedero = {
             <div class="card" data-monedero-id="${m.id}">
                 <div class="monedero-header">
                     <h4>
-                        ${m.nombre}
-                        ${m.tipo === 'principal' ? '<span class="text-secondary" style="font-size: 0.8rem;">(Principal)</span>' : ''}
+                        ${m.tipo === 'principal' ? 'Mi monedero' : m.nombre}
                     </h4>
                     <span class="monedero-saldo">${FinanzasApp.formatCurrency(m.saldo)}</span>
                 </div>
@@ -134,7 +133,7 @@ const Monedero = {
         
         const opciones = monederos.map(m => ({
             value: m.id,
-            label: `${m.nombre} (${FinanzasApp.formatCurrency(m.saldo)})`
+            label: `${m.tipo === 'principal' ? 'Mi monedero' : m.nombre} (${FinanzasApp.formatCurrency(m.saldo)})`
         }));
         
         const destinoId = await FinanzasApp.showSelect('Transferir a monedero', 'Selecciona monedero destino:', opciones);
@@ -162,12 +161,12 @@ const Monedero = {
                 destinoObj.saldo += cantidad;
                 FinanzasApp.saveData();
                 await FinanzasApp.showMessage('Transferencia completada', 
-                    `Se han transferido ${FinanzasApp.formatCurrency(cantidad)} de "${origen.nombre}" a "${destinoObj.nombre}".`, 
+                    `Se han transferido ${FinanzasApp.formatCurrency(cantidad)} de "${origen.tipo === 'principal' ? 'Mi monedero' : origen.nombre}" a "${destinoObj.tipo === 'principal' ? 'Mi monedero' : destinoObj.nombre}".`, 
                     'success');
                 this.actualizarVista();
             } else {
                 await FinanzasApp.showMessage('Saldo insuficiente', 
-                    `El monedero "${origen.nombre}" tiene ${FinanzasApp.formatCurrency(origen.saldo)}.`, 
+                    `El monedero "${origen.tipo === 'principal' ? 'Mi monedero' : origen.nombre}" tiene ${FinanzasApp.formatCurrency(origen.saldo)}.`, 
                     'error');
             }
         }
@@ -211,12 +210,12 @@ const Monedero = {
                 alcancia.saldo += cantidad;
                 FinanzasApp.saveData();
                 await FinanzasApp.showMessage('Transferencia completada', 
-                    `Se han transferido ${FinanzasApp.formatCurrency(cantidad)} del monedero "${origen.nombre}" a la alcancía "${alcancia.nombre}".`, 
+                    `Se han transferido ${FinanzasApp.formatCurrency(cantidad)} del monedero "${origen.tipo === 'principal' ? 'Mi monedero' : origen.nombre}" a la alcancía "${alcancia.nombre}".`, 
                     'success');
                 this.actualizarVista();
             } else {
                 await FinanzasApp.showMessage('Saldo insuficiente', 
-                    `El monedero "${origen.nombre}" tiene ${FinanzasApp.formatCurrency(origen.saldo)}.`, 
+                    `El monedero "${origen.tipo === 'principal' ? 'Mi monedero' : origen.nombre}" tiene ${FinanzasApp.formatCurrency(origen.saldo)}.`, 
                     'error');
             }
         }
