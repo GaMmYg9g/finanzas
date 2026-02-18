@@ -1,6 +1,6 @@
 {
-    "name": "Finanzas Personales",
-    "short_name": "Finanzas",
+    "name": "Mis Finanzas Personales",
+    "short_name": "Mis Finanzas",
     "description": "Aplicación diseñada para llevar el control de las finanzas personales",
     "start_url": ".",
     "display": "standalone",
