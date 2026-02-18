@@ -27,19 +27,19 @@
 [data-theme="dark"] {
     --bg-primary: #111b21;
     --bg-secondary: #1f2c34;
-    --text-primary: #e9edef;
-    --text-secondary: #8696a0;
-    --border-color: #2a3942;
-    --accent-color: #25D366;
-    --shadow-color: rgba(0,0,0,0.3);
+    --text-primary: #ffffff;
+    --text-secondary: #b0b8c0;
+    --border-color: #3a4a55;
+    --accent-color: #4cd964;
+    --shadow-color: rgba(0,0,0,0.5);
     --card-bg: #1f2c34;
     --menu-bg: #1f2c34;
     --header-bg: #1f2c34;
     --hover-bg: #2a3942;
-    --success-color: #25D366;
-    --error-color: #f15c5c;
+    --success-color: #4cd964;
+    --error-color: #ff5e5e;
     --warning-color: #ffc107;
-    --info-color: #2196f3;
+    --info-color: #64b5f6;
 }
 
 body {
@@ -275,6 +275,7 @@ body {
     font-size: 1.2rem;
     font-weight: 700;
     white-space: nowrap;
+    color: var(--text-primary);
 }
 
 .resumen-value.ingresos { color: var(--success-color); }
@@ -328,6 +329,7 @@ body {
     font-weight: 600;
     margin-bottom: 0.2rem;
     font-size: 0.95rem;
+    color: var(--text-primary);
 }
 
 .movimiento-fecha {
@@ -379,6 +381,7 @@ body {
 
 .alcancia-nombre {
     font-weight: 600;
+    color: var(--text-primary);
 }
 
 .alcancia-meta {
@@ -570,14 +573,6 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
-}
-
-.section-subtitle {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .objetivos-count {
@@ -1042,6 +1037,10 @@ body {
     color: var(--text-primary);
 }
 
+.metodo-total {
+    color: var(--text-primary);
+}
+
 .metodo-total.positive {
     color: var(--success-color);
 }
@@ -1104,4 +1103,56 @@ body {
     .day-balance, .day-total {
         font-size: 0.7rem;
     }
+}
+
+/* Estilos para mostrar progreso en objetivos */
+.objetivo-actual {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.objetivo-total {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.objetivo-completado {
+    display: inline-block;
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
+    color: var(--success-color);
+    font-weight: 600;
+    background-color: rgba(37, 211, 102, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+}
+
+/* Contenedor de progreso con porcentaje */
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.progress-container .progress-bar {
+    flex: 1;
+    margin: 0;
+}
+
+.progress-porcentaje {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 45px;
+    text-align: right;
+}
+
+[data-theme="dark"] .progress-porcentaje {
+    color: #b0b8c0;
+}
+
+.objetivo-item .objetivo-completado {
+    margin-top: 0;
+    margin-left: 0.5rem;
 }
