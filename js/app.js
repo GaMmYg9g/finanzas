@@ -249,49 +249,49 @@ const FinanzasApp = {
         });
     },
 
-    async showSelect(titulo, mensaje, opciones) {
-        return new Promise((resolve) => {
-            const modal = document.getElementById('customModal');
-            const title = document.getElementById('modalTitle');
-            const input = document.getElementById('modalInput');
-            const cancelBtn = document.getElementById('modalCancel');
-            const confirmBtn = document.getElementById('modalConfirm');
-            
-            const select = document.createElement('select');
-            select.className = 'form-input';
-            select.id = 'modalSelect';
-            select.innerHTML = opciones.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
-            
-            input.style.display = 'none';
-            select.style.marginBottom = '1.5rem';
-            modal.querySelector('.modal-content').insertBefore(select, modal.querySelector('.modal-buttons'));
-            
-            title.textContent = titulo;
-            modal.style.display = 'flex';
-            
-            const cleanup = () => {
-                modal.style.display = 'none';
-                input.style.display = 'block';
-                select.remove();
-                cancelBtn.removeEventListener('click', onCancel);
-                confirmBtn.removeEventListener('click', onConfirm);
-            };
-            
-            const onCancel = () => {
-                cleanup();
-                resolve(null);
-            };
-            
-            const onConfirm = () => {
-                const valor = select.value;
-                cleanup();
-                resolve(valor);
-            };
-            
-            cancelBtn.addEventListener('click', onCancel);
-            confirmBtn.addEventListener('click', onConfirm);
-        });
-    },
+   async showSelect(titulo, mensaje, opciones) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('customModal');
+        const title = document.getElementById('modalTitle');
+        const input = document.getElementById('modalInput');
+        const cancelBtn = document.getElementById('modalCancel');
+        const confirmBtn = document.getElementById('modalConfirm');
+        
+        const select = document.createElement('select');
+        select.className = 'form-input';
+        select.id = 'modalSelect';
+        select.innerHTML = opciones.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+        
+        input.style.display = 'none';
+        select.style.marginBottom = '1.5rem';
+        modal.querySelector('.modal-content').insertBefore(select, modal.querySelector('.modal-buttons'));
+        
+        title.textContent = titulo;
+        modal.style.display = 'flex';
+        
+        const cleanup = () => {
+            modal.style.display = 'none';
+            input.style.display = 'block';
+            select.remove();
+            cancelBtn.removeEventListener('click', onCancel);
+            confirmBtn.removeEventListener('click', onConfirm);
+        };
+        
+        const onCancel = () => {
+            cleanup();
+            resolve(null);
+        };
+        
+        const onConfirm = () => {
+            const valor = select.value;
+            cleanup();
+            resolve(valor);
+        };
+        
+        cancelBtn.addEventListener('click', onCancel);
+        confirmBtn.addEventListener('click', onConfirm);
+    });
+},
 
     async showPrompt(titulo, placeholder = '', tipo = 'text', valorPorDefecto = '') {
         return new Promise((resolve) => {
