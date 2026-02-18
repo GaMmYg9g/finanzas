@@ -134,7 +134,7 @@ const FinanzasApp = {
         } else {
             this.data = {
                 monederos: [
-                    { id: '1', nombre: 'Principal', saldo: 0, tipo: 'principal' }
+                    { id: '1', nombre: 'Mi monedero', saldo: 0, tipo: 'principal' }
                 ],
                 alcancias: [],
                 ingresos: [],
