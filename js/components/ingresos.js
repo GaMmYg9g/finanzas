@@ -24,46 +24,59 @@ const Ingresos = {
                         </div>
                         <div class="form-group">
                             <label class="form-label">Tipo</label>
-                            <select class="form-input" id="ingresoTipo">
+                            <select class="form-input select-limpio" id="ingresoTipo">
+                                <option value="">Seleccionar tipo</option>
                                 ${FinanzasApp.data.config.tiposIngreso.map(t => `<option value="${t}">${t}</option>`).join('')}
                                 <option value="nuevo">+ Agregar nuevo tipo</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Método de pago</label>
-                            <select class="form-input" id="ingresoMetodo">
+                            <select class="form-input select-limpio" id="ingresoMetodo">
+                                <option value="">Seleccionar método</option>
                                 ${FinanzasApp.data.config.metodosPago.map(m => `<option value="${m}">${m}</option>`).join('')}
                                 <option value="nuevo">+ Agregar nuevo método</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Descripción (opcional)</label>
-                            <input type="text" class="form-input" id="ingresoDescripcion">
+                            <input type="text" class="form-input" id="ingresoDescripcion" placeholder="Descripción del ingreso">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Monedero destino</label>
-                            <select class="form-input" id="ingresoMonedero">
-                                <option value="">Ninguno</option>
-                                ${FinanzasApp.data.monederos.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')}
-                            </select>
+                        
+                        <div class="destino-group">
+                            <div class="destino-titulo">Destino del ingreso (selecciona uno)</div>
+                            
+                            <div class="destino-opcion">
+                                <input type="radio" name="destinoIngreso" id="destinoMonedero" value="monedero" class="destino-radio">
+                                <label for="destinoMonedero" class="destino-label">Monedero</label>
+                                <select class="destino-select" id="ingresoMonedero" disabled>
+                                    <option value="">Seleccionar</option>
+                                    ${FinanzasApp.data.monederos.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')}
+                                </select>
+                            </div>
+                            
+                            <div class="destino-opcion">
+                                <input type="radio" name="destinoIngreso" id="destinoTarjeta" value="tarjeta" class="destino-radio">
+                                <label for="destinoTarjeta" class="destino-label">Tarjeta</label>
+                                <select class="destino-select" id="ingresoTarjeta" disabled>
+                                    <option value="">Seleccionar</option>
+                                    ${FinanzasApp.data.tarjetas.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('')}
+                                </select>
+                            </div>
+                            
+                            <div class="destino-opcion">
+                                <input type="radio" name="destinoIngreso" id="destinoAlcancia" value="alcancia" class="destino-radio">
+                                <label for="destinoAlcancia" class="destino-label">Alcancía</label>
+                                <select class="destino-select" id="ingresoAlcancia" disabled>
+                                    <option value="">Seleccionar</option>
+                                    ${FinanzasApp.data.alcancias.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('')}
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Tarjeta destino</label>
-                            <select class="form-input" id="ingresoTarjeta">
-                                <option value="">Ninguna</option>
-                                ${FinanzasApp.data.tarjetas.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Alcancía destino (opcional)</label>
-                            <select class="form-input" id="ingresoAlcancia">
-                                <option value="">Ninguna</option>
-                                ${FinanzasApp.data.alcancias.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('')}
-                            </select>
-                        </div>
+                        
                         <div class="form-group">
                             <label class="form-label">Frecuencia</label>
-                            <select class="form-input" id="ingresoFrecuencia">
+                            <select class="form-input select-limpio" id="ingresoFrecuencia">
                                 <option value="puntual">Puntual</option>
                                 <option value="diario">Diario</option>
                                 <option value="mensual">Mensual</option>
@@ -142,6 +155,13 @@ const Ingresos = {
             }
         });
 
+        // Event listeners para los radio buttons
+        document.querySelectorAll('input[name="destinoIngreso"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.actualizarDestinos(e.target.value);
+            });
+        });
+
         document.getElementById('prevMonth')?.addEventListener('click', () => {
             this.currentDate.setMonth(this.currentDate.getMonth() - 1);
             this.actualizarVista();
@@ -154,6 +174,26 @@ const Ingresos = {
         
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById('ingresoFecha').value = hoy;
+    },
+
+    actualizarDestinos(seleccion) {
+        // Deshabilitar todos los selects
+        document.querySelectorAll('.destino-select').forEach(select => {
+            select.disabled = true;
+            select.style.opacity = '0.5';
+        });
+        
+        // Habilitar el select correspondiente
+        if (seleccion === 'monedero') {
+            document.getElementById('ingresoMonedero').disabled = false;
+            document.getElementById('ingresoMonedero').style.opacity = '1';
+        } else if (seleccion === 'tarjeta') {
+            document.getElementById('ingresoTarjeta').disabled = false;
+            document.getElementById('ingresoTarjeta').style.opacity = '1';
+        } else if (seleccion === 'alcancia') {
+            document.getElementById('ingresoAlcancia').disabled = false;
+            document.getElementById('ingresoAlcancia').style.opacity = '1';
+        }
     },
 
     getMonthName(month) {
@@ -172,9 +212,10 @@ const Ingresos = {
             FinanzasApp.saveData();
             
             const select = document.getElementById('ingresoTipo');
-            select.innerHTML = FinanzasApp.data.config.tiposIngreso.map(t => 
-                `<option value="${t}">${t}</option>`
-            ).join('') + '<option value="nuevo">+ Agregar nuevo tipo</option>';
+            select.innerHTML = '<option value="">Seleccionar tipo</option>' + 
+                FinanzasApp.data.config.tiposIngreso.map(t => 
+                    `<option value="${t}">${t}</option>`
+                ).join('') + '<option value="nuevo">+ Agregar nuevo tipo</option>';
             select.value = nuevoTipo.trim();
         }
     },
@@ -186,9 +227,10 @@ const Ingresos = {
             FinanzasApp.saveData();
             
             const select = document.getElementById('ingresoMetodo');
-            select.innerHTML = FinanzasApp.data.config.metodosPago.map(m => 
-                `<option value="${m}">${m}</option>`
-            ).join('') + '<option value="nuevo">+ Agregar nuevo método</option>';
+            select.innerHTML = '<option value="">Seleccionar método</option>' + 
+                FinanzasApp.data.config.metodosPago.map(m => 
+                    `<option value="${m}">${m}</option>`
+                ).join('') + '<option value="nuevo">+ Agregar nuevo método</option>';
             select.value = nuevoMetodo.trim();
         }
     },
@@ -221,8 +263,8 @@ const Ingresos = {
                             </div>
                             <div class="movimiento-cantidad ingreso">+ ${FinanzasApp.formatCurrency(i.cantidad)}</div>
                             <div class="movimiento-actions">
-                                <button class="btn-icon" onclick="Ingresos.editarIngreso('${i.id}')">✏️</button>
-                                <button class="btn-icon" onclick="Ingresos.eliminarIngreso('${i.id}')">🗑️</button>
+                                <button class="btn-icon" onclick="Ingresos.editarIngreso('${i.id}')">Editar</button>
+                                <button class="btn-icon" onclick="Ingresos.eliminarIngreso('${i.id}')">Eliminar</button>
                             </div>
                         </li>
                     `).join('')}
@@ -243,18 +285,29 @@ const Ingresos = {
         const tipo = document.getElementById('ingresoTipo').value;
         const metodo = document.getElementById('ingresoMetodo').value;
         const descripcion = document.getElementById('ingresoDescripcion').value;
-        const monederoId = document.getElementById('ingresoMonedero').value;
-        const tarjetaId = document.getElementById('ingresoTarjeta').value;
-        const alcanciaId = document.getElementById('ingresoAlcancia').value;
         const frecuencia = document.getElementById('ingresoFrecuencia').value;
-
+        
+        // Validar tipo y método
+        if (!tipo) {
+            FinanzasApp.showMessage('Error', 'Selecciona un tipo de ingreso', 'error');
+            return;
+        }
+        
+        if (!metodo) {
+            FinanzasApp.showMessage('Error', 'Selecciona un método de pago', 'error');
+            return;
+        }
+        
+        // Determinar qué destino está seleccionado
+        const destinoSeleccionado = document.querySelector('input[name="destinoIngreso"]:checked')?.value;
+        
         if (!fecha || !cantidad) {
             FinanzasApp.showMessage('Error', 'Completa los campos obligatorios', 'error');
             return;
         }
 
-        if (!monederoId && !tarjetaId && !alcanciaId) {
-            FinanzasApp.showMessage('Error', 'Selecciona al menos un destino', 'error');
+        if (!destinoSeleccionado) {
+            FinanzasApp.showMessage('Error', 'Selecciona un destino para el ingreso', 'error');
             return;
         }
 
@@ -265,33 +318,53 @@ const Ingresos = {
             tipo: tipo,
             metodo: metodo,
             descripcion: descripcion,
-            monederoId: monederoId || null,
-            tarjetaId: tarjetaId || null,
-            alcanciaId: alcanciaId || null,
             frecuencia: frecuencia
         };
 
-        FinanzasApp.data.ingresos.push(nuevoIngreso);
-
-        if (monederoId) {
+        // Aplicar el ingreso al destino seleccionado
+        if (destinoSeleccionado === 'monedero') {
+            const monederoId = document.getElementById('ingresoMonedero').value;
+            if (!monederoId) {
+                FinanzasApp.showMessage('Error', 'Selecciona un monedero', 'error');
+                return;
+            }
+            nuevoIngreso.monederoId = monederoId;
             const monedero = FinanzasApp.data.monederos.find(m => m.id === monederoId);
             if (monedero) monedero.saldo += cantidad;
-        }
-
-        if (tarjetaId) {
+            
+        } else if (destinoSeleccionado === 'tarjeta') {
+            const tarjetaId = document.getElementById('ingresoTarjeta').value;
+            if (!tarjetaId) {
+                FinanzasApp.showMessage('Error', 'Selecciona una tarjeta', 'error');
+                return;
+            }
+            nuevoIngreso.tarjetaId = tarjetaId;
             const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === tarjetaId);
             if (tarjeta) tarjeta.saldo += cantidad;
-        }
-
-        if (alcanciaId) {
+            
+        } else if (destinoSeleccionado === 'alcancia') {
+            const alcanciaId = document.getElementById('ingresoAlcancia').value;
+            if (!alcanciaId) {
+                FinanzasApp.showMessage('Error', 'Selecciona una alcancía', 'error');
+                return;
+            }
+            nuevoIngreso.alcanciaId = alcanciaId;
             const alcancia = FinanzasApp.data.alcancias.find(a => a.id === alcanciaId);
-            if (alcancia) alcancia.saldo += cantidad;
+            if (alcancia) {
+                alcancia.saldo += cantidad;
+                alcancia.acumulado = (alcancia.acumulado || 0) + cantidad;
+            }
         }
 
+        FinanzasApp.data.ingresos.push(nuevoIngreso);
         FinanzasApp.saveData();
         
         this.actualizarVista();
         document.getElementById('formIngreso').reset();
+        
+        // Resetear radio buttons
+        document.querySelectorAll('input[name="destinoIngreso"]').forEach(r => r.checked = false);
+        this.actualizarDestinos(null);
         
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById('ingresoFecha').value = hoy;
