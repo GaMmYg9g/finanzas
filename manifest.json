@@ -2,7 +2,7 @@
     "name": "Finanzas Personales",
     "short_name": "Finanzas",
     "description": "Aplicación de control de finanzas personales",
-    "start_url": "/finanzas/",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#ffffff",
