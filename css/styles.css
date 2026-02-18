@@ -1394,3 +1394,57 @@ body {
         font-size: 0.7rem;
     }
 }
+
+/* Estilos para el botón Transferir en monedero/tarjetas */
+.monedero-actions .btn-secondary {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 80px;
+    text-align: center;
+}
+
+.monedero-actions .btn-secondary:hover {
+    background-color: var(--hover-bg);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+    color: var(--accent-color);
+}
+
+.monedero-actions .btn-secondary:active {
+    transform: translateY(0);
+}
+
+/* Responsive para móvil */
+@media (max-width: 480px) {
+    .monedero-actions .btn-secondary {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+        min-width: 70px;
+    }
+}
+
+/* Si quieres que todos los botones secundarios tengan el mismo estilo */
+.btn-secondary {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--hover-bg);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
