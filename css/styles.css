@@ -265,6 +265,14 @@ body {
 .resumen-value {
     font-size: 1.2rem;
     font-weight: 700;
+    white-space: nowrap;
+}
+
+.resumen-value::after {
+    content: " €";
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-left: 2px;
 }
 
 .resumen-value.ingresos { color: var(--success-color); }
