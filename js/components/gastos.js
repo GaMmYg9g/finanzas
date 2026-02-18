@@ -271,45 +271,48 @@ const Gastos = {
         }
     },
 
-    async mostrarGastosDia(dateStr) {
-        const gastos = this.getGastosDelDia(dateStr);
-        const fecha = new Date(dateStr + 'T12:00:00');
-        const titulo = fecha.toLocaleDateString('es-ES', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-        
-        document.getElementById('diaSeleccionado').textContent = titulo;
-        
-        if (gastos.length === 0) {
-            document.getElementById('listaGastosDia').innerHTML = `
-                <p class="empty-state">No hay gastos este día</p>
-            `;
-        } else {
-            document.getElementById('listaGastosDia').innerHTML = `
-                <ul class="movimientos-list">
-                    ${gastos.map(g => `
-                        <li class="movimiento-item" data-id="${g.id}">
-                            <div class="movimiento-icon gasto">G</div>
-                            <div class="movimiento-info">
-                                <div class="movimiento-concepto">${g.tipo} - ${g.descripcion || 'Sin descripción'}</div>
-                                <div class="movimiento-fecha">${FinanzasApp.formatDate(g.fecha)} · ${g.metodo || 'Efectivo'}</div>
+async mostrarGastosDia(dateStr) {
+    const gastos = this.getGastosDelDia(dateStr);
+    const fecha = new Date(dateStr + 'T12:00:00');
+    const titulo = fecha.toLocaleDateString('es-ES', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    
+    document.getElementById('diaSeleccionado').textContent = titulo;
+    
+    if (gastos.length === 0) {
+        document.getElementById('listaGastosDia').innerHTML = `
+            <p class="empty-state">No hay gastos este día</p>
+        `;
+    } else {
+        document.getElementById('listaGastosDia').innerHTML = `
+            <ul class="movimientos-list">
+                ${gastos.map(g => `
+                    <li class="movimiento-item">
+                        <div class="movimiento-icon gasto">G</div>
+                        <div class="movimiento-info">
+                            <div class="movimiento-concepto">${g.tipo} - ${g.descripcion || 'Sin descripción'}</div>
+                            <div class="movimiento-detalles">
+                                <span class="movimiento-fecha">${FinanzasApp.formatDate(g.fecha)}</span>
+                                <span class="movimiento-metodo">${g.metodo || 'Efectivo'}</span>
                             </div>
-                            <div class="movimiento-cantidad gasto">- ${FinanzasApp.formatCurrency(g.cantidad)}</div>
-                            <div class="movimiento-actions">
-                                <button class="btn-icon" onclick="Gastos.editarGasto('${g.id}')">Editar</button>
-                                <button class="btn-icon" onclick="Gastos.eliminarGasto('${g.id}')">Eliminar</button>
-                            </div>
-                        </li>
-                    `).join('')}
-                </ul>
-            `;
-        }
-        
-        document.getElementById('detalleDia').style.display = 'block';
-    },
+                        </div>
+                        <div class="movimiento-cantidad gasto">- ${FinanzasApp.formatCurrency(g.cantidad)}</div>
+                        <div class="movimiento-actions">
+                            <button class="btn-icon" onclick="Gastos.editarGasto('${g.id}')">Editar</button>
+                            <button class="btn-icon" onclick="Gastos.eliminarGasto('${g.id}')">Eliminar</button>
+                        </div>
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+    }
+    
+    document.getElementById('detalleDia').style.display = 'block';
+},
 
     cerrarDetalle() {
         document.getElementById('detalleDia').style.display = 'none';
