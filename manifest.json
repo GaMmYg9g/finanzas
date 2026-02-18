@@ -1,7 +1,7 @@
 {
     "name": "Finanzas Personales",
     "short_name": "Finanzas",
-    "description": "Aplicación de control de finanzas personales",
+    "description": "Aplicación diseñada para llevar el control de las finanzas personales",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",
