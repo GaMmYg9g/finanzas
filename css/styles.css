@@ -486,21 +486,19 @@ body {
     background-color: var(--hover-bg);
 }
 
-/* Alcancía */
+/* Alcancía - Acciones en dos filas de 3 */
 .alcancia-actions {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    margin-top: 1rem;
 }
 
 .actions-group {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
-}
-
-.actions-group:last-child {
-    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
 }
 
 .action-btn {
@@ -509,7 +507,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.3rem;
-    padding: 0.8rem 0.3rem;
+    padding: 0.8rem 0.2rem;
     background: none;
     border: 1px solid var(--border-color);
     border-radius: 10px;
@@ -519,16 +517,29 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     background-color: var(--card-bg);
+    width: 100%;
+    min-width: 0;
+    text-align: center;
 }
 
 .action-btn:hover {
     background-color: var(--hover-bg);
     transform: translateY(-1px);
+    border-color: var(--accent-color);
 }
 
 .action-text {
     font-size: 0.75rem;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.action-btn-stats:hover {
+    border-color: var(--info-color);
+    color: var(--info-color);
 }
 
 .action-btn-edit:hover {
@@ -539,6 +550,17 @@ body {
 .action-btn-delete:hover {
     border-color: var(--error-color);
     color: var(--error-color);
+}
+
+/* Responsive para pantallas muy pequeñas */
+@media (max-width: 360px) {
+    .action-text {
+        font-size: 0.7rem;
+    }
+    
+    .action-btn {
+        padding: 0.6rem 0.1rem;
+    }
 }
 
 .alcancia-nombre {
@@ -594,12 +616,22 @@ body {
     background-color: var(--hover-bg);
     padding: 0.8rem;
     border-radius: 10px;
+    margin-bottom: 0.8rem;
+}
+
+.objetivo-item:last-child {
+    margin-bottom: 0;
+}
+
+.objetivo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
 }
 
 .objetivo-info {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
+    flex: 1;
 }
 
 .objetivo-nombre {
@@ -613,22 +645,121 @@ body {
     font-weight: 500;
 }
 
-.objetivo-completado {
-    display: inline-block;
-    margin-top: 0.3rem;
-    font-size: 0.8rem;
+.objetivo-actual {
     color: var(--success-color);
     font-weight: 600;
 }
 
-.empty-state {
-    text-align: center;
+.objetivo-total {
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    padding: 2rem;
-    background-color: var(--hover-bg);
-    border-radius: 10px;
     font-weight: 500;
+}
+
+.objetivo-actions {
+    display: flex;
+    gap: 0.3rem;
+    margin-left: 0.5rem;
+}
+
+.btn-icon-small {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    min-width: 45px;
+    text-align: center;
+}
+
+.btn-icon-small:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-primary);
+    border-color: var(--accent-color);
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.progress-container .progress-bar {
+    flex: 1;
+    margin: 0;
+}
+
+.progress-porcentaje {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 45px;
+    text-align: right;
+}
+
+.objetivo-completado-badge {
+    display: inline-block;
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
+    color: var(--success-color);
+    font-weight: 600;
+    background-color: rgba(37, 211, 102, 0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+}
+
+/* Estilos para objetivos retirados */
+.objetivo-retirado-item {
+    background-color: var(--hover-bg);
+    border-left: 4px solid var(--text-secondary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    opacity: 0.9;
+}
+
+.objetivo-retirado-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.objetivo-retirado-nombre {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.objetivo-retirado-badge {
+    background-color: var(--text-secondary);
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.objetivo-retirado-monto {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-align: right;
+}
+
+[data-theme="dark"] .objetivo-retirado-item {
+    background-color: #2a3942;
+    border-left-color: #8696a0;
+}
+
+[data-theme="dark"] .objetivo-retirado-badge {
+    background-color: #8696a0;
+    color: #111b21;
 }
 
 /* Calendario */
@@ -884,6 +1015,56 @@ body {
     color: var(--text-primary);
 }
 
+/* Estilos para la tarjeta de estadísticas */
+.stats-container {
+    padding: 1rem 0;
+}
+
+.stats-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.stats-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stats-value.positive {
+    color: var(--success-color);
+}
+
+.stats-value.negative {
+    color: var(--error-color);
+}
+
+.stats-value.success {
+    color: var(--success-color);
+}
+
+.stats-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 0.5rem 0;
+}
+
 /* Toast messages */
 .toast-message {
     position: fixed;
@@ -1103,56 +1284,4 @@ body {
     .day-balance, .day-total {
         font-size: 0.7rem;
     }
-}
-
-/* Estilos para mostrar progreso en objetivos */
-.objetivo-actual {
-    color: var(--success-color);
-    font-weight: 600;
-}
-
-.objetivo-total {
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.objetivo-completado {
-    display: inline-block;
-    margin-top: 0.3rem;
-    font-size: 0.8rem;
-    color: var(--success-color);
-    font-weight: 600;
-    background-color: rgba(37, 211, 102, 0.1);
-    padding: 0.2rem 0.5rem;
-    border-radius: 12px;
-}
-
-/* Contenedor de progreso con porcentaje */
-.progress-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0.5rem 0;
-}
-
-.progress-container .progress-bar {
-    flex: 1;
-    margin: 0;
-}
-
-.progress-porcentaje {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    min-width: 45px;
-    text-align: right;
-}
-
-[data-theme="dark"] .progress-porcentaje {
-    color: #b0b8c0;
-}
-
-.objetivo-item .objetivo-completado {
-    margin-top: 0;
-    margin-left: 0.5rem;
 }
