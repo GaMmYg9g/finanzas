@@ -214,6 +214,15 @@ body {
     text-transform: uppercase;
 }
 
+.section-subtitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 1rem 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 /* Dashboard */
 .period-selector {
     display: flex;
@@ -266,13 +275,6 @@ body {
     font-size: 1.2rem;
     font-weight: 700;
     white-space: nowrap;
-}
-
-.resumen-value::after {
-    content: " $";
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-left: 2px;
 }
 
 .resumen-value.ingresos { color: var(--success-color); }
@@ -687,6 +689,7 @@ body {
     grid-template-columns: repeat(7, 1fr);
     gap: 4px;
     margin-bottom: 1rem;
+    width: 100%;
 }
 
 .calendar-day {
@@ -701,6 +704,9 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .calendar-day:hover {
@@ -723,12 +729,17 @@ body {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-primary);
+    line-height: 1.2;
 }
 
 .day-balance, .day-total {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 700;
     margin-top: 2px;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .day-balance.positive, .day-total.positive {
@@ -902,6 +913,11 @@ body {
     transform: translateX(-50%) translateY(0);
 }
 
+.toast-icon {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
 .toast-content {
     flex: 1;
 }
@@ -970,7 +986,7 @@ body {
     font-weight: 500;
 }
 
-/* Monedero */
+/* Monedero y Tarjetas */
 .monedero-header {
     display: flex;
     justify-content: space-between;
@@ -982,6 +998,9 @@ body {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .monedero-saldo {
@@ -994,6 +1013,41 @@ body {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+}
+
+.text-secondary {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Estilos para métodos de pago */
+.metodo-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.metodo-item:last-child {
+    border-bottom: none;
+}
+
+.metodo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metodo-nombre {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.metodo-total.positive {
+    color: var(--success-color);
+}
+
+.metodo-total.negative {
+    color: var(--error-color);
 }
 
 /* Responsive */
@@ -1048,6 +1102,6 @@ body {
     }
     
     .day-balance, .day-total {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
     }
 }
