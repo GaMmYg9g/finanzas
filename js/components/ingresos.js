@@ -16,7 +16,13 @@ const Ingresos = {
                     <form id="formIngreso">
                         <div class="form-group">
                             <label class="form-label">Fecha</label>
-                            <input type="date" class="form-input" id="ingresoFecha" required>
+                            <div class="fecha-selector">
+                                <button type="button" class="fecha-btn" id="btnFecha">
+                                    <span class="fecha-icono">📅</span>
+                                    <span class="fecha-texto" id="fechaTexto">Seleccionar fecha</span>
+                                </button>
+                                <input type="hidden" id="fechaValor" required>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Cantidad</label>
@@ -50,7 +56,7 @@ const Ingresos = {
                                 <input type="radio" name="destinoIngreso" id="destinoMonedero" value="monedero" class="destino-radio">
                                 <label for="destinoMonedero" class="destino-label">Monedero</label>
                                 <select class="destino-select" id="ingresoMonedero" disabled>
-                                    <option value="">Seleccionar</option>
+                                    <option value="">Seleccionar monedero</option>
                                     ${FinanzasApp.data.monederos.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')}
                                 </select>
                             </div>
@@ -59,7 +65,7 @@ const Ingresos = {
                                 <input type="radio" name="destinoIngreso" id="destinoTarjeta" value="tarjeta" class="destino-radio">
                                 <label for="destinoTarjeta" class="destino-label">Tarjeta</label>
                                 <select class="destino-select" id="ingresoTarjeta" disabled>
-                                    <option value="">Seleccionar</option>
+                                    <option value="">Seleccionar tarjeta</option>
                                     ${FinanzasApp.data.tarjetas.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('')}
                                 </select>
                             </div>
@@ -68,7 +74,7 @@ const Ingresos = {
                                 <input type="radio" name="destinoIngreso" id="destinoAlcancia" value="alcancia" class="destino-radio">
                                 <label for="destinoAlcancia" class="destino-label">Alcancía</label>
                                 <select class="destino-select" id="ingresoAlcancia" disabled>
-                                    <option value="">Seleccionar</option>
+                                    <option value="">Seleccionar alcancía</option>
                                     ${FinanzasApp.data.alcancias.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('')}
                                 </select>
                             </div>
@@ -122,7 +128,9 @@ const Ingresos = {
                     </div>
                     
                     <div class="calendar-legend">
-                        <span><span class="legend-dot positive"></span> Días con ingresos</span>
+                        <span class="legend-item">
+                            <span class="legend-dot positive"></span> Días con ingresos
+                        </span>
                     </div>
                 </div>
 
@@ -143,6 +151,24 @@ const Ingresos = {
             this.registrarIngreso();
         });
 
+        document.getElementById('btnFecha').addEventListener('click', async () => {
+    const fecha = await FinanzasApp.mostrarSelectorFecha();
+    if (fecha) {
+        document.getElementById('fechaValor').value = fecha;
+        const fechaTexto = document.getElementById('fechaTexto');
+        
+        // Mostrar la fecha en formato local sin alteración de zona horaria
+        const [año, mes, dia] = fecha.split('-');
+        const fechaLocal = new Date(año, mes-1, dia);
+        fechaTexto.textContent = fechaLocal.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+        fechaTexto.classList.add('seleccionada');
+    }
+});
+
         document.getElementById('ingresoTipo').addEventListener('change', (e) => {
             if (e.target.value === 'nuevo') {
                 this.agregarNuevoTipo();
@@ -155,7 +181,6 @@ const Ingresos = {
             }
         });
 
-        // Event listeners para los radio buttons
         document.querySelectorAll('input[name="destinoIngreso"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 this.actualizarDestinos(e.target.value);
@@ -171,19 +196,14 @@ const Ingresos = {
             this.currentDate.setMonth(this.currentDate.getMonth() + 1);
             this.actualizarVista();
         });
-        
-        const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('ingresoFecha').value = hoy;
     },
 
     actualizarDestinos(seleccion) {
-        // Deshabilitar todos los selects
         document.querySelectorAll('.destino-select').forEach(select => {
             select.disabled = true;
             select.style.opacity = '0.5';
         });
         
-        // Habilitar el select correspondiente
         if (seleccion === 'monedero') {
             document.getElementById('ingresoMonedero').disabled = false;
             document.getElementById('ingresoMonedero').style.opacity = '1';
@@ -235,62 +255,60 @@ const Ingresos = {
         }
     },
 
-async mostrarIngresosDia(dateStr) {
-    const ingresos = this.getIngresosDelDia(dateStr);
-    const fecha = new Date(dateStr + 'T12:00:00');
-    const titulo = fecha.toLocaleDateString('es-ES', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    });
-    
-    document.getElementById('diaSeleccionado').textContent = titulo;
-    
-    if (ingresos.length === 0) {
-        document.getElementById('listaIngresosDia').innerHTML = `
-            <p class="empty-state">No hay ingresos este día</p>
-        `;
-    } else {
-        document.getElementById('listaIngresosDia').innerHTML = `
-            <ul class="movimientos-list">
-                ${ingresos.map(i => `
-                    <li class="movimiento-item">
-                        <div class="movimiento-icon ingreso">I</div>
-                        <div class="movimiento-info">
-                            <div class="movimiento-concepto">${i.tipo} - ${i.descripcion || 'Sin descripción'}</div>
-                            <div class="movimiento-detalles">
-                                <span class="movimiento-fecha">${FinanzasApp.formatDate(i.fecha)}</span>
-                                <span class="movimiento-metodo">${i.metodo || 'Efectivo'}</span>
+    async mostrarIngresosDia(dateStr) {
+        const ingresos = this.getIngresosDelDia(dateStr);
+        const titulo = FinanzasApp.formatDateLong(dateStr);
+        
+        document.getElementById('diaSeleccionado').textContent = titulo;
+        
+        if (ingresos.length === 0) {
+            document.getElementById('listaIngresosDia').innerHTML = `
+                <p class="empty-state">No hay ingresos este día</p>
+            `;
+        } else {
+            document.getElementById('listaIngresosDia').innerHTML = `
+                <ul class="movimientos-list">
+                    ${ingresos.map(i => `
+                        <li class="movimiento-item">
+                            <div class="movimiento-icon ingreso">I</div>
+                            <div class="movimiento-info">
+                                <div class="movimiento-concepto">${i.tipo} - ${i.descripcion || 'Sin descripción'}</div>
+                                <div class="movimiento-detalles">
+                                    <span class="movimiento-fecha">${FinanzasApp.formatDate(i.fecha)}</span>
+                                    <span class="movimiento-metodo">${i.metodo || 'Efectivo'}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="movimiento-cantidad ingreso">+ ${FinanzasApp.formatCurrency(i.cantidad)}</div>
-                        <div class="movimiento-actions">
-                            <button class="btn-icon" onclick="Ingresos.editarIngreso('${i.id}')">Editar</button>
-                            <button class="btn-icon" onclick="Ingresos.eliminarIngreso('${i.id}')">Eliminar</button>
-                        </div>
-                    </li>
-                `).join('')}
-            </ul>
-        `;
-    }
-    
-    document.getElementById('detalleDia').style.display = 'block';
-},
+                            <div class="movimiento-cantidad ingreso">+ ${FinanzasApp.formatCurrency(i.cantidad)}</div>
+                            <div class="movimiento-actions">
+                                <button class="btn-icon" onclick="Ingresos.editarIngreso('${i.id}')">Editar</button>
+                                <button class="btn-icon" onclick="Ingresos.eliminarIngreso('${i.id}')">Eliminar</button>
+                            </div>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+        
+        document.getElementById('detalleDia').style.display = 'block';
+    },
 
     cerrarDetalle() {
         document.getElementById('detalleDia').style.display = 'none';
     },
 
     registrarIngreso() {
-        const fecha = document.getElementById('ingresoFecha').value;
+        const fecha = document.getElementById('fechaValor').value;
         const cantidad = parseFloat(document.getElementById('ingresoCantidad').value);
         const tipo = document.getElementById('ingresoTipo').value;
         const metodo = document.getElementById('ingresoMetodo').value;
         const descripcion = document.getElementById('ingresoDescripcion').value;
         const frecuencia = document.getElementById('ingresoFrecuencia').value;
         
-        // Validar tipo y método
+        if (!fecha) {
+            FinanzasApp.showMessage('Error', 'Selecciona una fecha', 'error');
+            return;
+        }
+        
         if (!tipo) {
             FinanzasApp.showMessage('Error', 'Selecciona un tipo de ingreso', 'error');
             return;
@@ -301,11 +319,10 @@ async mostrarIngresosDia(dateStr) {
             return;
         }
         
-        // Determinar qué destino está seleccionado
         const destinoSeleccionado = document.querySelector('input[name="destinoIngreso"]:checked')?.value;
         
-        if (!fecha || !cantidad) {
-            FinanzasApp.showMessage('Error', 'Completa los campos obligatorios', 'error');
+        if (!cantidad) {
+            FinanzasApp.showMessage('Error', 'Ingresa una cantidad', 'error');
             return;
         }
 
@@ -324,7 +341,6 @@ async mostrarIngresosDia(dateStr) {
             frecuencia: frecuencia
         };
 
-        // Aplicar el ingreso al destino seleccionado
         if (destinoSeleccionado === 'monedero') {
             const monederoId = document.getElementById('ingresoMonedero').value;
             if (!monederoId) {
@@ -365,12 +381,11 @@ async mostrarIngresosDia(dateStr) {
         this.actualizarVista();
         document.getElementById('formIngreso').reset();
         
-        // Resetear radio buttons
+        document.getElementById('fechaTexto').textContent = 'Seleccionar fecha';
+        document.getElementById('fechaTexto').classList.remove('seleccionada');
+        
         document.querySelectorAll('input[name="destinoIngreso"]').forEach(r => r.checked = false);
         this.actualizarDestinos(null);
-        
-        const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('ingresoFecha').value = hoy;
         
         FinanzasApp.showMessage('Ingreso registrado', 'El ingreso se ha guardado correctamente', 'success');
     },
@@ -383,7 +398,6 @@ async mostrarIngresosDia(dateStr) {
         if (nuevaCantidad) {
             const cantidad = parseFloat(nuevaCantidad);
             if (cantidad > 0) {
-                // Restar cantidad anterior
                 if (ingreso.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === ingreso.monederoId);
                     if (monedero) monedero.saldo -= ingreso.cantidad;
@@ -399,7 +413,6 @@ async mostrarIngresosDia(dateStr) {
                 
                 ingreso.cantidad = cantidad;
                 
-                // Sumar nueva cantidad
                 if (ingreso.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === ingreso.monederoId);
                     if (monedero) monedero.saldo += cantidad;
@@ -425,7 +438,6 @@ async mostrarIngresosDia(dateStr) {
         if (confirmar) {
             const ingreso = FinanzasApp.data.ingresos.find(i => i.id === id);
             if (ingreso) {
-                // Restar de todos los destinos
                 if (ingreso.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === ingreso.monederoId);
                     if (monedero) monedero.saldo -= ingreso.cantidad;
