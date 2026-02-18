@@ -130,29 +130,37 @@ const FinanzasApp = {
         this.setTheme(newTheme);
     },
 
-    loadData() {
-        const saved = localStorage.getItem('finanzasData');
-        if (saved) {
-            this.data = JSON.parse(saved);
-        } else {
-            this.data = {
-                monederos: [
-                    { id: 'm1', nombre: 'Mi monedero', saldo: 0, tipo: 'principal' }
-                ],
-                tarjetas: [
-                    { id: 't1', nombre: 'Mi tarjeta', saldo: 0, tipo: 'principal' }
-                ],
-                alcancias: [],
-                ingresos: [],
-                gastos: [],
-                config: {
-                    tiposIngreso: ['Salario', 'Transferencias'],
-                    tiposGasto: ['Renta'],
-                    metodosPago: ['Efectivo', 'Tarjeta']
-                }
-            };
+loadData() {
+    const saved = localStorage.getItem('finanzasData');
+    if (saved) {
+        this.data = JSON.parse(saved);
+        // Asegurar que tarjetas existe (para usuarios con datos antiguos)
+        if (!this.data.tarjetas) {
+            this.data.tarjetas = [];  // ← Esto evita el error
         }
-    },
+        // Asegurar que metodosPago existe
+        if (!this.data.config.metodosPago) {
+            this.data.config.metodosPago = ['Efectivo', 'Tarjeta'];
+        }
+    } else {
+        this.data = {
+            monederos: [
+                { id: 'm1', nombre: 'Mi monedero', saldo: 0, tipo: 'principal' }
+            ],
+            tarjetas: [
+                { id: 't1', nombre: 'Mi tarjeta', saldo: 0, tipo: 'principal' }
+            ],
+            alcancias: [],
+            ingresos: [],
+            gastos: [],
+            config: {
+                tiposIngreso: ['Salario', 'Transferencias'],
+                tiposGasto: ['Renta'],
+                metodosPago: ['Efectivo', 'Tarjeta']
+            }
+        };
+    }
+},
 
     saveData() {
         localStorage.setItem('finanzasData', JSON.stringify(this.data));
