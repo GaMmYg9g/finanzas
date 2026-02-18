@@ -1,15 +1,15 @@
-const CACHE_NAME = 'finanzas-v1';
+const CACHE_NAME = 'finanzas-v2';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/css/styles.css',
-    '/js/app.js',
-    '/js/components/alcancia.js',
-    '/js/components/monedero.js',
-    '/js/components/ingresos.js',
-    '/js/components/gastos.js',
-    '/js/components/dashboard.js',
-    '/manifest.json'
+    '.',
+    './index.html',
+    './css/styles.css',
+    './js/app.js',
+    './js/components/alcancia.js',
+    './js/components/monedero.js',
+    './js/components/ingresos.js',
+    './js/components/gastos.js',
+    './js/components/dashboard.js',
+    './manifest.json'
 ];
 
 self.addEventListener('install', event => {
