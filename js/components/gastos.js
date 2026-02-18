@@ -78,7 +78,7 @@ const Gastos = {
                                     <span class="day-number">${day}</span>
                                     ${total > 0 ? `
                                         <div class="day-total negative">
-                                            ${total.toFixed(0)}€
+                                            ${total.toFixed(0)}$
                                         </div>
                                     ` : ''}
                                 </div>
