@@ -249,7 +249,7 @@ const FinanzasApp = {
         });
     },
 
-   async showSelect(titulo, mensaje, opciones) {
+async showSelect(titulo, mensaje, opciones) {
     return new Promise((resolve) => {
         const modal = document.getElementById('customModal');
         const title = document.getElementById('modalTitle');
@@ -257,17 +257,37 @@ const FinanzasApp = {
         const cancelBtn = document.getElementById('modalCancel');
         const confirmBtn = document.getElementById('modalConfirm');
         
+        // Limpiar el contenido previo
+        const existingSelect = document.getElementById('modalSelect');
+        if (existingSelect) existingSelect.remove();
+        
         const select = document.createElement('select');
         select.className = 'form-input';
         select.id = 'modalSelect';
-        select.innerHTML = opciones.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+        select.style.marginBottom = '1.5rem';
+        select.style.width = '100%';
+        select.style.padding = '0.8rem';
+        select.style.backgroundColor = 'var(--bg-primary)';
+        select.style.border = '1px solid var(--border-color)';
+        select.style.borderRadius = '8px';
+        select.style.color = 'var(--text-primary)';
+        select.style.fontSize = '1rem';
+        
+        select.innerHTML = opciones.map(o => {
+            // Detectar si es un objetivo completado (para poner icono)
+            const esObjetivo = o.value !== 'sin_objetivo' && o.value !== 'otros';
+            const icono = esObjetivo ? '🎯' : '';
+            return `<option value="${o.value}" style="background-color: var(--card-bg); color: var(--text-primary); padding: 0.5rem;">${icono}${o.label}</option>`;
+        }).join('');
         
         input.style.display = 'none';
-        select.style.marginBottom = '1.5rem';
         modal.querySelector('.modal-content').insertBefore(select, modal.querySelector('.modal-buttons'));
         
         title.textContent = titulo;
         modal.style.display = 'flex';
+        
+        // Enfocar el select
+        setTimeout(() => select.focus(), 100);
         
         const cleanup = () => {
             modal.style.display = 'none';
@@ -275,6 +295,7 @@ const FinanzasApp = {
             select.remove();
             cancelBtn.removeEventListener('click', onCancel);
             confirmBtn.removeEventListener('click', onConfirm);
+            select.removeEventListener('keypress', onKeyPress);
         };
         
         const onCancel = () => {
@@ -288,8 +309,16 @@ const FinanzasApp = {
             resolve(valor);
         };
         
+        const onKeyPress = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                onConfirm();
+            }
+        };
+        
         cancelBtn.addEventListener('click', onCancel);
         confirmBtn.addEventListener('click', onConfirm);
+        select.addEventListener('keypress', onKeyPress);
     });
 },
 
