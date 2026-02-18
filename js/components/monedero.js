@@ -8,6 +8,11 @@ const Monedero = {
                 </div>
 
                 <div class="card">
+                    <h3 class="section-title">Mis tarjetas</h3>
+                    <button class="btn btn-primary" id="nuevaTarjeta">+ Nueva tarjeta</button>
+                </div>
+
+                <div class="card">
                     <h3 class="section-title">Total general</h3>
                     <div class="resumen-value balance" id="totalGeneralMonedero">
                         ${this.calcularTotalGeneral()}
@@ -15,7 +20,13 @@ const Monedero = {
                 </div>
 
                 <div id="listaMonederos">
+                    <h4 class="section-subtitle">Monederos</h4>
                     ${this.renderMonederos()}
+                </div>
+
+                <div id="listaTarjetas">
+                    <h4 class="section-subtitle">Tarjetas</h4>
+                    ${this.renderTarjetas()}
                 </div>
             </div>
         `;
@@ -23,19 +34,16 @@ const Monedero = {
 
     calcularTotalGeneral() {
         const totalMonederos = FinanzasApp.data.monederos.reduce((sum, m) => sum + m.saldo, 0);
+        const totalTarjetas = FinanzasApp.data.tarjetas.reduce((sum, t) => sum + t.saldo, 0);
         const totalAlcancia = FinanzasApp.data.alcancias.reduce((sum, a) => sum + a.saldo, 0);
-        return FinanzasApp.formatCurrency(totalMonederos + totalAlcancia);
+        return FinanzasApp.formatCurrency(totalMonederos + totalTarjetas + totalAlcancia);
     },
 
     renderMonederos() {
         const monederos = FinanzasApp.data.monederos;
         
         if (monederos.length === 0) {
-            return `
-                <div class="card">
-                    <p class="empty-state">No hay monederos creados.</p>
-                </div>
-            `;
+            return '<p class="empty-state">No hay monederos creados.</p>';
         }
 
         return monederos.map(m => `
@@ -48,11 +56,38 @@ const Monedero = {
                 </div>
                 
                 <div class="monedero-actions">
-                    <button class="btn btn-secondary" onclick="Monedero.mostrarTransferenciaMonedero('${m.id}')">A monedero</button>
-                    <button class="btn btn-secondary" onclick="Monedero.mostrarTransferenciaAlcancia('${m.id}')">A alcancía</button>
+                    <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${m.id}', 'monedero')">Transferir</button>
                     ${m.tipo !== 'principal' ? `
                         <button class="btn btn-secondary" onclick="Monedero.editarMonedero('${m.id}')">Editar</button>
                         <button class="btn btn-secondary" onclick="Monedero.eliminarMonedero('${m.id}')">Eliminar</button>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+    },
+
+    renderTarjetas() {
+        const tarjetas = FinanzasApp.data.tarjetas;
+        
+        if (tarjetas.length === 0) {
+            return '<p class="empty-state">No hay tarjetas creadas.</p>';
+        }
+
+        return tarjetas.map(t => `
+            <div class="card" data-tarjeta-id="${t.id}">
+                <div class="monedero-header">
+                    <h4>
+                        ${t.nombre}
+                        ${t.tipo === 'principal' ? '<span class="text-secondary">(Principal)</span>' : ''}
+                    </h4>
+                    <span class="monedero-saldo">${FinanzasApp.formatCurrency(t.saldo)}</span>
+                </div>
+                
+                <div class="monedero-actions">
+                    <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${t.id}', 'tarjeta')">Transferir</button>
+                    ${t.tipo !== 'principal' ? `
+                        <button class="btn btn-secondary" onclick="Monedero.editarTarjeta('${t.id}')">Editar</button>
+                        <button class="btn btn-secondary" onclick="Monedero.eliminarTarjeta('${t.id}')">Eliminar</button>
                     ` : ''}
                 </div>
             </div>
@@ -63,18 +98,36 @@ const Monedero = {
         document.getElementById('nuevoMonedero').addEventListener('click', () => {
             this.mostrarFormNuevoMonedero();
         });
+        document.getElementById('nuevaTarjeta').addEventListener('click', () => {
+            this.mostrarFormNuevaTarjeta();
+        });
     },
 
     async mostrarFormNuevoMonedero() {
         const nombre = await FinanzasApp.showPrompt('Nuevo monedero', 'Nombre del monedero:', 'text');
         if (nombre && nombre.trim()) {
             FinanzasApp.data.monederos.push({
-                id: Date.now().toString(),
+                id: 'm' + Date.now().toString(),
                 nombre: nombre.trim(),
                 saldo: 0,
                 tipo: 'secundario'
             });
             await FinanzasApp.showMessage('Monedero creado', `El monedero "${nombre}" se ha creado correctamente.`, 'success');
+            FinanzasApp.saveData();
+            this.actualizarVista();
+        }
+    },
+
+    async mostrarFormNuevaTarjeta() {
+        const nombre = await FinanzasApp.showPrompt('Nueva tarjeta', 'Nombre de la tarjeta:', 'text');
+        if (nombre && nombre.trim()) {
+            FinanzasApp.data.tarjetas.push({
+                id: 't' + Date.now().toString(),
+                nombre: nombre.trim(),
+                saldo: 0,
+                tipo: 'secundario'
+            });
+            await FinanzasApp.showMessage('Tarjeta creada', `La tarjeta "${nombre}" se ha creado correctamente.`, 'success');
             FinanzasApp.saveData();
             this.actualizarVista();
         }
@@ -88,6 +141,19 @@ const Monedero = {
         if (nuevoNombre && nuevoNombre.trim() && nuevoNombre !== monedero.nombre) {
             monedero.nombre = nuevoNombre.trim();
             await FinanzasApp.showMessage('Nombre actualizado', 'El nombre del monedero se ha actualizado correctamente.', 'success');
+            FinanzasApp.saveData();
+            this.actualizarVista();
+        }
+    },
+
+    async editarTarjeta(id) {
+        const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === id);
+        if (!tarjeta) return;
+        
+        const nuevoNombre = await FinanzasApp.showPrompt('Editar tarjeta', 'Nuevo nombre:', 'text', tarjeta.nombre);
+        if (nuevoNombre && nuevoNombre.trim() && nuevoNombre !== tarjeta.nombre) {
+            tarjeta.nombre = nuevoNombre.trim();
+            await FinanzasApp.showMessage('Nombre actualizado', 'El nombre de la tarjeta se ha actualizado correctamente.', 'success');
             FinanzasApp.saveData();
             this.actualizarVista();
         }
@@ -108,36 +174,84 @@ const Monedero = {
         }
         
         FinanzasApp.data.monederos = FinanzasApp.data.monederos.filter(m => m.id !== id);
-        
-        const ingresosAfectados = FinanzasApp.data.ingresos.filter(i => i.monederoId === id);
-        const gastosAfectados = FinanzasApp.data.gastos.filter(g => g.monederoId === id);
-        
         FinanzasApp.saveData();
         this.actualizarVista();
-        
-        if (ingresosAfectados.length > 0 || gastosAfectados.length > 0) {
-            await FinanzasApp.showMessage('Movimientos afectados', 
-                `${ingresosAfectados.length} ingresos y ${gastosAfectados.length} gastos usaban este monedero.\n\nPuedes editarlos para asignarlos a otro monedero.`, 
-                'warning');
-        }
     },
 
-    async mostrarTransferenciaMonedero(monederoIdOrigen) {
-        const monederos = FinanzasApp.data.monederos.filter(m => m.id !== monederoIdOrigen);
-        if (monederos.length === 0) {
-            await FinanzasApp.showMessage('No hay destinos', 'No hay otros monederos disponibles para transferir.', 'error');
+    async eliminarTarjeta(id) {
+        const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === id);
+        if (!tarjeta) return;
+        
+        if (tarjeta.saldo > 0) {
+            const confirmar = await FinanzasApp.showConfirm('Eliminar tarjeta', 
+                `La tarjeta tiene ${FinanzasApp.formatCurrency(tarjeta.saldo)}.\n\n¿Estás seguro de eliminarla? El dinero se perderá.`);
+            if (!confirmar) return;
+        } else {
+            const confirmar = await FinanzasApp.showConfirm('Eliminar tarjeta', 
+                `¿Estás seguro de eliminar la tarjeta "${tarjeta.nombre}"?`);
+            if (!confirmar) return;
+        }
+        
+        FinanzasApp.data.tarjetas = FinanzasApp.data.tarjetas.filter(t => t.id !== id);
+        FinanzasApp.saveData();
+        this.actualizarVista();
+    },
+
+    async mostrarTransferencia(origenId, tipoOrigen) {
+        // Recopilar todos los destinos posibles
+        const destinos = [];
+        
+        FinanzasApp.data.monederos.forEach(m => {
+            if (!(tipoOrigen === 'monedero' && m.id === origenId)) {
+                destinos.push({
+                    id: m.id,
+                    tipo: 'monedero',
+                    nombre: m.tipo === 'principal' ? 'Mi monedero' : m.nombre,
+                    saldo: m.saldo
+                });
+            }
+        });
+        
+        FinanzasApp.data.tarjetas.forEach(t => {
+            if (!(tipoOrigen === 'tarjeta' && t.id === origenId)) {
+                destinos.push({
+                    id: t.id,
+                    tipo: 'tarjeta',
+                    nombre: t.nombre,
+                    saldo: t.saldo
+                });
+            }
+        });
+        
+        FinanzasApp.data.alcancias.forEach(a => {
+            destinos.push({
+                id: a.id,
+                tipo: 'alcancia',
+                nombre: a.nombre,
+                saldo: a.saldo
+            });
+        });
+        
+        if (destinos.length === 0) {
+            await FinanzasApp.showMessage('No hay destinos', 'No hay otros lugares disponibles para transferir.', 'error');
             return;
         }
         
-        const origen = FinanzasApp.data.monederos.find(m => m.id === monederoIdOrigen);
+        const origen = tipoOrigen === 'monedero' 
+            ? FinanzasApp.data.monederos.find(m => m.id === origenId)
+            : FinanzasApp.data.tarjetas.find(t => t.id === origenId);
         
-        const opciones = monederos.map(m => ({
-            value: m.id,
-            label: `${m.tipo === 'principal' ? 'Mi monedero' : m.nombre} (${FinanzasApp.formatCurrency(m.saldo)})`
+        if (!origen) return;
+        
+        const opciones = destinos.map(d => ({
+            value: JSON.stringify({ id: d.id, tipo: d.tipo }),
+            label: `${d.tipo === 'monedero' ? '💰' : d.tipo === 'tarjeta' ? '💳' : '🏦'} ${d.nombre} (${FinanzasApp.formatCurrency(d.saldo)})`
         }));
         
-        const destinoId = await FinanzasApp.showSelect('Transferir a monedero', 'Selecciona monedero destino:', opciones);
-        if (!destinoId) return;
+        const destinoStr = await FinanzasApp.showSelect('Transferir', 'Selecciona destino:', opciones);
+        if (!destinoStr) return;
+        
+        const destino = JSON.parse(destinoStr);
         
         const opcionTransferencia = await FinanzasApp.showConfirm('Transferir todo', 
             `¿Quieres transferir el saldo completo de ${FinanzasApp.formatCurrency(origen.saldo)}?\n\nSelecciona "No" para ingresar una cantidad personalizada.`);
@@ -153,78 +267,35 @@ const Monedero = {
             cantidad = parseFloat(cantidadStr);
         }
         
-        const destinoObj = FinanzasApp.data.monederos.find(m => m.id === destinoId);
-        
-        if (origen && destinoObj && cantidad > 0) {
-            if (origen.saldo >= cantidad) {
-                origen.saldo -= cantidad;
-                destinoObj.saldo += cantidad;
-                FinanzasApp.saveData();
-                await FinanzasApp.showMessage('Transferencia completada', 
-                    `Se han transferido ${FinanzasApp.formatCurrency(cantidad)} de "${origen.tipo === 'principal' ? 'Mi monedero' : origen.nombre}" a "${destinoObj.tipo === 'principal' ? 'Mi monedero' : destinoObj.nombre}".`, 
-                    'success');
-                this.actualizarVista();
-            } else {
-                await FinanzasApp.showMessage('Saldo insuficiente', 
-                    `El monedero "${origen.tipo === 'principal' ? 'Mi monedero' : origen.nombre}" tiene ${FinanzasApp.formatCurrency(origen.saldo)}.`, 
-                    'error');
+        if (origen.saldo >= cantidad) {
+            origen.saldo -= cantidad;
+            
+            // Sumar al destino
+            if (destino.tipo === 'monedero') {
+                const dest = FinanzasApp.data.monederos.find(m => m.id === destino.id);
+                if (dest) dest.saldo += cantidad;
+            } else if (destino.tipo === 'tarjeta') {
+                const dest = FinanzasApp.data.tarjetas.find(t => t.id === destino.id);
+                if (dest) dest.saldo += cantidad;
+            } else if (destino.tipo === 'alcancia') {
+                const dest = FinanzasApp.data.alcancias.find(a => a.id === destino.id);
+                if (dest) dest.saldo += cantidad;
             }
-        }
-    },
-
-    async mostrarTransferenciaAlcancia(monederoIdOrigen) {
-        if (FinanzasApp.data.alcancias.length === 0) {
-            await FinanzasApp.showMessage('Sin alcancías', 'No hay alcancías creadas. Crea una primero.', 'warning');
-            return;
-        }
-        
-        const origen = FinanzasApp.data.monederos.find(m => m.id === monederoIdOrigen);
-        
-        const opciones = FinanzasApp.data.alcancias.map(a => ({
-            value: a.id,
-            label: `${a.nombre} (${FinanzasApp.formatCurrency(a.saldo)})`
-        }));
-        
-        const alcanciaId = await FinanzasApp.showSelect('Transferir a alcancía', 'Selecciona alcancía destino:', opciones);
-        if (!alcanciaId) return;
-        
-        const opcionTransferencia = await FinanzasApp.showConfirm('Transferir todo', 
-            `¿Quieres transferir el saldo completo de ${FinanzasApp.formatCurrency(origen.saldo)}?\n\nSelecciona "No" para ingresar una cantidad personalizada.`);
-        
-        let cantidad;
-        if (opcionTransferencia) {
-            cantidad = origen.saldo;
+            
+            FinanzasApp.saveData();
+            await FinanzasApp.showMessage('Transferencia completada', 
+                `Se han transferido ${FinanzasApp.formatCurrency(cantidad)}.`, 
+                'success');
+            this.actualizarVista();
         } else {
-            const cantidadStr = await FinanzasApp.showPrompt('Cantidad personalizada', 
-                `Cantidad a transferir (Máximo: ${FinanzasApp.formatCurrency(origen.saldo)}):`, 
-                'number');
-            if (!cantidadStr) return;
-            cantidad = parseFloat(cantidadStr);
-        }
-        
-        const alcancia = FinanzasApp.data.alcancias.find(a => a.id === alcanciaId);
-        
-        if (origen && alcancia && cantidad > 0) {
-            if (origen.saldo >= cantidad) {
-                origen.saldo -= cantidad;
-                alcancia.saldo += cantidad;
-                FinanzasApp.saveData();
-                await FinanzasApp.showMessage('Transferencia completada', 
-                    `Se han transferido ${FinanzasApp.formatCurrency(cantidad)} del monedero "${origen.tipo === 'principal' ? 'Mi monedero' : origen.nombre}" a la alcancía "${alcancia.nombre}".`, 
-                    'success');
-                this.actualizarVista();
-            } else {
-                await FinanzasApp.showMessage('Saldo insuficiente', 
-                    `El monedero "${origen.tipo === 'principal' ? 'Mi monedero' : origen.nombre}" tiene ${FinanzasApp.formatCurrency(origen.saldo)}.`, 
-                    'error');
-            }
+            await FinanzasApp.showMessage('Saldo insuficiente', 
+                `El origen tiene ${FinanzasApp.formatCurrency(origen.saldo)}.`, 
+                'error');
         }
     },
 
     actualizarVista() {
-        document.getElementById('listaMonederos').innerHTML = this.renderMonederos();
-        document.getElementById('totalGeneralMonedero').textContent = this.calcularTotalGeneral();
-        FinanzasApp.updateTotalGeneral();
+        FinanzasApp.renderView('monedero');
     }
 };
 
