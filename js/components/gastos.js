@@ -56,7 +56,7 @@ const Gastos = {
                                 <input type="radio" name="origenGasto" id="origenMonedero" value="monedero" class="destino-radio">
                                 <label for="origenMonedero" class="destino-label">Monedero</label>
                                 <select class="destino-select" id="gastoMonedero" disabled>
-                                    <option value="">Seleccionar monedero</option>
+                                    <option value="">Seleccionar</option>
                                     ${FinanzasApp.data.monederos.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')}
                                 </select>
                             </div>
@@ -65,7 +65,7 @@ const Gastos = {
                                 <input type="radio" name="origenGasto" id="origenTarjeta" value="tarjeta" class="destino-radio">
                                 <label for="origenTarjeta" class="destino-label">Tarjeta</label>
                                 <select class="destino-select" id="gastoTarjeta" disabled>
-                                    <option value="">Seleccionar tarjeta</option>
+                                    <option value="">Seleccionar</option>
                                     ${FinanzasApp.data.tarjetas.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('')}
                                 </select>
                             </div>
@@ -74,7 +74,7 @@ const Gastos = {
                                 <input type="radio" name="origenGasto" id="origenAlcancia" value="alcancia" class="destino-radio">
                                 <label for="origenAlcancia" class="destino-label">Alcancía</label>
                                 <select class="destino-select" id="gastoAlcancia" disabled>
-                                    <option value="">Seleccionar alcancía</option>
+                                    <option value="">Seleccionar</option>
                                     ${FinanzasApp.data.alcancias.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('')}
                                 </select>
                             </div>
