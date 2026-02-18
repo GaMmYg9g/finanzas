@@ -45,18 +45,28 @@ const Alcancia = {
                     
                     ${a.objetivos.length > 0 ? `
                         <div class="objetivos-list">
-                            ${a.objetivos.map(o => `
-                                <div class="objetivo-item">
-                                    <div class="objetivo-info">
-                                        <span class="objetivo-nombre">${o.nombre}</span>
-                                        <span class="objetivo-meta">${FinanzasApp.formatCurrency(o.meta)}</span>
+                            ${a.objetivos.map(o => {
+                                const progreso = Math.min((a.saldo / o.meta) * 100, 100);
+                                return `
+                                    <div class="objetivo-item">
+                                        <div class="objetivo-info">
+                                            <span class="objetivo-nombre">${o.nombre}</span>
+                                            <span class="objetivo-meta">
+                                                <span class="objetivo-actual">${FinanzasApp.formatCurrency(Math.min(a.saldo, o.meta))}</span>
+                                                /
+                                                <span class="objetivo-total">${FinanzasApp.formatCurrency(o.meta)}</span>
+                                            </span>
+                                        </div>
+                                        <div class="progress-container">
+                                            <div class="progress-bar">
+                                                <div class="progress-fill" style="width: ${progreso}%"></div>
+                                            </div>
+                                            <span class="progress-porcentaje">${progreso.toFixed(0)}%</span>
+                                        </div>
+                                        ${a.saldo >= o.meta ? '<span class="objetivo-completado">✓ Completado</span>' : ''}
                                     </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${Math.min((a.saldo / o.meta) * 100, 100)}%"></div>
-                                    </div>
-                                    ${a.saldo >= o.meta ? '<span class="objetivo-completado">Completado</span>' : ''}
-                                </div>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </div>
                     ` : `
                         <p class="empty-state">No hay objetivos creados</p>
