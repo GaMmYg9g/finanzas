@@ -278,6 +278,9 @@ const Dashboard = {
         
         const { labels, ingresosData, gastosData } = this.getChartData();
         
+        // Detectar tema actual
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        
         this.chart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -286,16 +289,16 @@ const Dashboard = {
                     {
                         label: 'Ingresos',
                         data: ingresosData,
-                        borderColor: '#25D366',
-                        backgroundColor: 'rgba(37, 211, 102, 0.1)',
+                        borderColor: isDark ? '#4cd964' : '#25D366',
+                        backgroundColor: isDark ? 'rgba(76, 217, 100, 0.1)' : 'rgba(37, 211, 102, 0.1)',
                         tension: 0.4,
                         fill: true
                     },
                     {
                         label: 'Gastos',
                         data: gastosData,
-                        borderColor: '#f15c5c',
-                        backgroundColor: 'rgba(241, 92, 92, 0.1)',
+                        borderColor: isDark ? '#ff5e5e' : '#f15c5c',
+                        backgroundColor: isDark ? 'rgba(255, 94, 94, 0.1)' : 'rgba(241, 92, 92, 0.1)',
                         tension: 0.4,
                         fill: true
                     }
@@ -307,19 +310,29 @@ const Dashboard = {
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        titleColor: isDark ? '#ffffff' : '#1a1a1a',
+                        bodyColor: isDark ? '#b0b8c0' : '#667781',
+                        backgroundColor: isDark ? '#1f2c34' : '#ffffff',
+                        borderColor: isDark ? '#3a4a55' : '#f0f2f4',
+                        borderWidth: 1
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
                         grid: {
-                            color: 'var(--border-color)'
+                            color: isDark ? '#3a4a55' : '#f0f2f4',
                         },
                         ticks: {
                             callback: function(value) {
                                 return value + '$';
                             },
-                            color: 'var(--text-secondary)'
+                            color: isDark ? '#ffffff' : '#1a1a1a',
+                            font: {
+                                weight: '500'
+                            }
                         }
                     },
                     x: {
@@ -327,9 +340,12 @@ const Dashboard = {
                             display: false
                         },
                         ticks: {
-                            color: 'var(--text-secondary)',
+                            color: isDark ? '#ffffff' : '#1a1a1a',
                             maxRotation: 45,
-                            minRotation: 45
+                            minRotation: 45,
+                            font: {
+                                weight: '500'
+                            }
                         }
                     }
                 }
