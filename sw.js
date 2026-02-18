@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finanzas-v2';
+const CACHE_NAME = 'finanzas-v3'; // Versión aumentada para forzar actualización
 const urlsToCache = [
     '.',
     './index.html',
@@ -13,6 +13,7 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+    self.skipWaiting(); // Forzar activación inmediata
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(urlsToCache))
@@ -27,6 +28,7 @@ self.addEventListener('fetch', event => {
 });
 
 self.addEventListener('activate', event => {
+    // Eliminar cachés antiguas
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
@@ -36,6 +38,9 @@ self.addEventListener('activate', event => {
                     }
                 })
             );
+        }).then(() => {
+            // Tomar control de todas las páginas abiertas inmediatamente
+            return clients.claim();
         })
     );
 });
