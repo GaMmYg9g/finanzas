@@ -22,15 +22,15 @@ const Dashboard = {
                 <div class="resumen-cards">
                     <div class="resumen-item">
                         <div class="resumen-label">Ingresos</div>
-                        <div class="resumen-value ingresos" id="totalIngresos">0.00 €</div>
+                        <div class="resumen-value ingresos" id="totalIngresos">0.00 $</div>
                     </div>
                     <div class="resumen-item">
                         <div class="resumen-label">Gastos</div>
-                        <div class="resumen-value gastos" id="totalGastos">0.00 €</div>
+                        <div class="resumen-value gastos" id="totalGastos">0.00 $</div>
                     </div>
                     <div class="resumen-item">
                         <div class="resumen-label">Balance</div>
-                        <div class="resumen-value balance" id="totalBalance">0.00 €</div>
+                        <div class="resumen-value balance" id="totalBalance">0.00 $</div>
                     </div>
                 </div>
 
@@ -69,7 +69,7 @@ const Dashboard = {
                                         <span class="day-number">${day}</span>
                                         ${balance !== 0 ? `
                                             <div class="day-balance ${balance > 0 ? 'positive' : 'negative'}">
-                                                ${balance > 0 ? '+' : ''}${balance.toFixed(0)}€
+                                                ${balance > 0 ? '+' : ''}${balance.toFixed(0)}$
                                             </div>
                                         ` : ''}
                                     </div>
@@ -280,7 +280,7 @@ const Dashboard = {
                         },
                         ticks: {
                             callback: function(value) {
-                                return value + '€';
+                                return value + '$';
                             },
                             color: 'var(--text-secondary)'
                         }
