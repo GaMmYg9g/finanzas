@@ -24,46 +24,59 @@ const Gastos = {
                         </div>
                         <div class="form-group">
                             <label class="form-label">Tipo</label>
-                            <select class="form-input" id="gastoTipo">
+                            <select class="form-input select-limpio" id="gastoTipo">
+                                <option value="">Seleccionar tipo</option>
                                 ${FinanzasApp.data.config.tiposGasto.map(t => `<option value="${t}">${t}</option>`).join('')}
                                 <option value="nuevo">+ Agregar nuevo tipo</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Método de pago</label>
-                            <select class="form-input" id="gastoMetodo">
+                            <select class="form-input select-limpio" id="gastoMetodo">
+                                <option value="">Seleccionar método</option>
                                 ${FinanzasApp.data.config.metodosPago.map(m => `<option value="${m}">${m}</option>`).join('')}
                                 <option value="nuevo">+ Agregar nuevo método</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Descripción (opcional)</label>
-                            <input type="text" class="form-input" id="gastoDescripcion">
+                            <input type="text" class="form-input" id="gastoDescripcion" placeholder="Descripción del gasto">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Origen (Monedero)</label>
-                            <select class="form-input" id="gastoMonedero">
-                                <option value="">Ninguno</option>
-                                ${FinanzasApp.data.monederos.map(m => `<option value="${m.id}">${m.nombre} (${FinanzasApp.formatCurrency(m.saldo)})</option>`).join('')}
-                            </select>
+                        
+                        <div class="destino-group">
+                            <div class="destino-titulo">Origen del gasto (selecciona uno)</div>
+                            
+                            <div class="destino-opcion">
+                                <input type="radio" name="origenGasto" id="origenMonedero" value="monedero" class="destino-radio">
+                                <label for="origenMonedero" class="destino-label">Monedero</label>
+                                <select class="destino-select" id="gastoMonedero" disabled>
+                                    <option value="">Seleccionar</option>
+                                    ${FinanzasApp.data.monederos.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')}
+                                </select>
+                            </div>
+                            
+                            <div class="destino-opcion">
+                                <input type="radio" name="origenGasto" id="origenTarjeta" value="tarjeta" class="destino-radio">
+                                <label for="origenTarjeta" class="destino-label">Tarjeta</label>
+                                <select class="destino-select" id="gastoTarjeta" disabled>
+                                    <option value="">Seleccionar</option>
+                                    ${FinanzasApp.data.tarjetas.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('')}
+                                </select>
+                            </div>
+                            
+                            <div class="destino-opcion">
+                                <input type="radio" name="origenGasto" id="origenAlcancia" value="alcancia" class="destino-radio">
+                                <label for="origenAlcancia" class="destino-label">Alcancía</label>
+                                <select class="destino-select" id="gastoAlcancia" disabled>
+                                    <option value="">Seleccionar</option>
+                                    ${FinanzasApp.data.alcancias.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('')}
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Origen (Tarjeta)</label>
-                            <select class="form-input" id="gastoTarjeta">
-                                <option value="">Ninguna</option>
-                                ${FinanzasApp.data.tarjetas.map(t => `<option value="${t.id}">${t.nombre} (${FinanzasApp.formatCurrency(t.saldo)})</option>`).join('')}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Origen (Alcancía)</label>
-                            <select class="form-input" id="gastoAlcancia">
-                                <option value="">Ninguna</option>
-                                ${FinanzasApp.data.alcancias.map(a => `<option value="${a.id}">${a.nombre} (${FinanzasApp.formatCurrency(a.saldo)})</option>`).join('')}
-                            </select>
-                        </div>
+                        
                         <div class="form-group">
                             <label class="form-label">Frecuencia</label>
-                            <select class="form-input" id="gastoFrecuencia">
+                            <select class="form-input select-limpio" id="gastoFrecuencia">
                                 <option value="puntual">Puntual</option>
                                 <option value="diario">Diario</option>
                                 <option value="mensual">Mensual</option>
@@ -149,6 +162,13 @@ const Gastos = {
             }
         });
 
+        // Event listeners para los radio buttons
+        document.querySelectorAll('input[name="origenGasto"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.actualizarOrigenes(e.target.value);
+            });
+        });
+
         document.getElementById('prevMonth')?.addEventListener('click', () => {
             this.currentDate.setMonth(this.currentDate.getMonth() - 1);
             this.actualizarVista();
@@ -161,6 +181,26 @@ const Gastos = {
         
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById('gastoFecha').value = hoy;
+    },
+
+    actualizarOrigenes(seleccion) {
+        // Deshabilitar todos los selects
+        document.querySelectorAll('.destino-select').forEach(select => {
+            select.disabled = true;
+            select.style.opacity = '0.5';
+        });
+        
+        // Habilitar el select correspondiente
+        if (seleccion === 'monedero') {
+            document.getElementById('gastoMonedero').disabled = false;
+            document.getElementById('gastoMonedero').style.opacity = '1';
+        } else if (seleccion === 'tarjeta') {
+            document.getElementById('gastoTarjeta').disabled = false;
+            document.getElementById('gastoTarjeta').style.opacity = '1';
+        } else if (seleccion === 'alcancia') {
+            document.getElementById('gastoAlcancia').disabled = false;
+            document.getElementById('gastoAlcancia').style.opacity = '1';
+        }
     },
 
     getMonthName(month) {
@@ -208,9 +248,10 @@ const Gastos = {
             FinanzasApp.saveData();
             
             const select = document.getElementById('gastoTipo');
-            select.innerHTML = FinanzasApp.data.config.tiposGasto.map(t => 
-                `<option value="${t}">${t}</option>`
-            ).join('') + '<option value="nuevo">+ Agregar nuevo tipo</option>';
+            select.innerHTML = '<option value="">Seleccionar tipo</option>' + 
+                FinanzasApp.data.config.tiposGasto.map(t => 
+                    `<option value="${t}">${t}</option>`
+                ).join('') + '<option value="nuevo">+ Agregar nuevo tipo</option>';
             select.value = nuevoTipo.trim();
         }
     },
@@ -222,9 +263,10 @@ const Gastos = {
             FinanzasApp.saveData();
             
             const select = document.getElementById('gastoMetodo');
-            select.innerHTML = FinanzasApp.data.config.metodosPago.map(m => 
-                `<option value="${m}">${m}</option>`
-            ).join('') + '<option value="nuevo">+ Agregar nuevo método</option>';
+            select.innerHTML = '<option value="">Seleccionar método</option>' + 
+                FinanzasApp.data.config.metodosPago.map(m => 
+                    `<option value="${m}">${m}</option>`
+                ).join('') + '<option value="nuevo">+ Agregar nuevo método</option>';
             select.value = nuevoMetodo.trim();
         }
     },
@@ -257,8 +299,8 @@ const Gastos = {
                             </div>
                             <div class="movimiento-cantidad gasto">- ${FinanzasApp.formatCurrency(g.cantidad)}</div>
                             <div class="movimiento-actions">
-                                <button class="btn-icon" onclick="Gastos.editarGasto('${g.id}')">✏️</button>
-                                <button class="btn-icon" onclick="Gastos.eliminarGasto('${g.id}')">🗑️</button>
+                                <button class="btn-icon" onclick="Gastos.editarGasto('${g.id}')">Editar</button>
+                                <button class="btn-icon" onclick="Gastos.eliminarGasto('${g.id}')">Eliminar</button>
                             </div>
                         </li>
                     `).join('')}
@@ -279,44 +321,30 @@ const Gastos = {
         const tipo = document.getElementById('gastoTipo').value;
         const metodo = document.getElementById('gastoMetodo').value;
         const descripcion = document.getElementById('gastoDescripcion').value;
-        const monederoId = document.getElementById('gastoMonedero').value;
-        const tarjetaId = document.getElementById('gastoTarjeta').value;
-        const alcanciaId = document.getElementById('gastoAlcancia').value;
         const frecuencia = document.getElementById('gastoFrecuencia').value;
-
+        
+        // Validar tipo y método
+        if (!tipo) {
+            FinanzasApp.showMessage('Error', 'Selecciona un tipo de gasto', 'error');
+            return;
+        }
+        
+        if (!metodo) {
+            FinanzasApp.showMessage('Error', 'Selecciona un método de pago', 'error');
+            return;
+        }
+        
+        // Determinar qué origen está seleccionado
+        const origenSeleccionado = document.querySelector('input[name="origenGasto"]:checked')?.value;
+        
         if (!fecha || !cantidad) {
             FinanzasApp.showMessage('Error', 'Completa los campos obligatorios', 'error');
             return;
         }
 
-        if (!monederoId && !tarjetaId && !alcanciaId) {
-            FinanzasApp.showMessage('Error', 'Selecciona al menos un origen', 'error');
+        if (!origenSeleccionado) {
+            FinanzasApp.showMessage('Error', 'Selecciona un origen para el gasto', 'error');
             return;
-        }
-
-        // Verificar saldos
-        if (monederoId) {
-            const monedero = FinanzasApp.data.monederos.find(m => m.id === monederoId);
-            if (monedero && monedero.saldo < cantidad) {
-                FinanzasApp.showMessage('Saldo insuficiente', `El monedero ${monedero.nombre} tiene ${FinanzasApp.formatCurrency(monedero.saldo)}`, 'error');
-                return;
-            }
-        }
-        
-        if (tarjetaId) {
-            const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === tarjetaId);
-            if (tarjeta && tarjeta.saldo < cantidad) {
-                FinanzasApp.showMessage('Saldo insuficiente', `La tarjeta ${tarjeta.nombre} tiene ${FinanzasApp.formatCurrency(tarjeta.saldo)}`, 'error');
-                return;
-            }
-        }
-        
-        if (alcanciaId) {
-            const alcancia = FinanzasApp.data.alcancias.find(a => a.id === alcanciaId);
-            if (alcancia && alcancia.saldo < cantidad) {
-                FinanzasApp.showMessage('Saldo insuficiente', `La alcancía ${alcancia.nombre} tiene ${FinanzasApp.formatCurrency(alcancia.saldo)}`, 'error');
-                return;
-            }
         }
 
         const nuevoGasto = {
@@ -326,33 +354,68 @@ const Gastos = {
             tipo: tipo,
             metodo: metodo,
             descripcion: descripcion,
-            monederoId: monederoId || null,
-            tarjetaId: tarjetaId || null,
-            alcanciaId: alcanciaId || null,
             frecuencia: frecuencia
         };
 
-        FinanzasApp.data.gastos.push(nuevoGasto);
-
-        if (monederoId) {
+        // Verificar saldo y aplicar el gasto al origen seleccionado
+        if (origenSeleccionado === 'monedero') {
+            const monederoId = document.getElementById('gastoMonedero').value;
+            if (!monederoId) {
+                FinanzasApp.showMessage('Error', 'Selecciona un monedero', 'error');
+                return;
+            }
             const monedero = FinanzasApp.data.monederos.find(m => m.id === monederoId);
-            if (monedero) monedero.saldo -= cantidad;
-        }
-
-        if (tarjetaId) {
+            if (!monedero) return;
+            
+            if (monedero.saldo < cantidad) {
+                FinanzasApp.showMessage('Saldo insuficiente', `El monedero tiene ${FinanzasApp.formatCurrency(monedero.saldo)}`, 'error');
+                return;
+            }
+            monedero.saldo -= cantidad;
+            nuevoGasto.monederoId = monederoId;
+            
+        } else if (origenSeleccionado === 'tarjeta') {
+            const tarjetaId = document.getElementById('gastoTarjeta').value;
+            if (!tarjetaId) {
+                FinanzasApp.showMessage('Error', 'Selecciona una tarjeta', 'error');
+                return;
+            }
             const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === tarjetaId);
-            if (tarjeta) tarjeta.saldo -= cantidad;
-        }
-
-        if (alcanciaId) {
+            if (!tarjeta) return;
+            
+            if (tarjeta.saldo < cantidad) {
+                FinanzasApp.showMessage('Saldo insuficiente', `La tarjeta tiene ${FinanzasApp.formatCurrency(tarjeta.saldo)}`, 'error');
+                return;
+            }
+            tarjeta.saldo -= cantidad;
+            nuevoGasto.tarjetaId = tarjetaId;
+            
+        } else if (origenSeleccionado === 'alcancia') {
+            const alcanciaId = document.getElementById('gastoAlcancia').value;
+            if (!alcanciaId) {
+                FinanzasApp.showMessage('Error', 'Selecciona una alcancía', 'error');
+                return;
+            }
             const alcancia = FinanzasApp.data.alcancias.find(a => a.id === alcanciaId);
-            if (alcancia) alcancia.saldo -= cantidad;
+            if (!alcancia) return;
+            
+            if (alcancia.saldo < cantidad) {
+                FinanzasApp.showMessage('Saldo insuficiente', `La alcancía tiene ${FinanzasApp.formatCurrency(alcancia.saldo)}`, 'error');
+                return;
+            }
+            alcancia.saldo -= cantidad;
+            nuevoGasto.alcanciaId = alcanciaId;
         }
 
+        FinanzasApp.data.gastos.push(nuevoGasto);
         FinanzasApp.saveData();
         
         this.actualizarVista();
         document.getElementById('formGasto').reset();
+        
+        // Resetear radio buttons
+        document.querySelectorAll('input[name="origenGasto"]').forEach(r => r.checked = false);
+        this.actualizarOrigenes(null);
         
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById('gastoFecha').value = hoy;
@@ -368,7 +431,7 @@ const Gastos = {
         if (nuevaCantidad) {
             const cantidad = parseFloat(nuevaCantidad);
             if (cantidad > 0) {
-                // Devolver cantidad anterior a todos los orígenes
+                // Devolver cantidad anterior
                 if (gasto.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
                     if (monedero) monedero.saldo += gasto.cantidad;
@@ -382,7 +445,7 @@ const Gastos = {
                     if (alcancia) alcancia.saldo += gasto.cantidad;
                 }
                 
-                // Verificar saldos para la nueva cantidad
+                // Verificar saldo para la nueva cantidad
                 let saldoSuficiente = true;
                 if (gasto.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
@@ -441,7 +504,7 @@ const Gastos = {
         if (confirmar) {
             const gasto = FinanzasApp.data.gastos.find(g => g.id === id);
             if (gasto) {
-                // Devolver dinero a todos los orígenes
+                // Devolver dinero
                 if (gasto.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
                     if (monedero) monedero.saldo += gasto.cantidad;
