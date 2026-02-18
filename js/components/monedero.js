@@ -42,7 +42,7 @@ const Monedero = {
     renderMonederos() {
         const monederos = FinanzasApp.data.monederos;
         
-        if (monederos.length === 0) {
+        if (!monederos || monederos.length === 0) {
             return '<p class="empty-state">No hay monederos creados.</p>';
         }
 
@@ -67,6 +67,10 @@ const Monedero = {
     },
 
     renderTarjetas() {
+        if (!FinanzasApp.data.tarjetas) {
+            FinanzasApp.data.tarjetas = [];
+        }
+        
         const tarjetas = FinanzasApp.data.tarjetas;
         
         if (tarjetas.length === 0) {
@@ -243,15 +247,16 @@ const Monedero = {
         
         if (!origen) return;
         
-        const opciones = destinos.map(d => ({
-            value: JSON.stringify({ id: d.id, tipo: d.tipo }),
+        // Crear opciones para el select usando índices
+        const opciones = destinos.map((d, index) => ({
+            value: index.toString(),
             label: `${d.tipo === 'monedero' ? '💰' : d.tipo === 'tarjeta' ? '💳' : '🏦'} ${d.nombre} (${FinanzasApp.formatCurrency(d.saldo)})`
         }));
         
-        const destinoStr = await FinanzasApp.showSelect('Transferir', 'Selecciona destino:', opciones);
-        if (!destinoStr) return;
+        const indiceSeleccionado = await FinanzasApp.showSelect('Transferir', 'Selecciona destino:', opciones);
+        if (indiceSeleccionado === null) return;
         
-        const destino = JSON.parse(destinoStr);
+        const destino = destinos[parseInt(indiceSeleccionado)];
         
         const opcionTransferencia = await FinanzasApp.showConfirm('Transferir todo', 
             `¿Quieres transferir el saldo completo de ${FinanzasApp.formatCurrency(origen.saldo)}?\n\nSelecciona "No" para ingresar una cantidad personalizada.`);
@@ -267,10 +272,15 @@ const Monedero = {
             cantidad = parseFloat(cantidadStr);
         }
         
+        if (cantidad <= 0) {
+            await FinanzasApp.showMessage('Cantidad inválida', 'La cantidad debe ser mayor a 0.', 'error');
+            return;
+        }
+        
         if (origen.saldo >= cantidad) {
             origen.saldo -= cantidad;
             
-            // Sumar al destino
+            // Sumar al destino según su tipo
             if (destino.tipo === 'monedero') {
                 const dest = FinanzasApp.data.monederos.find(m => m.id === destino.id);
                 if (dest) dest.saldo += cantidad;
