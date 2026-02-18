@@ -269,7 +269,7 @@ body {
 }
 
 .resumen-value::after {
-    content: " €";
+    content: " $";
     font-size: 0.9rem;
     font-weight: 500;
     margin-left: 2px;
