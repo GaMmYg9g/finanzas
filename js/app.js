@@ -158,7 +158,7 @@ const FinanzasApp = {
     },
 
     formatCurrency(amount) {
-        return `${amount.toFixed(2)} €`;
+        return `${amount.toFixed(2)}`;
     },
 
     async showMessage(titulo, mensaje, tipo = 'info') {
