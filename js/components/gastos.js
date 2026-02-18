@@ -30,13 +30,35 @@ const Gastos = {
                             </select>
                         </div>
                         <div class="form-group">
+                            <label class="form-label">Método de pago</label>
+                            <select class="form-input" id="gastoMetodo">
+                                ${FinanzasApp.data.config.metodosPago.map(m => `<option value="${m}">${m}</option>`).join('')}
+                                <option value="nuevo">+ Agregar nuevo método</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label class="form-label">Descripción (opcional)</label>
                             <input type="text" class="form-input" id="gastoDescripcion">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Monedero origen</label>
-                            <select class="form-input" id="gastoMonedero" required>
+                            <label class="form-label">Origen (Monedero)</label>
+                            <select class="form-input" id="gastoMonedero">
+                                <option value="">Ninguno</option>
                                 ${FinanzasApp.data.monederos.map(m => `<option value="${m.id}">${m.nombre} (${FinanzasApp.formatCurrency(m.saldo)})</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Origen (Tarjeta)</label>
+                            <select class="form-input" id="gastoTarjeta">
+                                <option value="">Ninguna</option>
+                                ${FinanzasApp.data.tarjetas.map(t => `<option value="${t.id}">${t.nombre} (${FinanzasApp.formatCurrency(t.saldo)})</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Origen (Alcancía)</label>
+                            <select class="form-input" id="gastoAlcancia">
+                                <option value="">Ninguna</option>
+                                ${FinanzasApp.data.alcancias.map(a => `<option value="${a.id}">${a.nombre} (${FinanzasApp.formatCurrency(a.saldo)})</option>`).join('')}
                             </select>
                         </div>
                         <div class="form-group">
@@ -121,6 +143,12 @@ const Gastos = {
             }
         });
 
+        document.getElementById('gastoMetodo').addEventListener('change', (e) => {
+            if (e.target.value === 'nuevo') {
+                this.agregarNuevoMetodo();
+            }
+        });
+
         document.getElementById('prevMonth')?.addEventListener('click', () => {
             this.currentDate.setMonth(this.currentDate.getMonth() - 1);
             this.actualizarVista();
@@ -187,6 +215,20 @@ const Gastos = {
         }
     },
 
+    async agregarNuevoMetodo() {
+        const nuevoMetodo = await FinanzasApp.showPrompt('Nuevo método de pago', 'Nombre:', 'text');
+        if (nuevoMetodo && nuevoMetodo.trim()) {
+            FinanzasApp.data.config.metodosPago.push(nuevoMetodo.trim());
+            FinanzasApp.saveData();
+            
+            const select = document.getElementById('gastoMetodo');
+            select.innerHTML = FinanzasApp.data.config.metodosPago.map(m => 
+                `<option value="${m}">${m}</option>`
+            ).join('') + '<option value="nuevo">+ Agregar nuevo método</option>';
+            select.value = nuevoMetodo.trim();
+        }
+    },
+
     async mostrarGastosDia(dateStr) {
         const gastos = this.getGastosDelDia(dateStr);
         const fecha = new Date(dateStr + 'T12:00:00');
@@ -210,8 +252,8 @@ const Gastos = {
                         <li class="movimiento-item" data-id="${g.id}">
                             <div class="movimiento-icon gasto">G</div>
                             <div class="movimiento-info">
-                                <div class="movimiento-concepto">${g.tipo === 'gasto' ? 'Gasto' : g.tipo} - ${g.descripcion || 'Sin descripción'}</div>
-                                <div class="movimiento-fecha">${FinanzasApp.formatDate(g.fecha)}</div>
+                                <div class="movimiento-concepto">${g.tipo} - ${g.descripcion || 'Sin descripción'}</div>
+                                <div class="movimiento-fecha">${FinanzasApp.formatDate(g.fecha)} · ${g.metodo || 'Efectivo'}</div>
                             </div>
                             <div class="movimiento-cantidad gasto">- ${FinanzasApp.formatCurrency(g.cantidad)}</div>
                             <div class="movimiento-actions">
@@ -235,21 +277,46 @@ const Gastos = {
         const fecha = document.getElementById('gastoFecha').value;
         const cantidad = parseFloat(document.getElementById('gastoCantidad').value);
         const tipo = document.getElementById('gastoTipo').value;
+        const metodo = document.getElementById('gastoMetodo').value;
         const descripcion = document.getElementById('gastoDescripcion').value;
         const monederoId = document.getElementById('gastoMonedero').value;
+        const tarjetaId = document.getElementById('gastoTarjeta').value;
+        const alcanciaId = document.getElementById('gastoAlcancia').value;
         const frecuencia = document.getElementById('gastoFrecuencia').value;
 
-        if (!fecha || !cantidad || !monederoId) {
-            FinanzasApp.showMessage('Error', 'Completa todos los campos obligatorios', 'error');
+        if (!fecha || !cantidad) {
+            FinanzasApp.showMessage('Error', 'Completa los campos obligatorios', 'error');
             return;
         }
 
-        const monedero = FinanzasApp.data.monederos.find(m => m.id === monederoId);
-        if (monedero.saldo < cantidad) {
-            FinanzasApp.showMessage('Saldo insuficiente', 
-                `El monedero tiene ${FinanzasApp.formatCurrency(monedero.saldo)}`, 
-                'error');
+        if (!monederoId && !tarjetaId && !alcanciaId) {
+            FinanzasApp.showMessage('Error', 'Selecciona al menos un origen', 'error');
             return;
+        }
+
+        // Verificar saldos
+        if (monederoId) {
+            const monedero = FinanzasApp.data.monederos.find(m => m.id === monederoId);
+            if (monedero && monedero.saldo < cantidad) {
+                FinanzasApp.showMessage('Saldo insuficiente', `El monedero ${monedero.nombre} tiene ${FinanzasApp.formatCurrency(monedero.saldo)}`, 'error');
+                return;
+            }
+        }
+        
+        if (tarjetaId) {
+            const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === tarjetaId);
+            if (tarjeta && tarjeta.saldo < cantidad) {
+                FinanzasApp.showMessage('Saldo insuficiente', `La tarjeta ${tarjeta.nombre} tiene ${FinanzasApp.formatCurrency(tarjeta.saldo)}`, 'error');
+                return;
+            }
+        }
+        
+        if (alcanciaId) {
+            const alcancia = FinanzasApp.data.alcancias.find(a => a.id === alcanciaId);
+            if (alcancia && alcancia.saldo < cantidad) {
+                FinanzasApp.showMessage('Saldo insuficiente', `La alcancía ${alcancia.nombre} tiene ${FinanzasApp.formatCurrency(alcancia.saldo)}`, 'error');
+                return;
+            }
         }
 
         const nuevoGasto = {
@@ -257,13 +324,30 @@ const Gastos = {
             fecha: fecha,
             cantidad: cantidad,
             tipo: tipo,
+            metodo: metodo,
             descripcion: descripcion,
-            monederoId: monederoId,
+            monederoId: monederoId || null,
+            tarjetaId: tarjetaId || null,
+            alcanciaId: alcanciaId || null,
             frecuencia: frecuencia
         };
 
         FinanzasApp.data.gastos.push(nuevoGasto);
-        monedero.saldo -= cantidad;
+
+        if (monederoId) {
+            const monedero = FinanzasApp.data.monederos.find(m => m.id === monederoId);
+            if (monedero) monedero.saldo -= cantidad;
+        }
+
+        if (tarjetaId) {
+            const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === tarjetaId);
+            if (tarjeta) tarjeta.saldo -= cantidad;
+        }
+
+        if (alcanciaId) {
+            const alcancia = FinanzasApp.data.alcancias.find(a => a.id === alcanciaId);
+            if (alcancia) alcancia.saldo -= cantidad;
+        }
 
         FinanzasApp.saveData();
         
@@ -284,19 +368,69 @@ const Gastos = {
         if (nuevaCantidad) {
             const cantidad = parseFloat(nuevaCantidad);
             if (cantidad > 0) {
-                const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
-                if (monedero) {
-                    monedero.saldo += gasto.cantidad;
-                    if (monedero.saldo >= cantidad) {
-                        monedero.saldo -= cantidad;
-                        gasto.cantidad = cantidad;
-                        FinanzasApp.saveData();
-                        this.actualizarVista();
-                        FinanzasApp.showMessage('Gasto actualizado', 'La cantidad se ha modificado correctamente', 'success');
-                    } else {
-                        monedero.saldo -= gasto.cantidad;
-                        FinanzasApp.showMessage('Saldo insuficiente', 'No hay suficiente saldo para esta edición', 'error');
+                // Devolver cantidad anterior a todos los orígenes
+                if (gasto.monederoId) {
+                    const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
+                    if (monedero) monedero.saldo += gasto.cantidad;
+                }
+                if (gasto.tarjetaId) {
+                    const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === gasto.tarjetaId);
+                    if (tarjeta) tarjeta.saldo += gasto.cantidad;
+                }
+                if (gasto.alcanciaId) {
+                    const alcancia = FinanzasApp.data.alcancias.find(a => a.id === gasto.alcanciaId);
+                    if (alcancia) alcancia.saldo += gasto.cantidad;
+                }
+                
+                // Verificar saldos para la nueva cantidad
+                let saldoSuficiente = true;
+                if (gasto.monederoId) {
+                    const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
+                    if (monedero && monedero.saldo < cantidad) saldoSuficiente = false;
+                }
+                if (gasto.tarjetaId) {
+                    const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === gasto.tarjetaId);
+                    if (tarjeta && tarjeta.saldo < cantidad) saldoSuficiente = false;
+                }
+                if (gasto.alcanciaId) {
+                    const alcancia = FinanzasApp.data.alcancias.find(a => a.id === gasto.alcanciaId);
+                    if (alcancia && alcancia.saldo < cantidad) saldoSuficiente = false;
+                }
+                
+                if (saldoSuficiente) {
+                    // Restar nueva cantidad
+                    if (gasto.monederoId) {
+                        const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
+                        if (monedero) monedero.saldo -= cantidad;
                     }
+                    if (gasto.tarjetaId) {
+                        const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === gasto.tarjetaId);
+                        if (tarjeta) tarjeta.saldo -= cantidad;
+                    }
+                    if (gasto.alcanciaId) {
+                        const alcancia = FinanzasApp.data.alcancias.find(a => a.id === gasto.alcanciaId);
+                        if (alcancia) alcancia.saldo -= cantidad;
+                    }
+                    
+                    gasto.cantidad = cantidad;
+                    FinanzasApp.saveData();
+                    this.actualizarVista();
+                    FinanzasApp.showMessage('Gasto actualizado', 'La cantidad se ha modificado correctamente', 'success');
+                } else {
+                    // Revertir devolución
+                    if (gasto.monederoId) {
+                        const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
+                        if (monedero) monedero.saldo -= gasto.cantidad;
+                    }
+                    if (gasto.tarjetaId) {
+                        const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === gasto.tarjetaId);
+                        if (tarjeta) tarjeta.saldo -= gasto.cantidad;
+                    }
+                    if (gasto.alcanciaId) {
+                        const alcancia = FinanzasApp.data.alcancias.find(a => a.id === gasto.alcanciaId);
+                        if (alcancia) alcancia.saldo -= gasto.cantidad;
+                    }
+                    FinanzasApp.showMessage('Saldo insuficiente', 'No hay suficiente saldo para esta edición', 'error');
                 }
             }
         }
@@ -307,9 +441,18 @@ const Gastos = {
         if (confirmar) {
             const gasto = FinanzasApp.data.gastos.find(g => g.id === id);
             if (gasto) {
-                const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
-                if (monedero) {
-                    monedero.saldo += gasto.cantidad;
+                // Devolver dinero a todos los orígenes
+                if (gasto.monederoId) {
+                    const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
+                    if (monedero) monedero.saldo += gasto.cantidad;
+                }
+                if (gasto.tarjetaId) {
+                    const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === gasto.tarjetaId);
+                    if (tarjeta) tarjeta.saldo += gasto.cantidad;
+                }
+                if (gasto.alcanciaId) {
+                    const alcancia = FinanzasApp.data.alcancias.find(a => a.id === gasto.alcanciaId);
+                    if (alcancia) alcancia.saldo += gasto.cantidad;
                 }
                 
                 FinanzasApp.data.gastos = FinanzasApp.data.gastos.filter(g => g.id !== id);
