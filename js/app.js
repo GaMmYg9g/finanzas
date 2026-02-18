@@ -4,11 +4,13 @@ const FinanzasApp = {
     data: {
         monederos: [],
         alcancias: [],
+        tarjetas: [], // NUEVO: Array de tarjetas
         ingresos: [],
         gastos: [],
         config: {
             tiposIngreso: ['Salario', 'Transferencias'],
-            tiposGasto: ['Renta']
+            tiposGasto: ['Renta'],
+            metodosPago: ['Efectivo', 'Tarjeta']
         }
     },
 
@@ -105,8 +107,9 @@ const FinanzasApp = {
 
     updateTotalGeneral() {
         const totalMonederos = this.data.monederos.reduce((sum, m) => sum + m.saldo, 0);
+        const totalTarjetas = this.data.tarjetas.reduce((sum, t) => sum + t.saldo, 0);
         const totalAlcancia = this.data.alcancias.reduce((sum, a) => sum + a.saldo, 0);
-        const total = totalMonederos + totalAlcancia;
+        const total = totalMonederos + totalTarjetas + totalAlcancia;
         
         document.getElementById('totalGeneral').textContent = `${total.toFixed(2)} $`;
     },
@@ -134,14 +137,18 @@ const FinanzasApp = {
         } else {
             this.data = {
                 monederos: [
-                    { id: '1', nombre: 'Mi monedero', saldo: 0, tipo: 'principal' }
+                    { id: 'm1', nombre: 'Mi monedero', saldo: 0, tipo: 'principal' }
+                ],
+                tarjetas: [
+                    { id: 't1', nombre: 'Mi tarjeta', saldo: 0, tipo: 'principal' }
                 ],
                 alcancias: [],
                 ingresos: [],
                 gastos: [],
                 config: {
                     tiposIngreso: ['Salario', 'Transferencias'],
-                    tiposGasto: ['Renta']
+                    tiposGasto: ['Renta'],
+                    metodosPago: ['Efectivo', 'Tarjeta']
                 }
             };
         }
@@ -158,7 +165,7 @@ const FinanzasApp = {
     },
 
     formatCurrency(amount) {
-        return `${amount.toFixed(2)}`;
+        return `${amount.toFixed(2)} $`;
     },
 
     async showMessage(titulo, mensaje, tipo = 'info') {
