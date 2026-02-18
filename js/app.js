@@ -108,7 +108,7 @@ const FinanzasApp = {
         const totalAlcancia = this.data.alcancias.reduce((sum, a) => sum + a.saldo, 0);
         const total = totalMonederos + totalAlcancia;
         
-        document.getElementById('totalGeneral').textContent = `${total.toFixed(2)} €`;
+        document.getElementById('totalGeneral').textContent = `${total.toFixed(2)} $`;
     },
 
     setTheme(theme) {
