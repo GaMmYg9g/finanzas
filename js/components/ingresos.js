@@ -235,45 +235,48 @@ const Ingresos = {
         }
     },
 
-    async mostrarIngresosDia(dateStr) {
-        const ingresos = this.getIngresosDelDia(dateStr);
-        const fecha = new Date(dateStr + 'T12:00:00');
-        const titulo = fecha.toLocaleDateString('es-ES', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-        
-        document.getElementById('diaSeleccionado').textContent = titulo;
-        
-        if (ingresos.length === 0) {
-            document.getElementById('listaIngresosDia').innerHTML = `
-                <p class="empty-state">No hay ingresos este día</p>
-            `;
-        } else {
-            document.getElementById('listaIngresosDia').innerHTML = `
-                <ul class="movimientos-list">
-                    ${ingresos.map(i => `
-                        <li class="movimiento-item" data-id="${i.id}">
-                            <div class="movimiento-icon ingreso">I</div>
-                            <div class="movimiento-info">
-                                <div class="movimiento-concepto">${i.tipo} - ${i.descripcion || 'Sin descripción'}</div>
-                                <div class="movimiento-fecha">${FinanzasApp.formatDate(i.fecha)} · ${i.metodo || 'Efectivo'}</div>
+async mostrarIngresosDia(dateStr) {
+    const ingresos = this.getIngresosDelDia(dateStr);
+    const fecha = new Date(dateStr + 'T12:00:00');
+    const titulo = fecha.toLocaleDateString('es-ES', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    
+    document.getElementById('diaSeleccionado').textContent = titulo;
+    
+    if (ingresos.length === 0) {
+        document.getElementById('listaIngresosDia').innerHTML = `
+            <p class="empty-state">No hay ingresos este día</p>
+        `;
+    } else {
+        document.getElementById('listaIngresosDia').innerHTML = `
+            <ul class="movimientos-list">
+                ${ingresos.map(i => `
+                    <li class="movimiento-item">
+                        <div class="movimiento-icon ingreso">I</div>
+                        <div class="movimiento-info">
+                            <div class="movimiento-concepto">${i.tipo} - ${i.descripcion || 'Sin descripción'}</div>
+                            <div class="movimiento-detalles">
+                                <span class="movimiento-fecha">${FinanzasApp.formatDate(i.fecha)}</span>
+                                <span class="movimiento-metodo">${i.metodo || 'Efectivo'}</span>
                             </div>
-                            <div class="movimiento-cantidad ingreso">+ ${FinanzasApp.formatCurrency(i.cantidad)}</div>
-                            <div class="movimiento-actions">
-                                <button class="btn-icon" onclick="Ingresos.editarIngreso('${i.id}')">Editar</button>
-                                <button class="btn-icon" onclick="Ingresos.eliminarIngreso('${i.id}')">Eliminar</button>
-                            </div>
-                        </li>
-                    `).join('')}
-                </ul>
-            `;
-        }
-        
-        document.getElementById('detalleDia').style.display = 'block';
-    },
+                        </div>
+                        <div class="movimiento-cantidad ingreso">+ ${FinanzasApp.formatCurrency(i.cantidad)}</div>
+                        <div class="movimiento-actions">
+                            <button class="btn-icon" onclick="Ingresos.editarIngreso('${i.id}')">Editar</button>
+                            <button class="btn-icon" onclick="Ingresos.eliminarIngreso('${i.id}')">Eliminar</button>
+                        </div>
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+    }
+    
+    document.getElementById('detalleDia').style.display = 'block';
+},
 
     cerrarDetalle() {
         document.getElementById('detalleDia').style.display = 'none';
