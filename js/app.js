@@ -124,7 +124,6 @@ const FinanzasApp = {
             toggleBtn.textContent = theme === 'dark' ? 'Claro' : 'Oscuro';
         }
         
-        // Actualizar gráfico si estamos en dashboard
         if (this.currentView === 'dashboard' && Dashboard.chart) {
             Dashboard.initChart();
         }
@@ -139,11 +138,9 @@ const FinanzasApp = {
         const saved = localStorage.getItem('finanzasData');
         if (saved) {
             this.data = JSON.parse(saved);
-            // Asegurar que tarjetas existe (para usuarios con datos antiguos)
             if (!this.data.tarjetas) {
                 this.data.tarjetas = [];
             }
-            // Asegurar que metodosPago existe
             if (!this.data.config.metodosPago) {
                 this.data.config.metodosPago = ['Efectivo', 'Tarjeta'];
             }
@@ -172,9 +169,28 @@ const FinanzasApp = {
         this.updateTotalGeneral();
     },
 
+    // Funciones de formato de fechas CORREGIDAS
     formatDate(dateStr) {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        if (!dateStr) return '';
+        const [año, mes, dia] = dateStr.split('-');
+        const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
+        return fecha.toLocaleDateString('es-ES', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+        });
+    },
+
+    formatDateLong(dateStr) {
+        if (!dateStr) return '';
+        const [año, mes, dia] = dateStr.split('-');
+        const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
+        return fecha.toLocaleDateString('es-ES', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
     },
 
     formatCurrency(amount) {
@@ -249,78 +265,71 @@ const FinanzasApp = {
         });
     },
 
-async showSelect(titulo, mensaje, opciones) {
-    return new Promise((resolve) => {
-        const modal = document.getElementById('customModal');
-        const title = document.getElementById('modalTitle');
-        const input = document.getElementById('modalInput');
-        const cancelBtn = document.getElementById('modalCancel');
-        const confirmBtn = document.getElementById('modalConfirm');
-        
-        // Limpiar el contenido previo
-        const existingSelect = document.getElementById('modalSelect');
-        if (existingSelect) existingSelect.remove();
-        
-        const select = document.createElement('select');
-        select.className = 'form-input';
-        select.id = 'modalSelect';
-        select.style.marginBottom = '1.5rem';
-        select.style.width = '100%';
-        select.style.padding = '0.8rem';
-        select.style.backgroundColor = 'var(--bg-primary)';
-        select.style.border = '1px solid var(--border-color)';
-        select.style.borderRadius = '8px';
-        select.style.color = 'var(--text-primary)';
-        select.style.fontSize = '1rem';
-        
-        select.innerHTML = opciones.map(o => {
-            // Detectar si es un objetivo completado (para poner icono)
-            const esObjetivo = o.value !== 'sin_objetivo' && o.value !== 'otros';
-            const icono = esObjetivo ? '🎯' : '';
-            return `<option value="${o.value}" style="background-color: var(--card-bg); color: var(--text-primary); padding: 0.5rem;">${icono}${o.label}</option>`;
-        }).join('');
-        
-        input.style.display = 'none';
-        modal.querySelector('.modal-content').insertBefore(select, modal.querySelector('.modal-buttons'));
-        
-        title.textContent = titulo;
-        modal.style.display = 'flex';
-        
-        // Enfocar el select
-        setTimeout(() => select.focus(), 100);
-        
-        const cleanup = () => {
-            modal.style.display = 'none';
-            input.style.display = 'block';
-            select.remove();
-            cancelBtn.removeEventListener('click', onCancel);
-            confirmBtn.removeEventListener('click', onConfirm);
-            select.removeEventListener('keypress', onKeyPress);
-        };
-        
-        const onCancel = () => {
-            cleanup();
-            resolve(null);
-        };
-        
-        const onConfirm = () => {
-            const valor = select.value;
-            cleanup();
-            resolve(valor);
-        };
-        
-        const onKeyPress = (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                onConfirm();
-            }
-        };
-        
-        cancelBtn.addEventListener('click', onCancel);
-        confirmBtn.addEventListener('click', onConfirm);
-        select.addEventListener('keypress', onKeyPress);
-    });
-},
+    async showSelect(titulo, mensaje, opciones) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('customModal');
+            const title = document.getElementById('modalTitle');
+            const input = document.getElementById('modalInput');
+            const cancelBtn = document.getElementById('modalCancel');
+            const confirmBtn = document.getElementById('modalConfirm');
+            
+            const existingSelect = document.getElementById('modalSelect');
+            if (existingSelect) existingSelect.remove();
+            
+            const select = document.createElement('select');
+            select.className = 'form-input';
+            select.id = 'modalSelect';
+            select.style.marginBottom = '1.5rem';
+            select.style.width = '100%';
+            select.style.padding = '0.8rem';
+            select.style.backgroundColor = 'var(--bg-primary)';
+            select.style.border = '1px solid var(--border-color)';
+            select.style.borderRadius = '8px';
+            select.style.color = 'var(--text-primary)';
+            select.style.fontSize = '1rem';
+            
+            select.innerHTML = opciones.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+            
+            input.style.display = 'none';
+            modal.querySelector('.modal-content').insertBefore(select, modal.querySelector('.modal-buttons'));
+            
+            title.textContent = titulo;
+            modal.style.display = 'flex';
+            
+            setTimeout(() => select.focus(), 100);
+            
+            const cleanup = () => {
+                modal.style.display = 'none';
+                input.style.display = 'block';
+                select.remove();
+                cancelBtn.removeEventListener('click', onCancel);
+                confirmBtn.removeEventListener('click', onConfirm);
+                select.removeEventListener('keypress', onKeyPress);
+            };
+            
+            const onCancel = () => {
+                cleanup();
+                resolve(null);
+            };
+            
+            const onConfirm = () => {
+                const valor = select.value;
+                cleanup();
+                resolve(valor);
+            };
+            
+            const onKeyPress = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    onConfirm();
+                }
+            };
+            
+            cancelBtn.addEventListener('click', onCancel);
+            confirmBtn.addEventListener('click', onConfirm);
+            select.addEventListener('keypress', onKeyPress);
+        });
+    },
 
     async showPrompt(titulo, placeholder = '', tipo = 'text', valorPorDefecto = '') {
         return new Promise((resolve) => {
@@ -379,6 +388,122 @@ async showSelect(titulo, mensaje, opciones) {
             confirmBtn.addEventListener('click', onConfirm);
             input.addEventListener('keypress', onKeyPress);
         });
+    },
+
+    // Selector de fecha personalizado
+    async mostrarSelectorFecha(titulo = 'Seleccionar fecha') {
+        return new Promise((resolve) => {
+            const fechaActual = new Date();
+            let mesActual = fechaActual.getMonth();
+            let añoActual = fechaActual.getFullYear();
+            let diaSeleccionado = null;
+            
+            const popup = document.createElement('div');
+            popup.className = 'calendario-popup';
+            popup.id = 'calendarioPopup';
+            
+            const actualizarCalendario = () => {
+                const primerDia = new Date(añoActual, mesActual, 1).getDay();
+                const diasEnMes = new Date(añoActual, mesActual + 1, 0).getDate();
+                const diasMesAnterior = new Date(añoActual, mesActual, 0).getDate();
+                
+                let inicio = primerDia === 0 ? 6 : primerDia - 1;
+                
+                let html = `
+                    <div class="calendario-popup-header">
+                        <span class="calendario-popup-mes">${this.getMonthName(mesActual)} ${añoActual}</span>
+                        <button class="calendario-popup-close" id="cerrarCalendario">&times;</button>
+                    </div>
+                    <div class="calendario-popup-weekdays">
+                        <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                    </div>
+                    <div class="calendario-popup-grid" id="calendarioGrid">
+                `;
+                
+                for (let i = 0; i < inicio; i++) {
+                    const dia = diasMesAnterior - inicio + i + 1;
+                    html += `<div class="calendario-popup-dia otro-mes" data-dia="${dia}" data-mes="${mesActual-1}" data-año="${añoActual}">${dia}</div>`;
+                }
+                
+                for (let i = 1; i <= diasEnMes; i++) {
+                    const seleccionado = diaSeleccionado && 
+                        diaSeleccionado.dia === i && 
+                        diaSeleccionado.mes === mesActual && 
+                        diaSeleccionado.año === añoActual;
+                    html += `<div class="calendario-popup-dia ${seleccionado ? 'seleccionado' : ''}" data-dia="${i}" data-mes="${mesActual}" data-año="${añoActual}">${i}</div>`;
+                }
+                
+                const totalCeldas = 42;
+                const celdasRestantes = totalCeldas - (inicio + diasEnMes);
+                for (let i = 1; i <= celdasRestantes; i++) {
+                    html += `<div class="calendario-popup-dia otro-mes" data-dia="${i}" data-mes="${mesActual+1}" data-año="${añoActual}">${i}</div>`;
+                }
+                
+                html += `
+                    </div>
+                    <div class="calendario-popup-footer">
+                        <button class="calendario-popup-btn cancelar" id="cancelarFecha">Cancelar</button>
+                        <button class="calendario-popup-btn aceptar" id="aceptarFecha">Aceptar</button>
+                    </div>
+                `;
+                
+                popup.innerHTML = html;
+            };
+            
+            actualizarCalendario();
+            document.body.appendChild(popup);
+            setTimeout(() => popup.classList.add('mostrar'), 10);
+            
+            popup.addEventListener('click', (e) => {
+                if (e.target.classList.contains('calendario-popup-dia')) {
+                    const dia = e.target.dataset.dia;
+                    const mes = parseInt(e.target.dataset.mes);
+                    const año = parseInt(e.target.dataset.año);
+                    
+                    diaSeleccionado = { dia, mes, año };
+                    
+                    document.querySelectorAll('.calendario-popup-dia').forEach(el => {
+                        el.classList.remove('seleccionado');
+                    });
+                    e.target.classList.add('seleccionado');
+                }
+            });
+            
+            document.getElementById('cerrarCalendario')?.addEventListener('click', () => {
+                popup.classList.remove('mostrar');
+                setTimeout(() => {
+                    document.body.removeChild(popup);
+                    resolve(null);
+                }, 300);
+            });
+            
+            document.getElementById('cancelarFecha')?.addEventListener('click', () => {
+                popup.classList.remove('mostrar');
+                setTimeout(() => {
+                    document.body.removeChild(popup);
+                    resolve(null);
+                }, 300);
+            });
+            
+            document.getElementById('aceptarFecha')?.addEventListener('click', () => {
+                if (diaSeleccionado) {
+                    const mes = String(diaSeleccionado.mes + 1).padStart(2, '0');
+                    const dia = String(diaSeleccionado.dia).padStart(2, '0');
+                    const fechaStr = `${diaSeleccionado.año}-${mes}-${dia}`;
+                    
+                    popup.classList.remove('mostrar');
+                    setTimeout(() => {
+                        document.body.removeChild(popup);
+                        resolve(fechaStr);
+                    }, 300);
+                }
+            });
+        });
+    },
+
+    getMonthName(month) {
+        const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        return months[month];
     }
 };
 
