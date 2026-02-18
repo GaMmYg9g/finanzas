@@ -49,13 +49,19 @@ const Alcancia = {
                                 const progreso = Math.min((a.saldo / o.meta) * 100, 100);
                                 return `
                                     <div class="objetivo-item">
-                                        <div class="objetivo-info">
-                                            <span class="objetivo-nombre">${o.nombre}</span>
-                                            <span class="objetivo-meta">
-                                                <span class="objetivo-actual">${FinanzasApp.formatCurrency(Math.min(a.saldo, o.meta))}</span>
-                                                /
-                                                <span class="objetivo-total">${FinanzasApp.formatCurrency(o.meta)}</span>
-                                            </span>
+                                        <div class="objetivo-header">
+                                            <div class="objetivo-info">
+                                                <span class="objetivo-nombre">${o.nombre}</span>
+                                                <span class="objetivo-meta">
+                                                    <span class="objetivo-actual">${FinanzasApp.formatCurrency(Math.min(a.saldo, o.meta))}</span>
+                                                    /
+                                                    <span class="objetivo-total">${FinanzasApp.formatCurrency(o.meta)}</span>
+                                                </span>
+                                            </div>
+                                            <div class="objetivo-actions">
+                                                <button class="btn-icon-small" onclick="Alcancia.editarObjetivo('${a.id}', '${o.id}')">✏️</button>
+                                                <button class="btn-icon-small" onclick="Alcancia.eliminarObjetivo('${a.id}', '${o.id}')">🗑️</button>
+                                            </div>
                                         </div>
                                         <div class="progress-container">
                                             <div class="progress-bar">
@@ -146,6 +152,7 @@ const Alcancia = {
             if (!confirmar) return;
         }
         
+        // Filtrar para eliminar la alcancía
         FinanzasApp.data.alcancias = FinanzasApp.data.alcancias.filter(a => a.id !== id);
         
         await FinanzasApp.showMessage('Alcancía eliminada', `La alcancía se ha eliminado correctamente.`, 'success');
@@ -219,9 +226,6 @@ const Alcancia = {
             return;
         }
         
-        const acumular = await FinanzasApp.showConfirm('Acumular saldo', 
-            '¿Quieres que este objetivo empiece con el saldo actual de la alcancía?');
-        
         alcancia.objetivos.push({
             id: Date.now().toString(),
             nombre: nombre.trim(),
@@ -233,6 +237,47 @@ const Alcancia = {
             `El objetivo "${nombre}" se ha añadido a "${alcancia.nombre}".`, 
             'success');
         
+        FinanzasApp.saveData();
+        this.actualizarVista();
+    },
+
+    async editarObjetivo(alcanciaId, objetivoId) {
+        const alcancia = FinanzasApp.data.alcancias.find(a => a.id === alcanciaId);
+        if (!alcancia) return;
+        
+        const objetivo = alcancia.objetivos.find(o => o.id === objetivoId);
+        if (!objetivo) return;
+        
+        // Editar nombre
+        const nuevoNombre = await FinanzasApp.showPrompt('Editar objetivo', 'Nuevo nombre:', 'text', objetivo.nombre);
+        if (nuevoNombre && nuevoNombre.trim() && nuevoNombre !== objetivo.nombre) {
+            objetivo.nombre = nuevoNombre.trim();
+        }
+        
+        // Editar meta
+        const nuevaMeta = await FinanzasApp.showPrompt('Editar meta', 'Nueva cantidad:', 'number', objetivo.meta.toString());
+        if (nuevaMeta) {
+            const meta = parseFloat(nuevaMeta);
+            if (meta > 0) {
+                objetivo.meta = meta;
+            }
+        }
+        
+        await FinanzasApp.showMessage('Objetivo actualizado', 'El objetivo se ha modificado correctamente.', 'success');
+        FinanzasApp.saveData();
+        this.actualizarVista();
+    },
+
+    async eliminarObjetivo(alcanciaId, objetivoId) {
+        const alcancia = FinanzasApp.data.alcancias.find(a => a.id === alcanciaId);
+        if (!alcancia) return;
+        
+        const confirmar = await FinanzasApp.showConfirm('Eliminar objetivo', '¿Estás seguro de eliminar este objetivo?');
+        if (!confirmar) return;
+        
+        alcancia.objetivos = alcancia.objetivos.filter(o => o.id !== objetivoId);
+        
+        await FinanzasApp.showMessage('Objetivo eliminado', 'El objetivo se ha eliminado correctamente.', 'success');
         FinanzasApp.saveData();
         this.actualizarVista();
     },
