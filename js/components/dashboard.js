@@ -13,12 +13,14 @@ const Dashboard = {
         
         return `
             <div class="dashboard">
+                <!-- Selector de período -->
                 <div class="period-selector">
                     <button class="period-btn ${this.currentPeriod === 'dia' ? 'active' : ''}" data-period="dia">Día</button>
                     <button class="period-btn ${this.currentPeriod === 'mes' ? 'active' : ''}" data-period="mes">Mes</button>
                     <button class="period-btn ${this.currentPeriod === 'año' ? 'active' : ''}" data-period="año">Año</button>
                 </div>
 
+                <!-- Resumen de números -->
                 <div class="resumen-cards">
                     <div class="resumen-item">
                         <div class="resumen-label">Ingresos</div>
@@ -34,19 +36,26 @@ const Dashboard = {
                     </div>
                 </div>
 
+                <!-- Resumen de deudas -->
                 <div class="card">
-                    <h3 class="section-title">Distribución por método</h3>
-                    <div id="resumenMetodos">
-                        ${this.renderResumenMetodos()}
-                    </div>
+                    <h3 class="section-title">Resumen de deudas</h3>
+                    <div id="resumenDeudas">${this.renderResumenDeudas()}</div>
                 </div>
 
+                <!-- Distribución por método -->
+                <div class="card">
+                    <h3 class="section-title">Distribución por método</h3>
+                    <div id="resumenMetodos">${this.renderResumenMetodos()}</div>
+                </div>
+
+                <!-- GRÁFICO -->
                 <div class="card">
                     <div class="chart-container">
                         <canvas id="dashboardChart"></canvas>
                     </div>
                 </div>
 
+                <!-- CALENDARIO (solo en vista mes) -->
                 ${this.currentPeriod === 'mes' ? `
                     <div class="card calendar-card">
                         <div class="calendar-header">
@@ -91,6 +100,7 @@ const Dashboard = {
                     </div>
                 ` : ''}
 
+                <!-- Movimientos del día -->
                 <div class="card" id="movimientosDia" style="${this.currentPeriod === 'dia' ? 'display: block;' : 'display: none;'}">
                     <h3 class="section-title" id="movimientosDiaTitulo">
                         ${this.currentPeriod === 'dia' ? 'Hoy' : 'Selecciona un día'}
@@ -100,6 +110,7 @@ const Dashboard = {
                     </ul>
                 </div>
 
+                <!-- Últimos movimientos -->
                 <div class="card" id="ultimosMovimientosCard" style="${this.currentPeriod !== 'dia' ? 'display: block;' : 'display: none;'}">
                     <h3 class="section-title">Últimos movimientos</h3>
                     <ul class="movimientos-list" id="ultimosMovimientos">
@@ -107,44 +118,60 @@ const Dashboard = {
                     </ul>
                 </div>
 
+                <!-- Progreso de alcancías -->
                 <div class="card">
                     <h3 class="section-title">Progreso de alcancías</h3>
-                    <div id="progresoAlcancia">
-                        ${this.renderProgresoAlcancia()}
-                    </div>
+                    <div id="progresoAlcancia">${this.renderProgresoAlcancia()}</div>
                 </div>
 
+                <!-- Alertas -->
                 <div class="card">
                     <h3 class="section-title">Alertas</h3>
-                    <div class="alertas" id="alertas">
-                        ${this.renderAlertas()}
-                    </div>
+                    <div class="alertas" id="alertas">${this.renderAlertas()}</div>
                 </div>
             </div>
         `;
     },
 
-    init() {
-        this.setupPeriodButtons();
-        this.setupCalendarNav();
-        this.updateResumen();
-        this.initChart();
+    renderResumenDeudas() {
+        const deudas = FinanzasApp.data.deudas || [];
+        if (deudas.length === 0) {
+            return '<p class="empty-state">No hay deudas registradas</p>';
+        }
+
+        const totalDeudas = deudas.reduce((sum, d) => sum + d.montoTotal, 0);
+        const totalPagado = deudas.reduce((sum, d) => sum + (d.montoPagado || 0), 0);
+        const totalPendiente = totalDeudas - totalPagado;
+
+        return `
+            <div class="stats-card">
+                <div class="stats-row">
+                    <span class="stats-label">Total deudas</span>
+                    <span class="stats-value">${FinanzasApp.formatCurrency(totalDeudas)}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Total pagado</span>
+                    <span class="stats-value success">${FinanzasApp.formatCurrency(totalPagado)}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Pendiente</span>
+                    <span class="stats-value negative">${FinanzasApp.formatCurrency(totalPendiente)}</span>
+                </div>
+            </div>
+        `;
     },
 
     renderResumenMetodos() {
         const metodos = {};
         
-        // Inicializar métodos
         FinanzasApp.data.config.metodosPago.forEach(m => metodos[m] = 0);
         
-        // Sumar ingresos por método
         FinanzasApp.data.ingresos.forEach(i => {
             const metodo = i.metodo || 'Efectivo';
             if (!metodos[metodo]) metodos[metodo] = 0;
             metodos[metodo] += i.cantidad;
         });
         
-        // Restar gastos por método
         FinanzasApp.data.gastos.forEach(g => {
             const metodo = g.metodo || 'Efectivo';
             if (!metodos[metodo]) metodos[metodo] = 0;
@@ -161,6 +188,13 @@ const Dashboard = {
         `).join('');
     },
 
+    init() {
+        this.setupPeriodButtons();
+        this.setupCalendarNav();
+        this.updateResumen();
+        this.initChart();
+    },
+
     setupPeriodButtons() {
         document.querySelectorAll('.period-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -168,7 +202,6 @@ const Dashboard = {
                 e.target.classList.add('active');
                 this.currentPeriod = e.target.dataset.period;
                 localStorage.setItem('dashboardPeriod', this.currentPeriod);
-                
                 FinanzasApp.renderView('dashboard');
             });
         });
@@ -278,7 +311,6 @@ const Dashboard = {
         
         const { labels, ingresosData, gastosData } = this.getChartData();
         
-        // Detectar tema actual
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         
         this.chart = new Chart(ctx, {
@@ -448,7 +480,16 @@ const Dashboard = {
         document.getElementById('totalGastos').textContent = FinanzasApp.formatCurrency(gastos);
         document.getElementById('totalBalance').textContent = FinanzasApp.formatCurrency(ingresos - gastos);
         
-        document.getElementById('resumenMetodos').innerHTML = this.renderResumenMetodos();
+        const resumenDeudas = document.getElementById('resumenDeudas');
+        if (resumenDeudas) {
+            resumenDeudas.innerHTML = this.renderResumenDeudas();
+        }
+        
+        const resumenMetodos = document.getElementById('resumenMetodos');
+        if (resumenMetodos) {
+            resumenMetodos.innerHTML = this.renderResumenMetodos();
+        }
+        
         this.initChart();
     },
 
@@ -540,13 +581,33 @@ const Dashboard = {
         
         FinanzasApp.data.alcancias.forEach(a => {
             a.objetivos.forEach(o => {
-                if (o.meta <= a.saldo && !o.completado) {
+                if (o.meta <= a.saldo && !o.retirado) {
                     alertas.push({
                         tipo: 'success',
                         mensaje: `¡Objetivo "${o.nombre}" alcanzado en ${a.nombre}!`
                     });
                 }
             });
+        });
+
+        const hoy = new Date();
+        (FinanzasApp.data.deudas || []).forEach(d => {
+            if (d.estado === 'activa' && d.fechaLimite) {
+                const fechaLimite = new Date(d.fechaLimite);
+                const diasRestantes = Math.ceil((fechaLimite - hoy) / (1000 * 60 * 60 * 24));
+                
+                if (diasRestantes <= 7 && diasRestantes > 0) {
+                    alertas.push({
+                        tipo: 'warning',
+                        mensaje: `⚠️ Deuda "${d.nombre}" vence en ${diasRestantes} días`
+                    });
+                } else if (diasRestantes <= 0) {
+                    alertas.push({
+                        tipo: 'error',
+                        mensaje: `❌ Deuda "${d.nombre}" está vencida`
+                    });
+                }
+            }
         });
 
         const gastosRecientes = FinanzasApp.data.gastos
