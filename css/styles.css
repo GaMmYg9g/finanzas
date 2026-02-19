@@ -1717,3 +1717,31 @@ body {
 #pagoDeudaContenido .form-group {
     margin-bottom: 1rem;
 }
+
+/* Botón de reinicio - NUEVO */
+.reset-button {
+    width: 100%;
+    padding: 1rem;
+    background-color: #f15c5c;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+.reset-button:hover {
+    background-color: #d44c4c;
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .reset-button {
+    background-color: #ff5e5e;
+}
+
+[data-theme="dark"] .reset-button:hover {
+    background-color: #e04e4e;
+}
