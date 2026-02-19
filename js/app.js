@@ -5,6 +5,7 @@ const FinanzasApp = {
         monederos: [],
         tarjetas: [],
         alcancias: [],
+        deudas: [],
         ingresos: [],
         gastos: [],
         config: {
@@ -15,6 +16,7 @@ const FinanzasApp = {
     },
 
     init() {
+        console.log('🚀 Iniciando FinanzasApp...');
         this.loadData();
         this.setupEventListeners();
         this.setTheme(this.theme);
@@ -23,20 +25,34 @@ const FinanzasApp = {
     },
 
     setupEventListeners() {
-        document.getElementById('menuToggle').addEventListener('click', () => {
-            document.getElementById('sideMenu').classList.add('open');
-            document.getElementById('menuOverlay').classList.add('open');
-        });
+        const menuToggle = document.getElementById('menuToggle');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                const sideMenu = document.getElementById('sideMenu');
+                const menuOverlay = document.getElementById('menuOverlay');
+                if (sideMenu) sideMenu.classList.add('open');
+                if (menuOverlay) menuOverlay.classList.add('open');
+            });
+        }
 
-        document.getElementById('closeMenu').addEventListener('click', () => {
-            document.getElementById('sideMenu').classList.remove('open');
-            document.getElementById('menuOverlay').classList.remove('open');
-        });
+        const closeMenu = document.getElementById('closeMenu');
+        if (closeMenu) {
+            closeMenu.addEventListener('click', () => {
+                const sideMenu = document.getElementById('sideMenu');
+                const menuOverlay = document.getElementById('menuOverlay');
+                if (sideMenu) sideMenu.classList.remove('open');
+                if (menuOverlay) menuOverlay.classList.remove('open');
+            });
+        }
 
-        document.getElementById('menuOverlay').addEventListener('click', () => {
-            document.getElementById('sideMenu').classList.remove('open');
-            document.getElementById('menuOverlay').classList.remove('open');
-        });
+        const menuOverlay = document.getElementById('menuOverlay');
+        if (menuOverlay) {
+            menuOverlay.addEventListener('click', () => {
+                const sideMenu = document.getElementById('sideMenu');
+                if (sideMenu) sideMenu.classList.remove('open');
+                menuOverlay.classList.remove('open');
+            });
+        }
 
         document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', (e) => {
@@ -45,15 +61,20 @@ const FinanzasApp = {
                 this.switchView(view);
                 
                 if (window.innerWidth < 768) {
-                    document.getElementById('sideMenu').classList.remove('open');
-                    document.getElementById('menuOverlay').classList.remove('open');
+                    const sideMenu = document.getElementById('sideMenu');
+                    const menuOverlay = document.getElementById('menuOverlay');
+                    if (sideMenu) sideMenu.classList.remove('open');
+                    if (menuOverlay) menuOverlay.classList.remove('open');
                 }
             });
         });
 
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            this.toggleTheme();
-        });
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                this.toggleTheme();
+            });
+        }
     },
 
     switchView(view) {
@@ -71,47 +92,77 @@ const FinanzasApp = {
             alcancia: 'Alcancía',
             monedero: 'Monedero',
             ingresos: 'Ingresos',
-            gastos: 'Gastos'
+            gastos: 'Gastos',
+            deudas: 'Deudas'
         };
-        document.getElementById('headerTitle').textContent = titles[view] || 'Finanzas';
+        
+        const headerTitle = document.getElementById('headerTitle');
+        if (headerTitle) {
+            headerTitle.textContent = titles[view] || 'Finanzas';
+        }
 
         this.renderView(view);
     },
 
     renderView(view) {
         const container = document.getElementById('mainContent');
+        if (!container) return;
         
         switch(view) {
             case 'dashboard':
-                container.innerHTML = Dashboard.render();
-                Dashboard.init();
+                if (typeof Dashboard !== 'undefined') {
+                    container.innerHTML = Dashboard.render();
+                    if (Dashboard.init) Dashboard.init();
+                }
                 break;
+                
             case 'alcancia':
-                container.innerHTML = Alcancia.render();
-                Alcancia.init();
+                if (typeof Alcancia !== 'undefined') {
+                    container.innerHTML = Alcancia.render();
+                    if (Alcancia.init) Alcancia.init();
+                }
                 break;
+                
             case 'monedero':
-                container.innerHTML = Monedero.render();
-                Monedero.init();
+                if (typeof Monedero !== 'undefined') {
+                    container.innerHTML = Monedero.render();
+                    if (Monedero.init) Monedero.init();
+                }
                 break;
+                
             case 'ingresos':
-                container.innerHTML = Ingresos.render();
-                Ingresos.init();
+                if (typeof Ingresos !== 'undefined') {
+                    container.innerHTML = Ingresos.render();
+                    if (Ingresos.init) Ingresos.init();
+                }
                 break;
+                
             case 'gastos':
-                container.innerHTML = Gastos.render();
-                Gastos.init();
+                if (typeof Gastos !== 'undefined') {
+                    container.innerHTML = Gastos.render();
+                    if (Gastos.init) Gastos.init();
+                }
+                break;
+                
+            case 'deudas':
+                if (typeof Deudas !== 'undefined') {
+                    container.innerHTML = Deudas.render();
+                    if (Deudas.init) Deudas.init();
+                }
                 break;
         }
     },
 
     updateTotalGeneral() {
-        const totalMonederos = this.data.monederos.reduce((sum, m) => sum + m.saldo, 0);
-        const totalTarjetas = this.data.tarjetas.reduce((sum, t) => sum + t.saldo, 0);
-        const totalAlcancia = this.data.alcancias.reduce((sum, a) => sum + a.saldo, 0);
+        const totalMonederos = this.data.monederos.reduce((sum, m) => sum + (m.saldo || 0), 0);
+        const totalTarjetas = this.data.tarjetas.reduce((sum, t) => sum + (t.saldo || 0), 0);
+        const totalAlcancia = this.data.alcancias.reduce((sum, a) => sum + (a.saldo || 0), 0);
         const total = totalMonederos + totalTarjetas + totalAlcancia;
         
-        document.getElementById('totalGeneral').textContent = `${total.toFixed(2)} $`;
+        const totalGeneral = document.getElementById('totalGeneral');
+        if (totalGeneral) {
+            totalGeneral.textContent = `${total.toFixed(2)} $`;
+        }
     },
 
     setTheme(theme) {
@@ -124,7 +175,7 @@ const FinanzasApp = {
             toggleBtn.textContent = theme === 'dark' ? 'Claro' : 'Oscuro';
         }
         
-        if (this.currentView === 'dashboard' && Dashboard.chart) {
+        if (this.currentView === 'dashboard' && Dashboard && Dashboard.chart) {
             Dashboard.initChart();
         }
     },
@@ -137,60 +188,78 @@ const FinanzasApp = {
     loadData() {
         const saved = localStorage.getItem('finanzasData');
         if (saved) {
-            this.data = JSON.parse(saved);
-            if (!this.data.tarjetas) {
-                this.data.tarjetas = [];
-            }
-            if (!this.data.config.metodosPago) {
-                this.data.config.metodosPago = ['Efectivo', 'Tarjeta'];
+            try {
+                this.data = JSON.parse(saved);
+                if (!this.data.tarjetas) this.data.tarjetas = [];
+                if (!this.data.deudas) this.data.deudas = [];
+                if (!this.data.config) this.data.config = {};
+                if (!this.data.config.metodosPago) this.data.config.metodosPago = ['Efectivo', 'Tarjeta'];
+                if (!this.data.config.tiposIngreso) this.data.config.tiposIngreso = ['Salario', 'Transferencias'];
+                if (!this.data.config.tiposGasto) this.data.config.tiposGasto = ['Renta'];
+            } catch (e) {
+                this.crearDatosPorDefecto();
             }
         } else {
-            this.data = {
-                monederos: [
-                    { id: 'm1', nombre: 'Mi monedero', saldo: 0, tipo: 'principal' }
-                ],
-                tarjetas: [
-                    { id: 't1', nombre: 'Mi tarjeta', saldo: 0, tipo: 'principal' }
-                ],
-                alcancias: [],
-                ingresos: [],
-                gastos: [],
-                config: {
-                    tiposIngreso: ['Salario', 'Transferencias'],
-                    tiposGasto: ['Renta'],
-                    metodosPago: ['Efectivo', 'Tarjeta']
-                }
-            };
+            this.crearDatosPorDefecto();
         }
     },
 
-    saveData() {
-        localStorage.setItem('finanzasData', JSON.stringify(this.data));
-        this.updateTotalGeneral();
+    crearDatosPorDefecto() {
+        this.data = {
+            monederos: [
+                { id: 'm1', nombre: 'Mi monedero', saldo: 0, tipo: 'principal' }
+            ],
+            tarjetas: [
+                { id: 't1', nombre: 'Mi tarjeta', saldo: 0, tipo: 'principal' }
+            ],
+            alcancias: [],
+            deudas: [],
+            ingresos: [],
+            gastos: [],
+            config: {
+                tiposIngreso: ['Salario', 'Transferencias'],
+                tiposGasto: ['Renta'],
+                metodosPago: ['Efectivo', 'Tarjeta']
+            }
+        };
     },
 
-    // Funciones de formato de fechas CORREGIDAS
+    saveData() {
+        try {
+            localStorage.setItem('finanzasData', JSON.stringify(this.data));
+            this.updateTotalGeneral();
+        } catch (e) {}
+    },
+
     formatDate(dateStr) {
         if (!dateStr) return '';
-        const [año, mes, dia] = dateStr.split('-');
-        const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
-        return fecha.toLocaleDateString('es-ES', { 
-            day: '2-digit', 
-            month: '2-digit', 
-            year: 'numeric' 
-        });
+        try {
+            const [año, mes, dia] = dateStr.split('-');
+            const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
+            return fecha.toLocaleDateString('es-ES', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            });
+        } catch (e) {
+            return dateStr;
+        }
     },
 
     formatDateLong(dateStr) {
         if (!dateStr) return '';
-        const [año, mes, dia] = dateStr.split('-');
-        const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
-        return fecha.toLocaleDateString('es-ES', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
+        try {
+            const [año, mes, dia] = dateStr.split('-');
+            const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
+            return fecha.toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        } catch (e) {
+            return dateStr;
+        }
     },
 
     formatCurrency(amount) {
@@ -213,9 +282,7 @@ const FinanzasApp = {
             `;
             
             document.body.appendChild(toast);
-            
             setTimeout(() => toast.classList.add('show'), 10);
-            
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => {
@@ -234,11 +301,15 @@ const FinanzasApp = {
             const cancelBtn = document.getElementById('modalCancel');
             const confirmBtn = document.getElementById('modalConfirm');
             
+            if (!modal) {
+                resolve(confirm(mensaje));
+                return;
+            }
+            
             title.textContent = titulo;
             input.style.display = 'none';
             cancelBtn.textContent = 'No';
             confirmBtn.textContent = 'Sí';
-            
             modal.style.display = 'flex';
             
             const cleanup = () => {
@@ -272,6 +343,12 @@ const FinanzasApp = {
             const input = document.getElementById('modalInput');
             const cancelBtn = document.getElementById('modalCancel');
             const confirmBtn = document.getElementById('modalConfirm');
+            
+            if (!modal) {
+                const seleccion = prompt(mensaje + '\n' + opciones.map(o => o.label).join('\n'));
+                resolve(seleccion);
+                return;
+            }
             
             const existingSelect = document.getElementById('modalSelect');
             if (existingSelect) existingSelect.remove();
@@ -339,10 +416,17 @@ const FinanzasApp = {
             const cancelBtn = document.getElementById('modalCancel');
             const confirmBtn = document.getElementById('modalConfirm');
             
+            if (!modal) {
+                const valor = prompt(titulo + '\n' + placeholder, valorPorDefecto);
+                resolve(valor);
+                return;
+            }
+            
             title.textContent = titulo;
             input.placeholder = placeholder;
             input.type = tipo;
             input.value = valorPorDefecto;
+            input.style.display = 'block';
             
             if (tipo === 'number') {
                 input.setAttribute('inputmode', 'decimal');
@@ -353,7 +437,6 @@ const FinanzasApp = {
             }
             
             modal.style.display = 'flex';
-            
             setTimeout(() => input.focus(), 100);
             
             const cleanup = () => {
@@ -390,7 +473,6 @@ const FinanzasApp = {
         });
     },
 
-    // Selector de fecha personalizado
     async mostrarSelectorFecha(titulo = 'Seleccionar fecha') {
         return new Promise((resolve) => {
             const fechaActual = new Date();
