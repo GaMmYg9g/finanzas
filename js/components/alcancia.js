@@ -68,24 +68,20 @@ const Alcancia = {
                                 return `
                                     <div class="objetivo-item ${completado ? 'objetivo-completado-item' : ''}">
                                         <div class="objetivo-header">
-                                            <div class="objetivo-info">
-                                                <span class="objetivo-nombre">${o.nombre}</span>
-                                                <span class="objetivo-meta">
-                                                    <span class="objetivo-actual">${FinanzasApp.formatCurrency(Math.min(a.saldo, o.meta))}</span>
-                                                    /
-                                                    <span class="objetivo-total">${FinanzasApp.formatCurrency(o.meta)}</span>
-                                                </span>
-                                            </div>
-                                            <div class="objetivo-actions">
-                                                <button class="btn-icon-small" onclick="Alcancia.editarObjetivo('${a.id}', '${o.id}')">Editar</button>
-                                                <button class="btn-icon-small" onclick="Alcancia.eliminarObjetivo('${a.id}', '${o.id}')">Eliminar</button>
-                                            </div>
+                                            <span class="objetivo-nombre">${o.nombre}</span>
+                                        </div>
+                                        <div class="objetivo-meta">
+                                            ${FinanzasApp.formatCurrency(Math.min(a.saldo, o.meta))} / ${FinanzasApp.formatCurrency(o.meta)}
                                         </div>
                                         <div class="progress-container">
                                             <div class="progress-bar">
                                                 <div class="progress-fill" style="width: ${progreso}%"></div>
                                             </div>
                                             <span class="progress-porcentaje">${progreso.toFixed(0)}%</span>
+                                        </div>
+                                        <div class="objetivo-actions-bottom">
+                                            <button class="btn-icon-small" onclick="Alcancia.editarObjetivo('${a.id}', '${o.id}')">Editar</button>
+                                            <button class="btn-icon-small" onclick="Alcancia.eliminarObjetivo('${a.id}', '${o.id}')">Eliminar</button>
                                         </div>
                                         ${completado ? '<span class="objetivo-completado-badge">✓ Completado</span>' : ''}
                                     </div>
