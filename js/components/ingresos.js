@@ -78,6 +78,18 @@ const Ingresos = {
                                     ${FinanzasApp.data.alcancias.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('')}
                                 </select>
                             </div>
+                            
+                            <!-- NUEVO: Destino Deuda -->
+                            <div class="destino-opcion">
+                                <input type="radio" name="destinoIngreso" id="destinoDeuda" value="deuda" class="destino-radio">
+                                <label for="destinoDeuda" class="destino-label">Deuda</label>
+                                <select class="destino-select" id="ingresoDeuda" disabled>
+                                    <option value="">Seleccionar deuda</option>
+                                    ${(FinanzasApp.data.deudas || []).filter(d => d.estado !== 'pagada').map(d => 
+                                        `<option value="${d.id}">${d.nombre} (Pendiente: ${FinanzasApp.formatCurrency(d.montoTotal - (d.montoPagado || 0))})</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="form-group">
@@ -152,22 +164,21 @@ const Ingresos = {
         });
 
         document.getElementById('btnFecha').addEventListener('click', async () => {
-    const fecha = await FinanzasApp.mostrarSelectorFecha();
-    if (fecha) {
-        document.getElementById('fechaValor').value = fecha;
-        const fechaTexto = document.getElementById('fechaTexto');
-        
-        // Mostrar la fecha en formato local sin alteración de zona horaria
-        const [año, mes, dia] = fecha.split('-');
-        const fechaLocal = new Date(año, mes-1, dia);
-        fechaTexto.textContent = fechaLocal.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
+            const fecha = await FinanzasApp.mostrarSelectorFecha();
+            if (fecha) {
+                document.getElementById('fechaValor').value = fecha;
+                const fechaTexto = document.getElementById('fechaTexto');
+                
+                const [año, mes, dia] = fecha.split('-');
+                const fechaLocal = new Date(año, mes-1, dia);
+                fechaTexto.textContent = fechaLocal.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                fechaTexto.classList.add('seleccionada');
+            }
         });
-        fechaTexto.classList.add('seleccionada');
-    }
-});
 
         document.getElementById('ingresoTipo').addEventListener('change', (e) => {
             if (e.target.value === 'nuevo') {
@@ -213,6 +224,9 @@ const Ingresos = {
         } else if (seleccion === 'alcancia') {
             document.getElementById('ingresoAlcancia').disabled = false;
             document.getElementById('ingresoAlcancia').style.opacity = '1';
+        } else if (seleccion === 'deuda') { // NUEVO
+            document.getElementById('ingresoDeuda').disabled = false;
+            document.getElementById('ingresoDeuda').style.opacity = '1';
         }
     },
 
@@ -373,6 +387,28 @@ const Ingresos = {
                 alcancia.saldo += cantidad;
                 alcancia.acumulado = (alcancia.acumulado || 0) + cantidad;
             }
+            
+        // NUEVO: Destino Deuda
+        } else if (destinoSeleccionado === 'deuda') {
+            const deudaId = document.getElementById('ingresoDeuda').value;
+            if (!deudaId) {
+                FinanzasApp.showMessage('Error', 'Selecciona una deuda', 'error');
+                return;
+            }
+            nuevoIngreso.deudaId = deudaId;
+            const deuda = FinanzasApp.data.deudas.find(d => d.id === deudaId);
+            if (deuda) {
+                deuda.montoPagado = (deuda.montoPagado || 0) + cantidad;
+                deuda.pagos = deuda.pagos || [];
+                deuda.pagos.push({
+                    fecha: fecha,
+                    cantidad: cantidad,
+                    origen: 'ingreso'
+                });
+                if (deuda.montoPagado >= deuda.montoTotal) {
+                    deuda.estado = 'pagada';
+                }
+            }
         }
 
         FinanzasApp.data.ingresos.push(nuevoIngreso);
@@ -398,6 +434,7 @@ const Ingresos = {
         if (nuevaCantidad) {
             const cantidad = parseFloat(nuevaCantidad);
             if (cantidad > 0) {
+                // Restar cantidad anterior
                 if (ingreso.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === ingreso.monederoId);
                     if (monedero) monedero.saldo -= ingreso.cantidad;
@@ -410,9 +447,19 @@ const Ingresos = {
                     const alcancia = FinanzasApp.data.alcancias.find(a => a.id === ingreso.alcanciaId);
                     if (alcancia) alcancia.saldo -= ingreso.cantidad;
                 }
+                if (ingreso.deudaId) { // NUEVO
+                    const deuda = FinanzasApp.data.deudas.find(d => d.id === ingreso.deudaId);
+                    if (deuda) {
+                        deuda.montoPagado = (deuda.montoPagado || 0) - ingreso.cantidad;
+                        if (deuda.montoPagado < deuda.montoTotal) {
+                            deuda.estado = 'activa';
+                        }
+                    }
+                }
                 
                 ingreso.cantidad = cantidad;
                 
+                // Sumar nueva cantidad
                 if (ingreso.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === ingreso.monederoId);
                     if (monedero) monedero.saldo += cantidad;
@@ -424,6 +471,15 @@ const Ingresos = {
                 if (ingreso.alcanciaId) {
                     const alcancia = FinanzasApp.data.alcancias.find(a => a.id === ingreso.alcanciaId);
                     if (alcancia) alcancia.saldo += cantidad;
+                }
+                if (ingreso.deudaId) { // NUEVO
+                    const deuda = FinanzasApp.data.deudas.find(d => d.id === ingreso.deudaId);
+                    if (deuda) {
+                        deuda.montoPagado = (deuda.montoPagado || 0) + cantidad;
+                        if (deuda.montoPagado >= deuda.montoTotal) {
+                            deuda.estado = 'pagada';
+                        }
+                    }
                 }
                 
                 FinanzasApp.saveData();
@@ -438,6 +494,30 @@ const Ingresos = {
         if (confirmar) {
             const ingreso = FinanzasApp.data.ingresos.find(i => i.id === id);
             if (ingreso) {
+                // Verificar saldo antes de eliminar (anti-negativo)
+                if (ingreso.monederoId) {
+                    const monedero = FinanzasApp.data.monederos.find(m => m.id === ingreso.monederoId);
+                    if (monedero && monedero.saldo < ingreso.cantidad) {
+                        FinanzasApp.showMessage('Error', 'No se puede eliminar: el monedero tiene menos dinero del que se eliminó', 'error');
+                        return;
+                    }
+                }
+                if (ingreso.tarjetaId) {
+                    const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === ingreso.tarjetaId);
+                    if (tarjeta && tarjeta.saldo < ingreso.cantidad) {
+                        FinanzasApp.showMessage('Error', 'No se puede eliminar: la tarjeta tiene menos dinero del que se eliminó', 'error');
+                        return;
+                    }
+                }
+                if (ingreso.alcanciaId) {
+                    const alcancia = FinanzasApp.data.alcancias.find(a => a.id === ingreso.alcanciaId);
+                    if (alcancia && alcancia.saldo < ingreso.cantidad) {
+                        FinanzasApp.showMessage('Error', 'No se puede eliminar: la alcancía tiene menos dinero del que se eliminó', 'error');
+                        return;
+                    }
+                }
+                
+                // Restar del destino
                 if (ingreso.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === ingreso.monederoId);
                     if (monedero) monedero.saldo -= ingreso.cantidad;
@@ -449,6 +529,15 @@ const Ingresos = {
                 if (ingreso.alcanciaId) {
                     const alcancia = FinanzasApp.data.alcancias.find(a => a.id === ingreso.alcanciaId);
                     if (alcancia) alcancia.saldo -= ingreso.cantidad;
+                }
+                if (ingreso.deudaId) { // NUEVO
+                    const deuda = FinanzasApp.data.deudas.find(d => d.id === ingreso.deudaId);
+                    if (deuda) {
+                        deuda.montoPagado = (deuda.montoPagado || 0) - ingreso.cantidad;
+                        if (deuda.montoPagado < deuda.montoTotal) {
+                            deuda.estado = 'activa';
+                        }
+                    }
                 }
                 
                 FinanzasApp.data.ingresos = FinanzasApp.data.ingresos.filter(i => i.id !== id);
