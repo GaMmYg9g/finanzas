@@ -75,6 +75,21 @@ const FinanzasApp = {
                 this.toggleTheme();
             });
         }
+
+        // BOTÓN DE REINICIO - NUEVO
+        const resetBtn = document.getElementById('resetData');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', async () => {
+                const confirmar = await this.showConfirm('Reiniciar datos', '¿Seguro? Se borrarán TODOS tus datos');
+                if (confirmar) {
+                    localStorage.removeItem('finanzasData');
+                    this.data = this.getDefaultData();
+                    this.saveData();
+                    this.renderView(this.currentView);
+                    this.showMessage('Datos reiniciados', 'La app está como nueva', 'success');
+                }
+            });
+        }
     },
 
     switchView(view) {
@@ -197,15 +212,15 @@ const FinanzasApp = {
                 if (!this.data.config.tiposIngreso) this.data.config.tiposIngreso = ['Salario', 'Transferencias'];
                 if (!this.data.config.tiposGasto) this.data.config.tiposGasto = ['Renta'];
             } catch (e) {
-                this.crearDatosPorDefecto();
+                this.data = this.getDefaultData();
             }
         } else {
-            this.crearDatosPorDefecto();
+            this.data = this.getDefaultData();
         }
     },
 
-    crearDatosPorDefecto() {
-        this.data = {
+    getDefaultData() {
+        return {
             monederos: [
                 { id: 'm1', nombre: 'Mi monedero', saldo: 0, tipo: 'principal' }
             ],
@@ -233,33 +248,25 @@ const FinanzasApp = {
 
     formatDate(dateStr) {
         if (!dateStr) return '';
-        try {
-            const [año, mes, dia] = dateStr.split('-');
-            const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
-            return fecha.toLocaleDateString('es-ES', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-            });
-        } catch (e) {
-            return dateStr;
-        }
+        const [año, mes, dia] = dateStr.split('-');
+        const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
+        return fecha.toLocaleDateString('es-ES', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+        });
     },
 
     formatDateLong(dateStr) {
         if (!dateStr) return '';
-        try {
-            const [año, mes, dia] = dateStr.split('-');
-            const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
-            return fecha.toLocaleDateString('es-ES', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-        } catch (e) {
-            return dateStr;
-        }
+        const [año, mes, dia] = dateStr.split('-');
+        const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
+        return fecha.toLocaleDateString('es-ES', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
     },
 
     formatCurrency(amount) {
