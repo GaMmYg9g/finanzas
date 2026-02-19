@@ -33,9 +33,9 @@ const Monedero = {
     },
 
     calcularTotalGeneral() {
-        const totalMonederos = FinanzasApp.data.monederos.reduce((sum, m) => sum + m.saldo, 0);
-        const totalTarjetas = FinanzasApp.data.tarjetas.reduce((sum, t) => sum + t.saldo, 0);
-        const totalAlcancia = FinanzasApp.data.alcancias.reduce((sum, a) => sum + a.saldo, 0);
+        const totalMonederos = FinanzasApp.data.monederos.reduce((sum, m) => sum + (m.saldo || 0), 0);
+        const totalTarjetas = FinanzasApp.data.tarjetas.reduce((sum, t) => sum + (t.saldo || 0), 0);
+        const totalAlcancia = FinanzasApp.data.alcancias.reduce((sum, a) => sum + (a.saldo || 0), 0);
         return FinanzasApp.formatCurrency(totalMonederos + totalTarjetas + totalAlcancia);
     },
 
@@ -57,8 +57,8 @@ const Monedero = {
                 
                 <div class="monedero-actions">
                     <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${m.id}', 'monedero')">Transferir</button>
+                    <button class="btn btn-secondary" onclick="Monedero.editarMonedero('${m.id}')">Editar</button>
                     ${m.tipo !== 'principal' ? `
-                        <button class="btn btn-secondary" onclick="Monedero.editarMonedero('${m.id}')">Editar</button>
                         <button class="btn btn-secondary" onclick="Monedero.eliminarMonedero('${m.id}')">Eliminar</button>
                     ` : ''}
                 </div>
@@ -89,8 +89,8 @@ const Monedero = {
                 
                 <div class="monedero-actions">
                     <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${t.id}', 'tarjeta')">Transferir</button>
+                    <button class="btn btn-secondary" onclick="Monedero.editarTarjeta('${t.id}')">Editar</button>
                     ${t.tipo !== 'principal' ? `
-                        <button class="btn btn-secondary" onclick="Monedero.editarTarjeta('${t.id}')">Editar</button>
                         <button class="btn btn-secondary" onclick="Monedero.eliminarTarjeta('${t.id}')">Eliminar</button>
                     ` : ''}
                 </div>
