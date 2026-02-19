@@ -30,7 +30,7 @@
             </nav>
             <div class="menu-footer">
                 <button class="theme-toggle" id="themeToggle">Oscuro</button>
-                <button class="theme-toggle" id="resetData" style="margin-top: 10px; background-color: #f15c5c; color: white; border-color: #f15c5c;">Reiniciar datos</button>
+                <button class="reset-button" id="resetData">Reiniciar datos</button>
             </div>
         </div>
 
@@ -72,5 +72,18 @@
     <script src="js/components/dashboard.js"></script>
     <script src="js/components/deudas.js"></script>
     <script src="js/app.js"></script>
+
+    <!-- Inicialización -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (typeof FinanzasApp !== 'undefined' && FinanzasApp) {
+                    FinanzasApp.init();
+                } else {
+                    console.error('FinanzasApp no está definido');
+                }
+            }, 100);
+        });
+    </script>
 </body>
 </html>
