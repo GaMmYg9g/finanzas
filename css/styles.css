@@ -1625,3 +1625,95 @@ body {
 .calendario-popup-btn.aceptar:hover {
     opacity: 0.9;
 }
+
+/* Estilos para deudas */
+.deuda-item {
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--info-color);
+}
+
+.deuda-item.pagada {
+    border-left-color: var(--success-color);
+    opacity: 0.8;
+}
+
+.deuda-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.deuda-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.deuda-estado {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.deuda-estado.activa {
+    background-color: rgba(33, 150, 243, 0.1);
+    color: var(--info-color);
+}
+
+.deuda-estado.pagada {
+    background-color: rgba(37, 211, 102, 0.1);
+    color: var(--success-color);
+}
+
+.deuda-estado.atrasada {
+    background-color: rgba(241, 92, 92, 0.1);
+    color: var(--error-color);
+}
+
+.deuda-montos {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+}
+
+.deuda-pendiente {
+    font-weight: 600;
+    color: var(--error-color);
+    margin-bottom: 0.5rem;
+}
+
+.deuda-fechaLimite {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.3rem;
+}
+
+.deuda-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.deuda-actions .btn-secondary {
+    flex: 1;
+    min-width: 70px;
+}
+
+/* Estilos para el modal de pago de deuda */
+#pagoDeudaContenido {
+    margin-bottom: 1rem;
+}
+
+#pagoDeudaContenido p {
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+#pagoDeudaContenido .form-group {
+    margin-bottom: 1rem;
+}
