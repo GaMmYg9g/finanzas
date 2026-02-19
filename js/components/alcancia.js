@@ -160,19 +160,140 @@ const Alcancia = {
         const alcancia = FinanzasApp.data.alcancias.find(a => a.id === id);
         if (!alcancia) return;
         
+        // Si la alcancía tiene dinero, preguntar qué hacer
         if (alcancia.saldo > 0) {
-            const confirmar = await FinanzasApp.showConfirm('Eliminar alcancía', 
-                `La alcancía tiene ${FinanzasApp.formatCurrency(alcancia.saldo)}.\n\n¿Estás seguro de eliminarla? El dinero se perderá.`);
-            if (!confirmar) return;
+            const opciones = [
+                { value: 'monedero', label: '💰 Transferir a monedero' },
+                { value: 'tarjeta', label: '💳 Transferir a tarjeta' }
+            ];
+            
+            // Añadir otras alcancías como opciones (si hay más de una)
+            const otrasAlcancias = FinanzasApp.data.alcancias.filter(a => a.id !== id);
+            otrasAlcancias.forEach(a => {
+                opciones.push({
+                    value: `alcancia:${a.id}`,
+                    label: `🏦 Transferir a alcancía: ${a.nombre}`
+                });
+            });
+            
+            // Opción de eliminar el dinero (con advertencia)
+            opciones.push({ value: 'eliminar', label: '❌ Eliminar el dinero (se perderá)' });
+            
+            opciones.push({ value: 'cancelar', label: '↩️ Cancelar' });
+            
+            const seleccion = await FinanzasApp.showSelect(
+                '¿Qué hacer con el dinero?', 
+                `La alcancía "${alcancia.nombre}" tiene ${FinanzasApp.formatCurrency(alcancia.saldo)}`,
+                opciones
+            );
+            
+            if (!seleccion || seleccion === 'cancelar') return; // Usuario canceló
+            
+            if (seleccion === 'monedero') {
+                // Transferir al monedero
+                const monederos = FinanzasApp.data.monederos;
+                if (monederos.length === 0) {
+                    await FinanzasApp.showMessage('Error', 'No hay monederos disponibles', 'error');
+                    return;
+                }
+                
+                let monederoId;
+                if (monederos.length === 1) {
+                    monederoId = monederos[0].id;
+                } else {
+                    const opcionesMonederos = monederos.map(m => ({
+                        value: m.id,
+                        label: `${m.nombre} (${FinanzasApp.formatCurrency(m.saldo)})`
+                    }));
+                    monederoId = await FinanzasApp.showSelect('Seleccionar monedero', '¿A qué monedero?', opcionesMonederos);
+                    if (!monederoId) return;
+                }
+                
+                const monedero = FinanzasApp.data.monederos.find(m => m.id === monederoId);
+                if (monedero) {
+                    monedero.saldo += alcancia.saldo;
+                    await FinanzasApp.showMessage('✅ Dinero transferido', 
+                        `Se transfirieron ${FinanzasApp.formatCurrency(alcancia.saldo)} a ${monedero.nombre}`, 
+                        'success');
+                }
+                
+            } else if (seleccion === 'tarjeta') {
+                // Transferir a tarjeta
+                const tarjetas = FinanzasApp.data.tarjetas;
+                if (tarjetas.length === 0) {
+                    await FinanzasApp.showMessage('Error', 'No hay tarjetas disponibles', 'error');
+                    return;
+                }
+                
+                let tarjetaId;
+                if (tarjetas.length === 1) {
+                    tarjetaId = tarjetas[0].id;
+                } else {
+                    const opcionesTarjetas = tarjetas.map(t => ({
+                        value: t.id,
+                        label: `${t.nombre} (${FinanzasApp.formatCurrency(t.saldo)})`
+                    }));
+                    tarjetaId = await FinanzasApp.showSelect('Seleccionar tarjeta', '¿A qué tarjeta?', opcionesTarjetas);
+                    if (!tarjetaId) return;
+                }
+                
+                const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === tarjetaId);
+                if (tarjeta) {
+                    tarjeta.saldo += alcancia.saldo;
+                    await FinanzasApp.showMessage('✅ Dinero transferido', 
+                        `Se transfirieron ${FinanzasApp.formatCurrency(alcancia.saldo)} a ${tarjeta.nombre}`, 
+                        'success');
+                }
+                
+            } else if (seleccion.startsWith('alcancia:')) {
+                // Transferir a otra alcancía
+                const alcanciaDestinoId = seleccion.split(':')[1];
+                const alcanciaDestino = FinanzasApp.data.alcancias.find(a => a.id === alcanciaDestinoId);
+                if (alcanciaDestino) {
+                    alcanciaDestino.saldo += alcancia.saldo;
+                    alcanciaDestino.acumulado = (alcanciaDestino.acumulado || 0) + alcancia.saldo;
+                    await FinanzasApp.showMessage('✅ Dinero transferido', 
+                        `Se transfirieron ${FinanzasApp.formatCurrency(alcancia.saldo)} a ${alcanciaDestino.nombre}`, 
+                        'success');
+                }
+                
+            } else if (seleccion === 'eliminar') {
+                // Doble confirmación para eliminar el dinero
+                const confirmarEliminar = await FinanzasApp.showConfirm(
+                    '⚠️ ¡ATENCIÓN! ⚠️', 
+                    `¿Estás ABSOLUTAMENTE SEGURO de querer ELIMINAR ${FinanzasApp.formatCurrency(alcancia.saldo)}?\n\n¡Este dinero se perderá para siempre!`
+                );
+                
+                if (!confirmarEliminar) {
+                    // Si no confirma, volvemos a preguntar qué hacer
+                    return this.eliminarAlcancia(id);
+                }
+                
+                // Segunda confirmación (por seguridad)
+                const confirmarEliminar2 = await FinanzasApp.showConfirm(
+                    'Última oportunidad', 
+                    `¿Realmente quieres perder ${FinanzasApp.formatCurrency(alcancia.saldo)}?`
+                );
+                
+                if (!confirmarEliminar2) {
+                    return this.eliminarAlcancia(id);
+                }
+                
+                await FinanzasApp.showMessage('💰 Dinero eliminado', 
+                    `Se han eliminado ${FinanzasApp.formatCurrency(alcancia.saldo)} de "${alcancia.nombre}"`, 
+                    'warning');
+            }
         } else {
+            // Si no tiene dinero, confirmar eliminación simple
             const confirmar = await FinanzasApp.showConfirm('Eliminar alcancía', 
                 `¿Estás seguro de eliminar la alcancía "${alcancia.nombre}"?`);
             if (!confirmar) return;
         }
         
+        // Finalmente, eliminar la alcancía
         FinanzasApp.data.alcancias = FinanzasApp.data.alcancias.filter(a => a.id !== id);
         
-        await FinanzasApp.showMessage('Alcancía eliminada', `La alcancía se ha eliminado correctamente.`, 'success');
+        await FinanzasApp.showMessage('🗑️ Alcancía eliminada', `La alcancía "${alcancia.nombre}" se ha eliminado correctamente.`, 'success');
         FinanzasApp.saveData();
         this.actualizarVista();
     },
