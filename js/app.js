@@ -187,7 +187,7 @@ const FinanzasApp = {
         
         const toggleBtn = document.getElementById('themeToggle');
         if (toggleBtn) {
-            toggleBtn.textContent = theme === 'dark' ? 'Claro' : 'Oscuro';
+            toggleBtn.textContent = theme === 'dark' ? 'Modo Claro' : 'Modo scuro';
         }
         
         if (this.currentView === 'dashboard' && Dashboard && Dashboard.chart) {
