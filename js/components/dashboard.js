@@ -615,7 +615,7 @@ const Dashboard = {
             .slice(0, 3);
             
         gastosRecientes.forEach(g => {
-            if (g.cantidad > 100) {
+            if (g.cantidad > 500) {
                 alertas.push({
                     tipo: 'warning',
                     mensaje: `Gasto elevado: ${g.descripcion || 'Gasto'} de ${FinanzasApp.formatCurrency(g.cantidad)}`
