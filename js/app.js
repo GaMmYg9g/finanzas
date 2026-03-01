@@ -6,6 +6,7 @@ const FinanzasApp = {
         tarjetas: [],
         alcancias: [],
         deudas: [],
+        prestamos: [],
         ingresos: [],
         gastos: [],
         config: {
@@ -76,7 +77,7 @@ const FinanzasApp = {
             });
         }
 
-        // BOTÓN DE REINICIO - NUEVO
+        // Botón de reinicio
         const resetBtn = document.getElementById('resetData');
         if (resetBtn) {
             resetBtn.addEventListener('click', async () => {
@@ -108,7 +109,8 @@ const FinanzasApp = {
             monedero: 'Monedero',
             ingresos: 'Ingresos',
             gastos: 'Gastos',
-            deudas: 'Deudas'
+            deudas: 'Deudas',
+            prestamos: 'Préstamos'
         };
         
         const headerTitle = document.getElementById('headerTitle');
@@ -123,55 +125,67 @@ const FinanzasApp = {
         const container = document.getElementById('mainContent');
         if (!container) return;
         
-        switch(view) {
-            case 'dashboard':
-                if (typeof Dashboard !== 'undefined') {
-                    container.innerHTML = Dashboard.render();
-                    if (Dashboard.init) Dashboard.init();
-                }
-                break;
-                
-            case 'alcancia':
-                if (typeof Alcancia !== 'undefined') {
-                    container.innerHTML = Alcancia.render();
-                    if (Alcancia.init) Alcancia.init();
-                }
-                break;
-                
-            case 'monedero':
-                if (typeof Monedero !== 'undefined') {
-                    container.innerHTML = Monedero.render();
-                    if (Monedero.init) Monedero.init();
-                }
-                break;
-                
-            case 'ingresos':
-                if (typeof Ingresos !== 'undefined') {
-                    container.innerHTML = Ingresos.render();
-                    if (Ingresos.init) Ingresos.init();
-                }
-                break;
-                
-            case 'gastos':
-                if (typeof Gastos !== 'undefined') {
-                    container.innerHTML = Gastos.render();
-                    if (Gastos.init) Gastos.init();
-                }
-                break;
-                
-            case 'deudas':
-                if (typeof Deudas !== 'undefined') {
-                    container.innerHTML = Deudas.render();
-                    if (Deudas.init) Deudas.init();
-                }
-                break;
+        try {
+            switch(view) {
+                case 'dashboard':
+                    if (typeof Dashboard !== 'undefined') {
+                        container.innerHTML = Dashboard.render();
+                        if (Dashboard.init) Dashboard.init();
+                    }
+                    break;
+                    
+                case 'alcancia':
+                    if (typeof Alcancia !== 'undefined') {
+                        container.innerHTML = Alcancia.render();
+                        if (Alcancia.init) Alcancia.init();
+                    }
+                    break;
+                    
+                case 'monedero':
+                    if (typeof Monedero !== 'undefined') {
+                        container.innerHTML = Monedero.render();
+                        if (Monedero.init) Monedero.init();
+                    }
+                    break;
+                    
+                case 'ingresos':
+                    if (typeof Ingresos !== 'undefined') {
+                        container.innerHTML = Ingresos.render();
+                        if (Ingresos.init) Ingresos.init();
+                    }
+                    break;
+                    
+                case 'gastos':
+                    if (typeof Gastos !== 'undefined') {
+                        container.innerHTML = Gastos.render();
+                        if (Gastos.init) Gastos.init();
+                    }
+                    break;
+                    
+                case 'deudas':
+                    if (typeof Deudas !== 'undefined') {
+                        container.innerHTML = Deudas.render();
+                        if (Deudas.init) Deudas.init();
+                    }
+                    break;
+                    
+                case 'prestamos':
+                    if (typeof Prestamos !== 'undefined') {
+                        container.innerHTML = Prestamos.render();
+                        if (Prestamos.init) Prestamos.init();
+                    }
+                    break;
+            }
+        } catch (error) {
+            console.error('Error en renderView:', error);
+            container.innerHTML = '<div class="card"><p class="empty-state">Error al cargar la vista</p></div>';
         }
     },
 
     updateTotalGeneral() {
-        const totalMonederos = this.data.monederos.reduce((sum, m) => sum + (m.saldo || 0), 0);
-        const totalTarjetas = this.data.tarjetas.reduce((sum, t) => sum + (t.saldo || 0), 0);
-        const totalAlcancia = this.data.alcancias.reduce((sum, a) => sum + (a.saldo || 0), 0);
+        const totalMonederos = (this.data.monederos || []).reduce((sum, m) => sum + (m.saldo || 0), 0);
+        const totalTarjetas = (this.data.tarjetas || []).reduce((sum, t) => sum + (t.saldo || 0), 0);
+        const totalAlcancia = (this.data.alcancias || []).reduce((sum, a) => sum + (a.saldo || 0), 0);
         const total = totalMonederos + totalTarjetas + totalAlcancia;
         
         const totalGeneral = document.getElementById('totalGeneral');
@@ -187,7 +201,7 @@ const FinanzasApp = {
         
         const toggleBtn = document.getElementById('themeToggle');
         if (toggleBtn) {
-            toggleBtn.textContent = theme === 'dark' ? 'Modo Claro' : 'Modo scuro';
+            toggleBtn.textContent = theme === 'dark' ? 'Claro' : 'Oscuro';
         }
         
         if (this.currentView === 'dashboard' && Dashboard && Dashboard.chart) {
@@ -207,11 +221,13 @@ const FinanzasApp = {
                 this.data = JSON.parse(saved);
                 if (!this.data.tarjetas) this.data.tarjetas = [];
                 if (!this.data.deudas) this.data.deudas = [];
+                if (!this.data.prestamos) this.data.prestamos = [];
                 if (!this.data.config) this.data.config = {};
                 if (!this.data.config.metodosPago) this.data.config.metodosPago = ['Efectivo', 'Tarjeta'];
                 if (!this.data.config.tiposIngreso) this.data.config.tiposIngreso = ['Salario', 'Transferencias'];
                 if (!this.data.config.tiposGasto) this.data.config.tiposGasto = ['Renta'];
             } catch (e) {
+                console.warn('Error al cargar datos, usando datos por defecto');
                 this.data = this.getDefaultData();
             }
         } else {
@@ -229,6 +245,7 @@ const FinanzasApp = {
             ],
             alcancias: [],
             deudas: [],
+            prestamos: [],
             ingresos: [],
             gastos: [],
             config: {
@@ -243,34 +260,44 @@ const FinanzasApp = {
         try {
             localStorage.setItem('finanzasData', JSON.stringify(this.data));
             this.updateTotalGeneral();
-        } catch (e) {}
+        } catch (e) {
+            console.warn('No se pudo guardar en localStorage');
+        }
     },
 
     formatDate(dateStr) {
         if (!dateStr) return '';
-        const [año, mes, dia] = dateStr.split('-');
-        const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
-        return fecha.toLocaleDateString('es-ES', { 
-            day: '2-digit', 
-            month: '2-digit', 
-            year: 'numeric' 
-        });
+        try {
+            const [año, mes, dia] = dateStr.split('-');
+            const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
+            return fecha.toLocaleDateString('es-ES', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            });
+        } catch (e) {
+            return dateStr;
+        }
     },
 
     formatDateLong(dateStr) {
         if (!dateStr) return '';
-        const [año, mes, dia] = dateStr.split('-');
-        const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
-        return fecha.toLocaleDateString('es-ES', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
+        try {
+            const [año, mes, dia] = dateStr.split('-');
+            const fecha = new Date(parseInt(año), parseInt(mes) - 1, parseInt(dia));
+            return fecha.toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        } catch (e) {
+            return dateStr;
+        }
     },
 
     formatCurrency(amount) {
-        return `${amount.toFixed(2)} $`;
+        return `${(amount || 0).toFixed(2)} $`;
     },
 
     async showMessage(titulo, mensaje, tipo = 'info') {
@@ -308,7 +335,7 @@ const FinanzasApp = {
             const cancelBtn = document.getElementById('modalCancel');
             const confirmBtn = document.getElementById('modalConfirm');
             
-            if (!modal) {
+            if (!modal || !title || !input || !cancelBtn || !confirmBtn) {
                 resolve(confirm(mensaje));
                 return;
             }
@@ -592,7 +619,7 @@ const FinanzasApp = {
 
     getMonthName(month) {
         const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        return months[month];
+        return months[month] || '';
     }
 };
 
