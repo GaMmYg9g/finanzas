@@ -1773,3 +1773,82 @@ body {
     border-color: var(--info-color);
     color: var(--info-color);
 }
+
+/* Estilos para préstamos */
+.prestamo-item {
+    margin-bottom: 1rem;
+    border-left: 4px solid #9c27b0;
+}
+
+.prestamo-item.finalizado {
+    border-left-color: var(--success-color);
+    opacity: 0.8;
+}
+
+.prestamo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.prestamo-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.prestamo-estado {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.prestamo-estado.activo {
+    background-color: rgba(156, 39, 176, 0.1);
+    color: #9c27b0;
+}
+
+.prestamo-estado.finalizado {
+    background-color: rgba(37, 211, 102, 0.1);
+    color: var(--success-color);
+}
+
+.prestamo-montos {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+}
+
+.prestamo-pendiente {
+    font-weight: 600;
+    color: #9c27b0;
+    margin-bottom: 0.5rem;
+}
+
+.prestamo-origen {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.3rem;
+}
+
+.prestamo-fechaLimite {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.3rem;
+}
+
+.prestamo-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.prestamo-actions .btn-secondary {
+    flex: 1;
+    min-width: 70px;
+}
