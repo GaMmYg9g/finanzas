@@ -79,7 +79,6 @@ const Ingresos = {
                                 </select>
                             </div>
                             
-                            <!-- NUEVO: Destino Deuda -->
                             <div class="destino-opcion">
                                 <input type="radio" name="destinoIngreso" id="destinoDeuda" value="deuda" class="destino-radio">
                                 <label for="destinoDeuda" class="destino-label">Deuda</label>
@@ -88,6 +87,19 @@ const Ingresos = {
                                     ${(FinanzasApp.data.deudas || []).filter(d => d.estado !== 'pagada').map(d => 
                                         `<option value="${d.id}">${d.nombre} (Pendiente: ${FinanzasApp.formatCurrency(d.montoTotal - (d.montoPagado || 0))})</option>`
                                     ).join('')}
+                                </select>
+                            </div>
+
+                            <!-- NUEVO: Destino Préstamo -->
+                            <div class="destino-opcion">
+                                <input type="radio" name="destinoIngreso" id="destinoPrestamo" value="prestamo" class="destino-radio">
+                                <label for="destinoPrestamo" class="destino-label">Préstamo</label>
+                                <select class="destino-select" id="ingresoPrestamo" disabled>
+                                    <option value="">Seleccionar préstamo</option>
+                                    ${(FinanzasApp.data.prestamos || []).filter(p => p.estado !== 'finalizado').map(p => {
+                                        const pendiente = p.montoTotal - (p.montoRecuperado || 0);
+                                        return `<option value="${p.id}">${p.nombre} (Pendiente: ${FinanzasApp.formatCurrency(pendiente)})</option>`;
+                                    }).join('')}
                                 </select>
                             </div>
                         </div>
@@ -224,9 +236,12 @@ const Ingresos = {
         } else if (seleccion === 'alcancia') {
             document.getElementById('ingresoAlcancia').disabled = false;
             document.getElementById('ingresoAlcancia').style.opacity = '1';
-        } else if (seleccion === 'deuda') { // NUEVO
+        } else if (seleccion === 'deuda') {
             document.getElementById('ingresoDeuda').disabled = false;
             document.getElementById('ingresoDeuda').style.opacity = '1';
+        } else if (seleccion === 'prestamo') {
+            document.getElementById('ingresoPrestamo').disabled = false;
+            document.getElementById('ingresoPrestamo').style.opacity = '1';
         }
     },
 
@@ -388,7 +403,6 @@ const Ingresos = {
                 alcancia.acumulado = (alcancia.acumulado || 0) + cantidad;
             }
             
-        // NUEVO: Destino Deuda
         } else if (destinoSeleccionado === 'deuda') {
             const deudaId = document.getElementById('ingresoDeuda').value;
             if (!deudaId) {
@@ -407,6 +421,28 @@ const Ingresos = {
                 });
                 if (deuda.montoPagado >= deuda.montoTotal) {
                     deuda.estado = 'pagada';
+                }
+            }
+
+        // NUEVO: Destino Préstamo
+        } else if (destinoSeleccionado === 'prestamo') {
+            const prestamoId = document.getElementById('ingresoPrestamo').value;
+            if (!prestamoId) {
+                FinanzasApp.showMessage('Error', 'Selecciona un préstamo', 'error');
+                return;
+            }
+            nuevoIngreso.prestamoId = prestamoId;
+            const prestamo = FinanzasApp.data.prestamos.find(p => p.id === prestamoId);
+            if (prestamo) {
+                prestamo.montoRecuperado = (prestamo.montoRecuperado || 0) + cantidad;
+                prestamo.pagos = prestamo.pagos || [];
+                prestamo.pagos.push({
+                    fecha: fecha,
+                    cantidad: cantidad,
+                    tipo: 'ingreso'
+                });
+                if (prestamo.montoRecuperado >= prestamo.montoTotal) {
+                    prestamo.estado = 'finalizado';
                 }
             }
         }
@@ -447,12 +483,21 @@ const Ingresos = {
                     const alcancia = FinanzasApp.data.alcancias.find(a => a.id === ingreso.alcanciaId);
                     if (alcancia) alcancia.saldo -= ingreso.cantidad;
                 }
-                if (ingreso.deudaId) { // NUEVO
+                if (ingreso.deudaId) {
                     const deuda = FinanzasApp.data.deudas.find(d => d.id === ingreso.deudaId);
                     if (deuda) {
                         deuda.montoPagado = (deuda.montoPagado || 0) - ingreso.cantidad;
                         if (deuda.montoPagado < deuda.montoTotal) {
                             deuda.estado = 'activa';
+                        }
+                    }
+                }
+                if (ingreso.prestamoId) {
+                    const prestamo = FinanzasApp.data.prestamos.find(p => p.id === ingreso.prestamoId);
+                    if (prestamo) {
+                        prestamo.montoRecuperado = (prestamo.montoRecuperado || 0) - ingreso.cantidad;
+                        if (prestamo.montoRecuperado < prestamo.montoTotal) {
+                            prestamo.estado = 'activo';
                         }
                     }
                 }
@@ -472,12 +517,21 @@ const Ingresos = {
                     const alcancia = FinanzasApp.data.alcancias.find(a => a.id === ingreso.alcanciaId);
                     if (alcancia) alcancia.saldo += cantidad;
                 }
-                if (ingreso.deudaId) { // NUEVO
+                if (ingreso.deudaId) {
                     const deuda = FinanzasApp.data.deudas.find(d => d.id === ingreso.deudaId);
                     if (deuda) {
                         deuda.montoPagado = (deuda.montoPagado || 0) + cantidad;
                         if (deuda.montoPagado >= deuda.montoTotal) {
                             deuda.estado = 'pagada';
+                        }
+                    }
+                }
+                if (ingreso.prestamoId) {
+                    const prestamo = FinanzasApp.data.prestamos.find(p => p.id === ingreso.prestamoId);
+                    if (prestamo) {
+                        prestamo.montoRecuperado = (prestamo.montoRecuperado || 0) + cantidad;
+                        if (prestamo.montoRecuperado >= prestamo.montoTotal) {
+                            prestamo.estado = 'finalizado';
                         }
                     }
                 }
@@ -530,12 +584,21 @@ const Ingresos = {
                     const alcancia = FinanzasApp.data.alcancias.find(a => a.id === ingreso.alcanciaId);
                     if (alcancia) alcancia.saldo -= ingreso.cantidad;
                 }
-                if (ingreso.deudaId) { // NUEVO
+                if (ingreso.deudaId) {
                     const deuda = FinanzasApp.data.deudas.find(d => d.id === ingreso.deudaId);
                     if (deuda) {
                         deuda.montoPagado = (deuda.montoPagado || 0) - ingreso.cantidad;
                         if (deuda.montoPagado < deuda.montoTotal) {
                             deuda.estado = 'activa';
+                        }
+                    }
+                }
+                if (ingreso.prestamoId) {
+                    const prestamo = FinanzasApp.data.prestamos.find(p => p.id === ingreso.prestamoId);
+                    if (prestamo) {
+                        prestamo.montoRecuperado = (prestamo.montoRecuperado || 0) - ingreso.cantidad;
+                        if (prestamo.montoRecuperado < prestamo.montoTotal) {
+                            prestamo.estado = 'activo';
                         }
                     }
                 }
