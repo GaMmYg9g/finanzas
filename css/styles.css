@@ -2168,3 +2168,41 @@ select:focus, .select-limpio:focus, .destino-select:focus {
         margin-left: 0;
     }
 }
+
+/* Versión de la app en el menú */
+.menu-version {
+    padding: 0.8rem 1rem;
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    margin: 0.5rem 0;
+    background-color: var(--hover-bg);
+}
+
+.version-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.version-text::before {
+    content: "⚡";
+    margin-right: 4px;
+    font-size: 0.9rem;
+}
+
+[data-theme="dark"] .version-text::before {
+    opacity: 0.8;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .menu-version {
+        padding: 0.6rem 1rem;
+    }
+    
+    .version-text {
+        font-size: 0.75rem;
+    }
+}
