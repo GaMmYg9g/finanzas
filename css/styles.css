@@ -587,13 +587,15 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
 }
 
-/* Estilos para grupo de destinos/orígenes tipo radio - CORREGIDO */
+/* Estilos para grupo de destinos/orígenes tipo radio - VERSIÓN DEFINITIVA */
 .destino-group {
     margin-bottom: 1.5rem;
     padding: 1rem;
     background-color: var(--hover-bg);
     border-radius: 12px;
     border: 1px solid var(--border-color);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .destino-titulo {
@@ -615,6 +617,8 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     transition: all 0.2s;
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .destino-opcion:hover {
@@ -643,7 +647,9 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--text-primary);
     font-size: 0.95rem;
     cursor: pointer;
-    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .destino-select {
@@ -659,6 +665,7 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     font-size: 0.95rem;
     cursor: pointer;
     box-sizing: border-box;
+    max-width: 100%;
 }
 
 .destino-select:not(:disabled) {
@@ -677,6 +684,9 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     background-color: var(--card-bg);
     color: var(--text-primary);
     padding: 0.5rem;
+    max-width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
 }
 
 /* Versión para tablets y escritorio */
@@ -689,11 +699,11 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     
     .destino-radio-wrapper {
         width: auto;
-        min-width: 120px;
+        min-width: 100px;
     }
     
     .destino-select {
-        width: auto;
+        width: 60%;
         flex: 1;
         margin-top: 0;
     }
@@ -707,6 +717,18 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     
     .destino-select {
         width: 100%;
+    }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .destino-radio-wrapper {
+        flex-wrap: wrap;
+    }
+    
+    .destino-label {
+        white-space: normal;
+        word-break: break-word;
     }
 }
 
