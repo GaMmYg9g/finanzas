@@ -43,7 +43,7 @@ const Dashboard = {
                         <div id="resumenDeudas">${this.renderResumenDeudas()}</div>
                     </div>
 
-                    <!-- Resumen de préstamos (NUEVO) -->
+                    <!-- Resumen de préstamos -->
                     <div class="card">
                         <h3 class="section-title">Resumen de préstamos</h3>
                         <div id="resumenPrestamos">${this.renderResumenPrestamos()}</div>
@@ -167,7 +167,7 @@ const Dashboard = {
                     </div>
                     <div class="stats-row">
                         <span class="stats-label">Pendiente</span>
-                        <span class="stats-value negative">${FinanzasApp.formatCurrency(totalPendiente)}</span>
+                        <span class="stats-value warning">${FinanzasApp.formatCurrency(totalPendiente)}</span>
                     </div>
                 </div>
             `;
@@ -185,7 +185,7 @@ const Dashboard = {
             }
 
             const activos = prestamos.filter(p => p.estado === 'activo');
-            const totalPrestado = activos.reduce((sum, p) => sum + p.montoTotal, 0);
+            const totalPrestado = activos.reduce((sum, p) => sum + (p.montoTotal || 0), 0);
             const totalRecuperado = activos.reduce((sum, p) => sum + (p.montoRecuperado || 0), 0);
             const totalPendiente = totalPrestado - totalRecuperado;
 
@@ -222,21 +222,20 @@ const Dashboard = {
             
             configMetodos.forEach(m => metodos[m] = 0);
             
+            // SOLO INGRESOS - Los gastos NO afectan la distribución por método
             (FinanzasApp.data.ingresos || []).forEach(i => {
                 const metodo = i.metodo || 'Efectivo';
                 metodos[metodo] = (metodos[metodo] || 0) + (i.cantidad || 0);
             });
             
-            (FinanzasApp.data.gastos || []).forEach(g => {
-                const metodo = g.metodo || 'Efectivo';
-                metodos[metodo] = (metodos[metodo] || 0) - (g.cantidad || 0);
-            });
+            // LOS GASTOS NO SE RESTAN DE LA DISTRIBUCIÓN POR MÉTODO
+            // Eliminado el forEach de gastos que causaba saldos negativos
             
             return Object.entries(metodos).map(([metodo, total]) => `
                 <div class="metodo-item">
                     <div class="metodo-header">
                         <span class="metodo-nombre">${metodo}</span>
-                        <span class="metodo-total ${total >= 0 ? 'positive' : 'negative'}">${FinanzasApp.formatCurrency(total)}</span>
+                        <span class="metodo-total positive">${FinanzasApp.formatCurrency(total)}</span>
                     </div>
                 </div>
             `).join('');
@@ -729,7 +728,7 @@ const Dashboard = {
                 }
             });
 
-            // Alertas de préstamos (NUEVO)
+            // Alertas de préstamos
             (FinanzasApp.data.prestamos || []).forEach(p => {
                 if (p.estado === 'activo' && p.fechaLimite) {
                     const fechaLimite = new Date(p.fechaLimite);
@@ -746,21 +745,6 @@ const Dashboard = {
                             mensaje: `❌ Préstamo "${p.nombre}" está vencido`
                         });
                     }
-                }
-            });
-
-            // Alertas de gastos elevados
-            const gastosRecientes = (FinanzasApp.data.gastos || [])
-                .filter(g => g && g.fecha)
-                .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-                .slice(0, 3);
-                
-            gastosRecientes.forEach(g => {
-                if ((g.cantidad || 0) > 100) {
-                    alertas.push({
-                        tipo: 'warning',
-                        mensaje: `Gasto elevado: ${g.descripcion || 'Gasto'} de ${FinanzasApp.formatCurrency(g.cantidad)}`
-                    });
                 }
             });
 
