@@ -12,50 +12,50 @@ const Gastos = {
         return `
             <div class="gastos-view">
                 <div class="card">
-                    <h3 class="section-title">Nuevo gasto</h3>
+                    <h3 class="section-title"><i class="fas fa-minus-circle"></i> Nuevo gasto</h3>
                     <form id="formGasto">
                         <div class="form-group">
-                            <label class="form-label">Fecha</label>
+                            <label class="form-label"><i class="far fa-calendar-alt"></i> Fecha</label>
                             <div class="fecha-selector">
                                 <button type="button" class="fecha-btn" id="btnFecha">
-                                    <span class="fecha-icono">📅</span>
+                                    <span class="fecha-icono"><i class="fas fa-calendar-day"></i></span>
                                     <span class="fecha-texto" id="fechaTexto">Seleccionar fecha</span>
                                 </button>
                                 <input type="hidden" id="fechaValor" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Cantidad</label>
+                            <label class="form-label"><i class="fas fa-dollar-sign"></i> Cantidad</label>
                             <input type="number" step="0.01" class="form-input" id="gastoCantidad" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Tipo</label>
+                            <label class="form-label"><i class="fas fa-tag"></i> Tipo</label>
                             <select class="form-input select-limpio" id="gastoTipo">
                                 <option value="">Seleccionar tipo</option>
                                 ${FinanzasApp.data.config.tiposGasto.map(t => `<option value="${t}">${t}</option>`).join('')}
-                                <option value="nuevo">+ Agregar nuevo tipo</option>
+                                <option value="nuevo"><i class="fas fa-plus"></i> Agregar nuevo tipo</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Método de pago</label>
+                            <label class="form-label"><i class="fas fa-credit-card"></i> Método de pago</label>
                             <select class="form-input select-limpio" id="gastoMetodo">
                                 <option value="">Seleccionar método</option>
                                 ${FinanzasApp.data.config.metodosPago.map(m => `<option value="${m}">${m}</option>`).join('')}
-                                <option value="nuevo">+ Agregar nuevo método</option>
+                                <option value="nuevo"><i class="fas fa-plus"></i> Agregar nuevo método</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Descripción (opcional)</label>
+                            <label class="form-label"><i class="fas fa-pencil-alt"></i> Descripción (opcional)</label>
                             <input type="text" class="form-input" id="gastoDescripcion" placeholder="Descripción del gasto">
                         </div>
                         
                         <div class="destino-group">
-                            <div class="destino-titulo">Origen del gasto (selecciona uno)</div>
+                            <div class="destino-titulo"><i class="fas fa-arrow-left"></i> Origen del gasto</div>
                             
                             <div class="destino-opcion">
                                 <div class="destino-radio-wrapper">
                                     <input type="radio" name="origenGasto" id="origenMonedero" value="monedero" class="destino-radio">
-                                    <label for="origenMonedero" class="destino-label">Monedero</label>
+                                    <label for="origenMonedero" class="destino-label"><i class="fas fa-wallet"></i> Monedero</label>
                                 </div>
                                 <select class="destino-select" id="gastoMonedero" disabled>
                                     <option value="">Seleccionar monedero</option>
@@ -66,7 +66,7 @@ const Gastos = {
                             <div class="destino-opcion">
                                 <div class="destino-radio-wrapper">
                                     <input type="radio" name="origenGasto" id="origenTarjeta" value="tarjeta" class="destino-radio">
-                                    <label for="origenTarjeta" class="destino-label">Tarjeta</label>
+                                    <label for="origenTarjeta" class="destino-label"><i class="fas fa-credit-card"></i> Tarjeta</label>
                                 </div>
                                 <select class="destino-select" id="gastoTarjeta" disabled>
                                     <option value="">Seleccionar tarjeta</option>
@@ -77,7 +77,7 @@ const Gastos = {
                             <div class="destino-opcion">
                                 <div class="destino-radio-wrapper">
                                     <input type="radio" name="origenGasto" id="origenAlcancia" value="alcancia" class="destino-radio">
-                                    <label for="origenAlcancia" class="destino-label">Alcancía</label>
+                                    <label for="origenAlcancia" class="destino-label"><i class="fas fa-piggy-bank"></i> Alcancía</label>
                                 </div>
                                 <select class="destino-select" id="gastoAlcancia" disabled>
                                     <option value="">Seleccionar alcancía</option>
@@ -87,22 +87,22 @@ const Gastos = {
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Frecuencia</label>
+                            <label class="form-label"><i class="fas fa-sync-alt"></i> Frecuencia</label>
                             <select class="form-input select-limpio" id="gastoFrecuencia">
                                 <option value="puntual">Puntual</option>
                                 <option value="diario">Diario</option>
                                 <option value="mensual">Mensual</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Registrar gasto</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Registrar gasto</button>
                     </form>
                 </div>
 
                 <div class="card calendar-card">
                     <div class="calendar-header">
-                        <button class="calendar-nav" id="prevMonth">←</button>
-                        <h3>${this.getMonthName(month)} ${year} - Gastos</h3>
-                        <button class="calendar-nav" id="nextMonth">→</button>
+                        <button class="calendar-nav" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                        <h3><i class="fas fa-calendar-alt"></i> ${this.getMonthName(month)} ${year} - Gastos</h3>
+                        <button class="calendar-nav" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     
                     <div class="calendar-weekdays">
@@ -142,14 +142,14 @@ const Gastos = {
 
                 <div class="card" id="detalleDia" style="display: none;">
                     <div class="detalle-header">
-                        <h3 class="section-title" id="diaSeleccionado">Selecciona un día</h3>
-                        <button class="btn-icon" onclick="Gastos.cerrarDetalle()">✕</button>
+                        <h3 class="section-title" id="diaSeleccionado"><i class="fas fa-calendar-day"></i> Selecciona un día</h3>
+                        <button class="btn-icon" onclick="Gastos.cerrarDetalle()"><i class="fas fa-times"></i></button>
                     </div>
                     <div id="listaGastosDia"></div>
                 </div>
 
                 <div class="card">
-                    <h3 class="section-title">Resumen por categorías</h3>
+                    <h3 class="section-title"><i class="fas fa-chart-pie"></i> Resumen por categorías</h3>
                     <div id="resumenCategorias">
                         ${this.renderResumenCategorias()}
                     </div>
@@ -248,7 +248,7 @@ const Gastos = {
         });
 
         if (Object.keys(totales).length === 0) {
-            return '<p class="empty-state">No hay gastos para mostrar</p>';
+            return '<p class="empty-state"><i class="fas fa-info-circle"></i> No hay gastos para mostrar</p>';
         }
 
         const maxTotal = Math.max(...Object.values(totales));
@@ -256,7 +256,7 @@ const Gastos = {
         return Object.entries(totales).map(([tipo, total]) => `
             <div class="categoria-item">
                 <div class="categoria-header">
-                    <span class="categoria-nombre">${tipo}</span>
+                    <span class="categoria-nombre"><i class="fas fa-tag"></i> ${tipo}</span>
                     <span class="categoria-total">${FinanzasApp.formatCurrency(total)}</span>
                 </div>
                 <div class="progress-bar">
@@ -276,7 +276,7 @@ const Gastos = {
             select.innerHTML = '<option value="">Seleccionar tipo</option>' + 
                 FinanzasApp.data.config.tiposGasto.map(t => 
                     `<option value="${t}">${t}</option>`
-                ).join('') + '<option value="nuevo">+ Agregar nuevo tipo</option>';
+                ).join('') + '<option value="nuevo"><i class="fas fa-plus"></i> Agregar nuevo tipo</option>';
             select.value = nuevoTipo.trim();
         }
     },
@@ -291,7 +291,7 @@ const Gastos = {
             select.innerHTML = '<option value="">Seleccionar método</option>' + 
                 FinanzasApp.data.config.metodosPago.map(m => 
                     `<option value="${m}">${m}</option>`
-                ).join('') + '<option value="nuevo">+ Agregar nuevo método</option>';
+                ).join('') + '<option value="nuevo"><i class="fas fa-plus"></i> Agregar nuevo método</option>';
             select.value = nuevoMetodo.trim();
         }
     },
@@ -300,29 +300,31 @@ const Gastos = {
         const gastos = this.getGastosDelDia(dateStr);
         const titulo = FinanzasApp.formatDateLong(dateStr);
         
-        document.getElementById('diaSeleccionado').textContent = titulo;
+        document.getElementById('diaSeleccionado').innerHTML = `<i class="fas fa-calendar-day"></i> ${titulo}`;
         
         if (gastos.length === 0) {
             document.getElementById('listaGastosDia').innerHTML = `
-                <p class="empty-state">No hay gastos este día</p>
+                <p class="empty-state"><i class="fas fa-info-circle"></i> No hay gastos este día</p>
             `;
         } else {
             document.getElementById('listaGastosDia').innerHTML = `
                 <ul class="movimientos-list">
                     ${gastos.map(g => `
                         <li class="movimiento-item">
-                            <div class="movimiento-icon gasto">G</div>
+                            <div class="movimiento-icon gasto">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
                             <div class="movimiento-info">
                                 <div class="movimiento-concepto">${g.tipo} - ${g.descripcion || 'Sin descripción'}</div>
                                 <div class="movimiento-detalles">
-                                    <span class="movimiento-fecha">${FinanzasApp.formatDate(g.fecha)}</span>
-                                    <span class="movimiento-metodo">${g.metodo || 'Efectivo'}</span>
+                                    <span class="movimiento-fecha"><i class="far fa-calendar-alt"></i> ${FinanzasApp.formatDate(g.fecha)}</span>
+                                    <span class="movimiento-metodo"><i class="fas fa-credit-card"></i> ${g.metodo || 'Efectivo'}</span>
                                 </div>
                             </div>
                             <div class="movimiento-cantidad gasto">- ${FinanzasApp.formatCurrency(g.cantidad)}</div>
                             <div class="movimiento-actions">
-                                <button class="btn-icon" onclick="Gastos.editarGasto('${g.id}')">Editar</button>
-                                <button class="btn-icon" onclick="Gastos.eliminarGasto('${g.id}')">Eliminar</button>
+                                <button class="btn-icon" onclick="Gastos.editarGasto('${g.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="btn-icon" onclick="Gastos.eliminarGasto('${g.id}')"><i class="fas fa-trash-alt"></i></button>
                             </div>
                         </li>
                     `).join('')}
@@ -454,7 +456,6 @@ const Gastos = {
         if (nuevaCantidad) {
             const cantidad = parseFloat(nuevaCantidad);
             if (cantidad > 0) {
-                // Guardar saldos anteriores
                 const saldosAnteriores = {};
                 
                 if (gasto.monederoId) {
@@ -479,7 +480,6 @@ const Gastos = {
                     }
                 }
                 
-                // Verificar saldo para la nueva cantidad
                 let saldoSuficiente = true;
                 if (gasto.monederoId) {
                     const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
@@ -495,7 +495,6 @@ const Gastos = {
                 }
                 
                 if (saldoSuficiente) {
-                    // Restar nueva cantidad
                     if (gasto.monederoId) {
                         const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
                         if (monedero) monedero.saldo -= cantidad;
@@ -514,7 +513,6 @@ const Gastos = {
                     this.actualizarVista();
                     FinanzasApp.showMessage('Gasto actualizado', 'La cantidad se ha modificado correctamente', 'success');
                 } else {
-                    // Revertir cambios
                     if (gasto.monederoId) {
                         const monedero = FinanzasApp.data.monederos.find(m => m.id === gasto.monederoId);
                         if (monedero) monedero.saldo = saldosAnteriores.monedero;
