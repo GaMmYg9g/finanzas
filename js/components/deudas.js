@@ -3,38 +3,38 @@ const Deudas = {
         return `
             <div class="deudas-view">
                 <div class="card">
-                    <h3 class="section-title">Nueva deuda</h3>
+                    <h3 class="section-title"><i class="fas fa-hand-holding-usd"></i> Nueva deuda</h3>
                     <form id="formDeuda">
                         <div class="form-group">
-                            <label class="form-label">Nombre</label>
+                            <label class="form-label"><i class="fas fa-tag"></i> Nombre</label>
                             <input type="text" class="form-input" id="deudaNombre" placeholder="Ej: Préstamo coche">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Monto total</label>
+                            <label class="form-label"><i class="fas fa-dollar-sign"></i> Monto total</label>
                             <input type="number" step="0.01" class="form-input" id="deudaMonto">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Fecha límite (opcional)</label>
+                            <label class="form-label"><i class="far fa-calendar-alt"></i> Fecha límite (opcional)</label>
                             <div class="fecha-selector">
                                 <button type="button" class="fecha-btn" id="btnFechaLimite">
-                                    <span class="fecha-icono">📅</span>
+                                    <span class="fecha-icono"><i class="fas fa-calendar-day"></i></span>
                                     <span class="fecha-texto" id="fechaLimiteTexto">Seleccionar</span>
                                 </button>
                                 <input type="hidden" id="fechaLimiteValor">
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Crear deuda</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Crear deuda</button>
                     </form>
                 </div>
 
                 <div class="card">
-                    <h3 class="section-title">Mis deudas</h3>
+                    <h3 class="section-title"><i class="fas fa-list"></i> Mis deudas</h3>
                     <div id="listaDeudas">${this.renderDeudas()}</div>
                 </div>
 
                 <div class="modal" id="pagoDeudaModal" style="display:none">
                     <div class="modal-content">
-                        <h3 class="modal-title" id="pagoDeudaTitulo">Pagar deuda</h3>
+                        <h3 class="modal-title"><i class="fas fa-hand-holding-usd"></i> Pagar deuda</h3>
                         <div id="pagoDeudaContenido"></div>
                     </div>
                 </div>
@@ -44,32 +44,32 @@ const Deudas = {
 
     renderDeudas() {
         const deudas = FinanzasApp.data.deudas || [];
-        if (!deudas.length) return '<p class="empty-state">No hay deudas</p>';
+        if (!deudas.length) return '<p class="empty-state"><i class="fas fa-info-circle"></i> No hay deudas</p>';
         
         return deudas.map(d => {
             const progreso = ((d.montoPagado || 0) / d.montoTotal) * 100;
             return `
                 <div class="deuda-item card">
                     <div class="deuda-header">
-                        <h4>${d.nombre}</h4>
+                        <h4><i class="fas fa-credit-card"></i> ${d.nombre}</h4>
                         <span class="deuda-estado ${d.estado}">${d.estado}</span>
                     </div>
                     <div class="deuda-montos">
-                        <span>Pagado: ${FinanzasApp.formatCurrency(d.montoPagado || 0)}</span>
-                        <span>Total: ${FinanzasApp.formatCurrency(d.montoTotal)}</span>
+                        <span><i class="fas fa-check-circle" style="color:var(--success-color);"></i> Pagado: ${FinanzasApp.formatCurrency(d.montoPagado || 0)}</span>
+                        <span><i class="fas fa-coins"></i> Total: ${FinanzasApp.formatCurrency(d.montoTotal)}</span>
                     </div>
                     <div class="deuda-pendiente">
-                        <span>Pendiente: ${FinanzasApp.formatCurrency(d.montoTotal - (d.montoPagado || 0))}</span>
+                        <i class="fas fa-exclamation-triangle" style="color:var(--error-color);"></i> Pendiente: ${FinanzasApp.formatCurrency(d.montoTotal - (d.montoPagado || 0))}
                     </div>
                     <div class="progress-container">
                         <div class="progress-bar"><div class="progress-fill" style="width:${progreso}%"></div></div>
                         <span class="progress-porcentaje">${progreso.toFixed(0)}%</span>
                     </div>
-                    ${d.fechaLimite ? `<div class="deuda-fechaLimite">📅 Límite: ${FinanzasApp.formatDate(d.fechaLimite)}</div>` : ''}
+                    ${d.fechaLimite ? `<div class="deuda-fechaLimite"><i class="far fa-calendar-alt"></i> Límite: ${FinanzasApp.formatDate(d.fechaLimite)}</div>` : ''}
                     <div class="deuda-actions">
-                        <button class="btn btn-secondary" onclick="Deudas.mostrarPago('${d.id}')">Pagar</button>
-                        <button class="btn btn-secondary" onclick="Deudas.verDetalle('${d.id}')">Detalle</button>
-                        ${d.estado !== 'pagada' ? `<button class="btn btn-secondary" onclick="Deudas.eliminarDeuda('${d.id}')">Eliminar</button>` : ''}
+                        <button class="btn btn-secondary" onclick="Deudas.mostrarPago('${d.id}')"><i class="fas fa-hand-holding-usd"></i> Pagar</button>
+                        <button class="btn btn-secondary" onclick="Deudas.verDetalle('${d.id}')"><i class="fas fa-info-circle"></i> Detalle</button>
+                        ${d.estado !== 'pagada' ? `<button class="btn btn-secondary" onclick="Deudas.eliminarDeuda('${d.id}')"><i class="fas fa-trash-alt"></i> Eliminar</button>` : ''}
                     </div>
                 </div>
             `;
@@ -128,21 +128,21 @@ const Deudas = {
         const modal = document.getElementById('pagoDeudaModal');
         const cont = document.getElementById('pagoDeudaContenido');
         cont.innerHTML = `
-            <p><strong>${d.nombre}</strong> - Pendiente: ${FinanzasApp.formatCurrency(d.montoTotal - (d.montoPagado || 0))}</p>
+            <p><i class="fas fa-credit-card"></i> <strong>${d.nombre}</strong> - Pendiente: ${FinanzasApp.formatCurrency(d.montoTotal - (d.montoPagado || 0))}</p>
             <div class="form-group">
-                <label>Cantidad</label>
+                <label><i class="fas fa-dollar-sign"></i> Cantidad</label>
                 <input type="number" class="form-input" id="pagoCantidad" value="${d.montoTotal - (d.montoPagado || 0)}">
             </div>
             <div class="form-group">
-                <label>Origen</label>
+                <label><i class="fas fa-arrow-left"></i> Origen</label>
                 <select class="form-input" id="pagoOrigen">
                     <option value="">Seleccionar</option>
-                    ${origenes.map(o => `<option value="${o.tipo}|${o.id}">${o.tipo}: ${o.nombre} (${FinanzasApp.formatCurrency(o.saldo)})</option>`).join('')}
+                    ${origenes.map(o => `<option value="${o.tipo}|${o.id}">${o.tipo === 'monedero' ? '💰' : o.tipo === 'tarjeta' ? '💳' : '🏦'} ${o.nombre} (${FinanzasApp.formatCurrency(o.saldo)})</option>`).join('')}
                 </select>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn cancel" id="cancelarPago">Cancelar</button>
-                <button class="modal-btn confirm" id="confirmarPago">Pagar</button>
+                <button class="modal-btn cancel" id="cancelarPago"><i class="fas fa-times"></i> Cancelar</button>
+                <button class="modal-btn confirm" id="confirmarPago"><i class="fas fa-check"></i> Pagar</button>
             </div>
         `;
         
