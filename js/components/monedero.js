@@ -3,29 +3,29 @@ const Monedero = {
         return `
             <div class="monedero-view">
                 <div class="card">
-                    <h3 class="section-title">Mis monederos</h3>
-                    <button class="btn btn-primary" id="nuevoMonedero">+ Nuevo monedero</button>
+                    <h3 class="section-title"><i class="fas fa-wallet"></i> Mis monederos</h3>
+                    <button class="btn btn-primary" id="nuevoMonedero"><i class="fas fa-plus-circle"></i> Nuevo monedero</button>
                 </div>
 
                 <div class="card">
-                    <h3 class="section-title">Mis tarjetas</h3>
-                    <button class="btn btn-primary" id="nuevaTarjeta">+ Nueva tarjeta</button>
+                    <h3 class="section-title"><i class="fas fa-credit-card"></i> Mis tarjetas</h3>
+                    <button class="btn btn-primary" id="nuevaTarjeta"><i class="fas fa-plus-circle"></i> Nueva tarjeta</button>
                 </div>
 
                 <div class="card">
-                    <h3 class="section-title">Total general</h3>
+                    <h3 class="section-title"><i class="fas fa-calculator"></i> Total general</h3>
                     <div class="resumen-value balance" id="totalGeneralMonedero">
                         ${this.calcularTotalGeneral()}
                     </div>
                 </div>
 
                 <div id="listaMonederos">
-                    <h4 class="section-subtitle">Monederos</h4>
+                    <h4 class="section-subtitle"><i class="fas fa-wallet"></i> Monederos</h4>
                     ${this.renderMonederos()}
                 </div>
 
                 <div id="listaTarjetas">
-                    <h4 class="section-subtitle">Tarjetas</h4>
+                    <h4 class="section-subtitle"><i class="fas fa-credit-card"></i> Tarjetas</h4>
                     ${this.renderTarjetas()}
                 </div>
             </div>
@@ -44,7 +44,7 @@ const Monedero = {
         const monederos = FinanzasApp.data.monederos;
         
         if (!monederos || monederos.length === 0) {
-            return '<p class="empty-state">No hay monederos creados.</p>';
+            return '<p class="empty-state"><i class="fas fa-info-circle"></i> No hay monederos creados.</p>';
         }
 
         return monederos.map(m => {
@@ -53,7 +53,7 @@ const Monedero = {
                 <div class="card" data-monedero-id="${m.id}">
                     <div class="monedero-header">
                         <h4>
-                            ${m.tipo === 'principal' ? 'Mi monedero' : m.nombre}
+                            <i class="fas fa-wallet"></i> ${m.tipo === 'principal' ? 'Mi monedero' : m.nombre}
                         </h4>
                         <span class="monedero-saldo">
                             ${FinanzasApp.formatCurrency(m.saldo)}
@@ -62,10 +62,16 @@ const Monedero = {
                     </div>
                     
                     <div class="monedero-actions">
-                        <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${m.id}', 'monedero')">Transferir</button>
-                        <button class="btn btn-secondary" onclick="Monedero.editarMonedero('${m.id}')">Editar</button>
+                        <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${m.id}', 'monedero')">
+                            <i class="fas fa-exchange-alt"></i> Transferir
+                        </button>
+                        <button class="btn btn-secondary" onclick="Monedero.editarMonedero('${m.id}')">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
                         ${m.tipo !== 'principal' ? `
-                            <button class="btn btn-secondary" onclick="Monedero.eliminarMonedero('${m.id}')">Eliminar</button>
+                            <button class="btn btn-secondary" onclick="Monedero.eliminarMonedero('${m.id}')">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </button>
                         ` : ''}
                     </div>
                 </div>
@@ -81,7 +87,7 @@ const Monedero = {
         const tarjetas = FinanzasApp.data.tarjetas;
         
         if (tarjetas.length === 0) {
-            return '<p class="empty-state">No hay tarjetas creadas.</p>';
+            return '<p class="empty-state"><i class="fas fa-info-circle"></i> No hay tarjetas creadas.</p>';
         }
 
         return tarjetas.map(t => {
@@ -90,7 +96,7 @@ const Monedero = {
                 <div class="card" data-tarjeta-id="${t.id}">
                     <div class="monedero-header">
                         <h4>
-                            ${t.nombre}
+                            <i class="fas fa-credit-card"></i> ${t.nombre}
                             ${t.tipo === 'principal' ? '<span class="text-secondary">(Principal)</span>' : ''}
                         </h4>
                         <span class="monedero-saldo">
@@ -100,10 +106,16 @@ const Monedero = {
                     </div>
                     
                     <div class="monedero-actions">
-                        <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${t.id}', 'tarjeta')">Transferir</button>
-                        <button class="btn btn-secondary" onclick="Monedero.editarTarjeta('${t.id}')">Editar</button>
+                        <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${t.id}', 'tarjeta')">
+                            <i class="fas fa-exchange-alt"></i> Transferir
+                        </button>
+                        <button class="btn btn-secondary" onclick="Monedero.editarTarjeta('${t.id}')">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
                         ${t.tipo !== 'principal' ? `
-                            <button class="btn btn-secondary" onclick="Monedero.eliminarTarjeta('${t.id}')">Eliminar</button>
+                            <button class="btn btn-secondary" onclick="Monedero.eliminarTarjeta('${t.id}')">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </button>
                         ` : ''}
                     </div>
                 </div>
