@@ -1,10 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finanzas App</title>
+    <!-- Font Awesome 6 (gratuito) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
@@ -18,37 +19,37 @@
         <div class="menu-overlay" id="menuOverlay"></div>
         <div class="side-menu" id="sideMenu">
             <div class="menu-header">
-                <h2>Finanzas</h2>
-                <button class="close-menu" id="closeMenu">&times;</button>
+                <h2><i class="fas fa-wallet"></i> Finanzas</h2>
+                <button class="close-menu" id="closeMenu"><i class="fas fa-times"></i></button>
             </div>
             <nav class="menu-nav">
-                <a href="#" class="menu-item active" data-view="dashboard">Resumen</a>
-                <a href="#" class="menu-item" data-view="alcancia">Alcancía</a>
-                <a href="#" class="menu-item" data-view="monedero">Monedero</a>
-                <a href="#" class="menu-item" data-view="ingresos">Ingresos</a>
-                <a href="#" class="menu-item" data-view="gastos">Gastos</a>
-                <a href="#" class="menu-item" data-view="deudas">Deudas</a>
-                <a href="#" class="menu-item" data-view="prestamos">Préstamos</a>
-                <a href="#" class="menu-item" data-view="divisas">Divisas</a> <!-- NUEVO -->
+                <a href="#" class="menu-item active" data-view="dashboard"><i class="fas fa-chart-pie"></i> Resumen</a>
+                <a href="#" class="menu-item" data-view="alcancia"><i class="fas fa-piggy-bank"></i> Alcancía</a>
+                <a href="#" class="menu-item" data-view="monedero"><i class="fas fa-coins"></i> Monedero</a>
+                <a href="#" class="menu-item" data-view="ingresos"><i class="fas fa-arrow-down"></i> Ingresos</a>
+                <a href="#" class="menu-item" data-view="gastos"><i class="fas fa-arrow-up"></i> Gastos</a>
+                <a href="#" class="menu-item" data-view="deudas"><i class="fas fa-hand-holding-usd"></i> Deudas</a>
+                <a href="#" class="menu-item" data-view="prestamos"><i class="fas fa-handshake"></i> Préstamos</a>
+                <a href="#" class="menu-item" data-view="divisas"><i class="fas fa-dollar-sign"></i> Divisas</a>
             </nav>
             
             <div class="menu-version">
-                <span class="version-text">v2.0.0</span>
+                <span class="version-text"><i class="fas fa-bolt"></i> v2.0.0</span>
             </div>
             
             <div class="menu-footer">
-                <button class="theme-toggle" id="themeToggle">Oscuro</button>
-                <button class="reset-button" id="resetData">Reiniciar datos</button>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i> Oscuro</button>
+                <button class="reset-button" id="resetData"><i class="fas fa-trash-alt"></i> Reiniciar datos</button>
             </div>
         </div>
 
         <!-- Header principal -->
         <header class="header">
-            <button class="menu-toggle" id="menuToggle">☰</button>
-            <h1 class="header-title" id="headerTitle">Resumen</h1>
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <h1 class="header-title" id="headerTitle"><i class="fas fa-home"></i> Resumen</h1>
             <div class="header-actions">
                 <span class="total-general" id="totalGeneral">0.00 $</span>
-                <span class="total-general" id="totalGeneralUSD" style="font-size:0.8rem; margin-left:0.5rem; opacity:0.7;">0.00 USD</span> <!-- NUEVO -->
+                <span class="total-general" id="totalGeneralUSD" style="font-size:0.8rem; margin-left:0.5rem; opacity:0.7;">0.00 USD</span>
             </div>
         </header>
 
@@ -61,11 +62,11 @@
     <!-- Modal personalizado para entradas -->
     <div class="modal" id="customModal" style="display: none;">
         <div class="modal-content">
-            <h3 class="modal-title" id="modalTitle">Ingresar datos</h3>
+            <h3 class="modal-title" id="modalTitle"><i class="fas fa-edit"></i> Ingresar datos</h3>
             <input type="text" class="modal-input" id="modalInput" placeholder="Escribe aquí...">
             <div class="modal-buttons">
-                <button class="modal-btn cancel" id="modalCancel">Cancelar</button>
-                <button class="modal-btn confirm" id="modalConfirm">Aceptar</button>
+                <button class="modal-btn cancel" id="modalCancel"><i class="fas fa-times"></i> Cancelar</button>
+                <button class="modal-btn confirm" id="modalConfirm"><i class="fas fa-check"></i> Aceptar</button>
             </div>
         </div>
     </div>
@@ -81,7 +82,7 @@
     <script src="js/components/dashboard.js"></script>
     <script src="js/components/deudas.js"></script>
     <script src="js/components/prestamos.js"></script>
-    <script src="js/components/divisas.js"></script> <!-- NUEVO -->
+    <script src="js/components/divisas.js"></script>
     <script src="js/app.js"></script>
 
     <!-- Inicialización -->
