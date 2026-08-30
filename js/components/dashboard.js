@@ -14,14 +14,12 @@ const Dashboard = {
             
             return `
                 <div class="dashboard">
-                    <!-- Selector de período -->
                     <div class="period-selector">
                         <button class="period-btn ${this.currentPeriod === 'dia' ? 'active' : ''}" data-period="dia">Día</button>
                         <button class="period-btn ${this.currentPeriod === 'mes' ? 'active' : ''}" data-period="mes">Mes</button>
                         <button class="period-btn ${this.currentPeriod === 'año' ? 'active' : ''}" data-period="año">Año</button>
                     </div>
 
-                    <!-- Resumen de números -->
                     <div class="resumen-cards">
                         <div class="resumen-item">
                             <div class="resumen-label">Ingresos</div>
@@ -35,34 +33,35 @@ const Dashboard = {
                             <div class="resumen-label">Balance</div>
                             <div class="resumen-value balance" id="totalBalance">0.00 $</div>
                         </div>
+                        <div class="resumen-item" style="background-color: var(--accent-color); border-color: var(--accent-color);">
+                            <div class="resumen-label" style="color: white; opacity: 0.9;">Total en USD</div>
+                            <div class="resumen-value" id="totalUSD" style="color: white; font-size: 1.4rem;">
+                                ${FinanzasApp.formatUSD(FinanzasApp.calcularTotalGeneral())}
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Resumen de deudas -->
                     <div class="card">
                         <h3 class="section-title">Resumen de deudas</h3>
                         <div id="resumenDeudas">${this.renderResumenDeudas()}</div>
                     </div>
 
-                    <!-- Resumen de préstamos -->
                     <div class="card">
                         <h3 class="section-title">Resumen de préstamos</h3>
                         <div id="resumenPrestamos">${this.renderResumenPrestamos()}</div>
                     </div>
 
-                    <!-- Distribución por método -->
                     <div class="card">
                         <h3 class="section-title">Distribución por método</h3>
                         <div id="resumenMetodos">${this.renderResumenMetodos()}</div>
                     </div>
 
-                    <!-- GRÁFICO -->
                     <div class="card">
                         <div class="chart-container">
                             <canvas id="dashboardChart"></canvas>
                         </div>
                     </div>
 
-                    <!-- CALENDARIO (solo en vista mes) -->
                     ${this.currentPeriod === 'mes' ? `
                         <div class="card calendar-card">
                             <div class="calendar-header">
@@ -107,7 +106,6 @@ const Dashboard = {
                         </div>
                     ` : ''}
 
-                    <!-- Movimientos del día -->
                     <div class="card" id="movimientosDia" style="${this.currentPeriod === 'dia' ? 'display: block;' : 'display: none;'}">
                         <h3 class="section-title" id="movimientosDiaTitulo">
                             ${this.currentPeriod === 'dia' ? 'Hoy' : 'Selecciona un día'}
@@ -117,7 +115,6 @@ const Dashboard = {
                         </ul>
                     </div>
 
-                    <!-- Últimos movimientos -->
                     <div class="card" id="ultimosMovimientosCard" style="${this.currentPeriod !== 'dia' ? 'display: block;' : 'display: none;'}">
                         <h3 class="section-title">Últimos movimientos</h3>
                         <ul class="movimientos-list" id="ultimosMovimientos">
@@ -125,13 +122,11 @@ const Dashboard = {
                         </ul>
                     </div>
 
-                    <!-- Progreso de alcancías -->
                     <div class="card">
                         <h3 class="section-title">Progreso de alcancías</h3>
                         <div id="progresoAlcancia">${this.renderProgresoAlcancia()}</div>
                     </div>
 
-                    <!-- Alertas -->
                     <div class="card">
                         <h3 class="section-title">Alertas</h3>
                         <div class="alertas" id="alertas">${this.renderAlertas()}</div>
@@ -222,14 +217,10 @@ const Dashboard = {
             
             configMetodos.forEach(m => metodos[m] = 0);
             
-            // SOLO INGRESOS - Los gastos NO afectan la distribución por método
             (FinanzasApp.data.ingresos || []).forEach(i => {
                 const metodo = i.metodo || 'Efectivo';
                 metodos[metodo] = (metodos[metodo] || 0) + (i.cantidad || 0);
             });
-            
-            // LOS GASTOS NO SE RESTAN DE LA DISTRIBUCIÓN POR MÉTODO
-            // Eliminado el forEach de gastos que causaba saldos negativos
             
             return Object.entries(metodos).map(([metodo, total]) => `
                 <div class="metodo-item">
@@ -570,6 +561,12 @@ const Dashboard = {
             document.getElementById('totalGastos').textContent = FinanzasApp.formatCurrency(gastos || 0);
             document.getElementById('totalBalance').textContent = FinanzasApp.formatCurrency((ingresos || 0) - (gastos || 0));
             
+            const totalGeneral = FinanzasApp.calcularTotalGeneral();
+            const totalUSD = document.getElementById('totalUSD');
+            if (totalUSD) {
+                totalUSD.textContent = FinanzasApp.formatUSD(totalGeneral);
+            }
+            
             const resumenDeudas = document.getElementById('resumenDeudas');
             if (resumenDeudas) {
                 resumenDeudas.innerHTML = this.renderResumenDeudas();
@@ -695,7 +692,6 @@ const Dashboard = {
         try {
             const alertas = [];
             
-            // Alertas de alcancías
             (FinanzasApp.data.alcancias || []).forEach(a => {
                 (a.objetivos || []).forEach(o => {
                     if (o.meta <= (a.saldo || 0) && !o.retirado) {
@@ -707,7 +703,6 @@ const Dashboard = {
                 });
             });
 
-            // Alertas de deudas
             const hoy = new Date();
             (FinanzasApp.data.deudas || []).forEach(d => {
                 if (d.estado === 'activa' && d.fechaLimite) {
@@ -728,7 +723,6 @@ const Dashboard = {
                 }
             });
 
-            // Alertas de préstamos
             (FinanzasApp.data.prestamos || []).forEach(p => {
                 if (p.estado === 'activo' && p.fechaLimite) {
                     const fechaLimite = new Date(p.fechaLimite);
