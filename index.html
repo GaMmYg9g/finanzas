@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -28,9 +29,9 @@
                 <a href="#" class="menu-item" data-view="gastos">Gastos</a>
                 <a href="#" class="menu-item" data-view="deudas">Deudas</a>
                 <a href="#" class="menu-item" data-view="prestamos">Préstamos</a>
+                <a href="#" class="menu-item" data-view="divisas">Divisas</a> <!-- NUEVO -->
             </nav>
             
-            <!-- VERSIÓN DE LA APP -->
             <div class="menu-version">
                 <span class="version-text">v2.0.0</span>
             </div>
@@ -47,6 +48,7 @@
             <h1 class="header-title" id="headerTitle">Resumen</h1>
             <div class="header-actions">
                 <span class="total-general" id="totalGeneral">0.00 $</span>
+                <span class="total-general" id="totalGeneralUSD" style="font-size:0.8rem; margin-left:0.5rem; opacity:0.7;">0.00 USD</span> <!-- NUEVO -->
             </div>
         </header>
 
@@ -79,6 +81,7 @@
     <script src="js/components/dashboard.js"></script>
     <script src="js/components/deudas.js"></script>
     <script src="js/components/prestamos.js"></script>
+    <script src="js/components/divisas.js"></script> <!-- NUEVO -->
     <script src="js/app.js"></script>
 
     <!-- Inicialización -->
