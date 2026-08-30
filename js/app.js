@@ -104,19 +104,19 @@ const FinanzasApp = {
         });
 
         const titles = {
-            dashboard: 'Resumen',
-            alcancia: 'Alcancía',
-            monedero: 'Monedero',
-            ingresos: 'Ingresos',
-            gastos: 'Gastos',
-            deudas: 'Deudas',
-            prestamos: 'Préstamos',
-            divisas: 'Divisas'
+            dashboard: '<i class="fas fa-chart-pie"></i> Resumen',
+            alcancia: '<i class="fas fa-piggy-bank"></i> Alcancía',
+            monedero: '<i class="fas fa-coins"></i> Monedero',
+            ingresos: '<i class="fas fa-arrow-down"></i> Ingresos',
+            gastos: '<i class="fas fa-arrow-up"></i> Gastos',
+            deudas: '<i class="fas fa-hand-holding-usd"></i> Deudas',
+            prestamos: '<i class="fas fa-handshake"></i> Préstamos',
+            divisas: '<i class="fas fa-dollar-sign"></i> Divisas'
         };
         
         const headerTitle = document.getElementById('headerTitle');
         if (headerTitle) {
-            headerTitle.textContent = titles[view] || 'Finanzas';
+            headerTitle.innerHTML = titles[view] || 'Finanzas';
         }
 
         this.renderView(view);
