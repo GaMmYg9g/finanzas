@@ -3,21 +3,21 @@ const Prestamos = {
         return `
             <div class="prestamos-view">
                 <div class="card">
-                    <h3 class="section-title">Nuevo préstamo</h3>
+                    <h3 class="section-title"><i class="fas fa-handshake"></i> Nuevo préstamo</h3>
                     <form id="formPrestamo">
                         <div class="form-group">
-                            <label class="form-label">Nombre del préstamo</label>
+                            <label class="form-label"><i class="fas fa-tag"></i> Nombre del préstamo</label>
                             <input type="text" class="form-input" id="prestamoNombre" placeholder="Ej: Préstamo a Juan" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Monto total</label>
+                            <label class="form-label"><i class="fas fa-dollar-sign"></i> Monto total</label>
                             <input type="number" step="0.01" class="form-input" id="prestamoMonto" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Fecha límite (opcional)</label>
+                            <label class="form-label"><i class="far fa-calendar-alt"></i> Fecha límite (opcional)</label>
                             <div class="fecha-selector">
                                 <button type="button" class="fecha-btn" id="btnFechaPrestamo">
-                                    <span class="fecha-icono">📅</span>
+                                    <span class="fecha-icono"><i class="fas fa-calendar-day"></i></span>
                                     <span class="fecha-texto" id="fechaPrestamoTexto">Seleccionar</span>
                                 </button>
                                 <input type="hidden" id="fechaPrestamoValor">
@@ -25,11 +25,11 @@ const Prestamos = {
                         </div>
                         
                         <div class="destino-group">
-                            <div class="destino-titulo">Origen del dinero prestado (selecciona uno)</div>
+                            <div class="destino-titulo"><i class="fas fa-arrow-left"></i> Origen del dinero prestado</div>
                             
                             <div class="destino-opcion">
                                 <input type="radio" name="origenPrestamo" value="monedero" class="destino-radio" id="origenPrestamoMonedero">
-                                <label for="origenPrestamoMonedero">Monedero</label>
+                                <label for="origenPrestamoMonedero"><i class="fas fa-wallet"></i> Monedero</label>
                                 <select class="destino-select" id="prestamoMonedero" disabled>
                                     <option value="">Seleccionar</option>
                                     ${FinanzasApp.data.monederos.map(m => `<option value="${m.id}">${m.nombre} (${FinanzasApp.formatCurrency(m.saldo)})</option>`).join('')}
@@ -38,7 +38,7 @@ const Prestamos = {
                             
                             <div class="destino-opcion">
                                 <input type="radio" name="origenPrestamo" value="tarjeta" class="destino-radio" id="origenPrestamoTarjeta">
-                                <label for="origenPrestamoTarjeta">Tarjeta</label>
+                                <label for="origenPrestamoTarjeta"><i class="fas fa-credit-card"></i> Tarjeta</label>
                                 <select class="destino-select" id="prestamoTarjeta" disabled>
                                     <option value="">Seleccionar</option>
                                     ${FinanzasApp.data.tarjetas.map(t => `<option value="${t.id}">${t.nombre} (${FinanzasApp.formatCurrency(t.saldo)})</option>`).join('')}
@@ -47,7 +47,7 @@ const Prestamos = {
                             
                             <div class="destino-opcion">
                                 <input type="radio" name="origenPrestamo" value="alcancia" class="destino-radio" id="origenPrestamoAlcancia">
-                                <label for="origenPrestamoAlcancia">Alcancía</label>
+                                <label for="origenPrestamoAlcancia"><i class="fas fa-piggy-bank"></i> Alcancía</label>
                                 <select class="destino-select" id="prestamoAlcancia" disabled>
                                     <option value="">Seleccionar</option>
                                     ${FinanzasApp.data.alcancias.map(a => `<option value="${a.id}">${a.nombre} (${FinanzasApp.formatCurrency(a.saldo)})</option>`).join('')}
@@ -56,22 +56,22 @@ const Prestamos = {
                             
                             <div class="destino-opcion">
                                 <input type="radio" name="origenPrestamo" value="ingreso" class="destino-radio" id="origenPrestamoIngreso">
-                                <label for="origenPrestamoIngreso">Ingreso (dinero nuevo)</label>
+                                <label for="origenPrestamoIngreso"><i class="fas fa-arrow-down"></i> Ingreso (dinero nuevo)</label>
                             </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary">Crear préstamo</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Crear préstamo</button>
                     </form>
                 </div>
 
                 <div class="card">
-                    <h3 class="section-title">Mis préstamos</h3>
+                    <h3 class="section-title"><i class="fas fa-list"></i> Mis préstamos</h3>
                     <div id="listaPrestamos">${this.renderPrestamos()}</div>
                 </div>
 
                 <div class="modal" id="pagoPrestamoModal" style="display:none">
                     <div class="modal-content">
-                        <h3 class="modal-title" id="pagoPrestamoTitulo">Registrar pago</h3>
+                        <h3 class="modal-title"><i class="fas fa-hand-holding-usd"></i> Registrar pago</h3>
                         <div id="pagoPrestamoContenido"></div>
                     </div>
                 </div>
@@ -81,7 +81,7 @@ const Prestamos = {
 
     renderPrestamos() {
         const prestamos = FinanzasApp.data.prestamos || [];
-        if (!prestamos.length) return '<p class="empty-state">No hay préstamos</p>';
+        if (!prestamos.length) return '<p class="empty-state"><i class="fas fa-info-circle"></i> No hay préstamos</p>';
         
         return prestamos.map(p => {
             const progreso = ((p.montoRecuperado || 0) / p.montoTotal) * 100;
@@ -89,31 +89,31 @@ const Prestamos = {
             return `
                 <div class="prestamo-item card">
                     <div class="prestamo-header">
-                        <h4>${p.nombre}</h4>
+                        <h4><i class="fas fa-handshake"></i> ${p.nombre}</h4>
                         <span class="prestamo-estado ${p.estado}">${p.estado === 'activo' ? 'Activo' : 'Finalizado'}</span>
                     </div>
                     <div class="prestamo-montos">
-                        <span>Recuperado: ${FinanzasApp.formatCurrency(p.montoRecuperado || 0)}</span>
-                        <span>Total: ${FinanzasApp.formatCurrency(p.montoTotal)}</span>
+                        <span><i class="fas fa-check-circle" style="color:var(--success-color);"></i> Recuperado: ${FinanzasApp.formatCurrency(p.montoRecuperado || 0)}</span>
+                        <span><i class="fas fa-coins"></i> Total: ${FinanzasApp.formatCurrency(p.montoTotal)}</span>
                     </div>
                     <div class="prestamo-pendiente">
-                        <span>Pendiente: ${FinanzasApp.formatCurrency(pendiente)}</span>
+                        <i class="fas fa-exclamation-triangle" style="color:#9c27b0;"></i> Pendiente: ${FinanzasApp.formatCurrency(pendiente)}
                     </div>
                     <div class="progress-container">
                         <div class="progress-bar"><div class="progress-fill" style="width:${progreso}%"></div></div>
                         <span class="progress-porcentaje">${progreso.toFixed(0)}%</span>
                     </div>
                     <div class="prestamo-origen">
-                        <small>Origen: ${p.origen.tipo} - ${p.origen.nombre}</small>
+                        <small><i class="fas fa-arrow-left"></i> Origen: ${p.origen.tipo} - ${p.origen.nombre}</small>
                     </div>
-                    ${p.fechaLimite ? `<div class="prestamo-fechaLimite">📅 Límite: ${FinanzasApp.formatDate(p.fechaLimite)}</div>` : ''}
+                    ${p.fechaLimite ? `<div class="prestamo-fechaLimite"><i class="far fa-calendar-alt"></i> Límite: ${FinanzasApp.formatDate(p.fechaLimite)}</div>` : ''}
                     <div class="prestamo-actions">
                         ${p.estado === 'activo' ? `
-                            <button class="btn btn-secondary" onclick="Prestamos.mostrarPago('${p.id}')">Registrar pago</button>
+                            <button class="btn btn-secondary" onclick="Prestamos.mostrarPago('${p.id}')"><i class="fas fa-hand-holding-usd"></i> Registrar pago</button>
                         ` : ''}
-                        <button class="btn btn-secondary" onclick="Prestamos.verDetalle('${p.id}')">Detalle</button>
+                        <button class="btn btn-secondary" onclick="Prestamos.verDetalle('${p.id}')"><i class="fas fa-info-circle"></i> Detalle</button>
                         ${p.estado === 'activo' && pendiente === 0 ? `
-                            <button class="btn btn-secondary" onclick="Prestamos.finalizarPrestamo('${p.id}')">Finalizar</button>
+                            <button class="btn btn-secondary" onclick="Prestamos.finalizarPrestamo('${p.id}')"><i class="fas fa-check"></i> Finalizar</button>
                         ` : ''}
                     </div>
                 </div>
@@ -246,22 +246,22 @@ const Prestamos = {
         const modal = document.getElementById('pagoPrestamoModal');
         const cont = document.getElementById('pagoPrestamoContenido');
         cont.innerHTML = `
-            <p><strong>${p.nombre}</strong> - Pendiente: ${FinanzasApp.formatCurrency(pendiente)}</p>
+            <p><i class="fas fa-handshake"></i> <strong>${p.nombre}</strong> - Pendiente: ${FinanzasApp.formatCurrency(pendiente)}</p>
             <div class="form-group">
-                <label>Cantidad a recibir</label>
+                <label><i class="fas fa-dollar-sign"></i> Cantidad a recibir</label>
                 <input type="number" class="form-input" id="pagoPrestamoCantidad" value="${pendiente}">
             </div>
             <div class="form-group">
-                <label>Destino del dinero</label>
+                <label><i class="fas fa-arrow-right"></i> Destino del dinero</label>
                 <select class="form-input" id="pagoPrestamoDestino">
                     <option value="">Seleccionar destino</option>
-                    ${destinos.map(d => `<option value="${d.tipo}|${d.id}">${d.tipo}: ${d.nombre} (${FinanzasApp.formatCurrency(d.saldo)})</option>`).join('')}
-                    <option value="ingreso">💰 Ingreso (dinero nuevo)</option>
+                    ${destinos.map(d => `<option value="${d.tipo}|${d.id}">${d.tipo === 'monedero' ? '💰' : d.tipo === 'tarjeta' ? '💳' : '🏦'} ${d.nombre} (${FinanzasApp.formatCurrency(d.saldo)})</option>`).join('')}
+                    <option value="ingreso"><i class="fas fa-arrow-down"></i> Ingreso (dinero nuevo)</option>
                 </select>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn cancel" id="cancelarPagoPrestamo">Cancelar</button>
-                <button class="modal-btn confirm" id="confirmarPagoPrestamo">Registrar pago</button>
+                <button class="modal-btn cancel" id="cancelarPagoPrestamo"><i class="fas fa-times"></i> Cancelar</button>
+                <button class="modal-btn confirm" id="confirmarPagoPrestamo"><i class="fas fa-check"></i> Registrar pago</button>
             </div>
         `;
         
