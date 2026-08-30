@@ -36,7 +36,8 @@ const Monedero = {
         const totalMonederos = FinanzasApp.data.monederos.reduce((sum, m) => sum + (m.saldo || 0), 0);
         const totalTarjetas = FinanzasApp.data.tarjetas.reduce((sum, t) => sum + (t.saldo || 0), 0);
         const totalAlcancia = FinanzasApp.data.alcancias.reduce((sum, a) => sum + (a.saldo || 0), 0);
-        return FinanzasApp.formatCurrency(totalMonederos + totalTarjetas + totalAlcancia);
+        const total = totalMonederos + totalTarjetas + totalAlcancia;
+        return FinanzasApp.formatCurrency(total);
     },
 
     renderMonederos() {
@@ -46,24 +47,30 @@ const Monedero = {
             return '<p class="empty-state">No hay monederos creados.</p>';
         }
 
-        return monederos.map(m => `
-            <div class="card" data-monedero-id="${m.id}">
-                <div class="monedero-header">
-                    <h4>
-                        ${m.tipo === 'principal' ? 'Mi monedero' : m.nombre}
-                    </h4>
-                    <span class="monedero-saldo">${FinanzasApp.formatCurrency(m.saldo)}</span>
+        return monederos.map(m => {
+            const saldoUSD = FinanzasApp.formatUSD(m.saldo);
+            return `
+                <div class="card" data-monedero-id="${m.id}">
+                    <div class="monedero-header">
+                        <h4>
+                            ${m.tipo === 'principal' ? 'Mi monedero' : m.nombre}
+                        </h4>
+                        <span class="monedero-saldo">
+                            ${FinanzasApp.formatCurrency(m.saldo)}
+                            <span style="font-size:0.8rem; font-weight:400; color:var(--text-secondary);">${saldoUSD}</span>
+                        </span>
+                    </div>
+                    
+                    <div class="monedero-actions">
+                        <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${m.id}', 'monedero')">Transferir</button>
+                        <button class="btn btn-secondary" onclick="Monedero.editarMonedero('${m.id}')">Editar</button>
+                        ${m.tipo !== 'principal' ? `
+                            <button class="btn btn-secondary" onclick="Monedero.eliminarMonedero('${m.id}')">Eliminar</button>
+                        ` : ''}
+                    </div>
                 </div>
-                
-                <div class="monedero-actions">
-                    <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${m.id}', 'monedero')">Transferir</button>
-                    <button class="btn btn-secondary" onclick="Monedero.editarMonedero('${m.id}')">Editar</button>
-                    ${m.tipo !== 'principal' ? `
-                        <button class="btn btn-secondary" onclick="Monedero.eliminarMonedero('${m.id}')">Eliminar</button>
-                    ` : ''}
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     },
 
     renderTarjetas() {
@@ -77,25 +84,31 @@ const Monedero = {
             return '<p class="empty-state">No hay tarjetas creadas.</p>';
         }
 
-        return tarjetas.map(t => `
-            <div class="card" data-tarjeta-id="${t.id}">
-                <div class="monedero-header">
-                    <h4>
-                        ${t.nombre}
-                        ${t.tipo === 'principal' ? '<span class="text-secondary">(Principal)</span>' : ''}
-                    </h4>
-                    <span class="monedero-saldo">${FinanzasApp.formatCurrency(t.saldo)}</span>
+        return tarjetas.map(t => {
+            const saldoUSD = FinanzasApp.formatUSD(t.saldo);
+            return `
+                <div class="card" data-tarjeta-id="${t.id}">
+                    <div class="monedero-header">
+                        <h4>
+                            ${t.nombre}
+                            ${t.tipo === 'principal' ? '<span class="text-secondary">(Principal)</span>' : ''}
+                        </h4>
+                        <span class="monedero-saldo">
+                            ${FinanzasApp.formatCurrency(t.saldo)}
+                            <span style="font-size:0.8rem; font-weight:400; color:var(--text-secondary);">${saldoUSD}</span>
+                        </span>
+                    </div>
+                    
+                    <div class="monedero-actions">
+                        <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${t.id}', 'tarjeta')">Transferir</button>
+                        <button class="btn btn-secondary" onclick="Monedero.editarTarjeta('${t.id}')">Editar</button>
+                        ${t.tipo !== 'principal' ? `
+                            <button class="btn btn-secondary" onclick="Monedero.eliminarTarjeta('${t.id}')">Eliminar</button>
+                        ` : ''}
+                    </div>
                 </div>
-                
-                <div class="monedero-actions">
-                    <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${t.id}', 'tarjeta')">Transferir</button>
-                    <button class="btn btn-secondary" onclick="Monedero.editarTarjeta('${t.id}')">Editar</button>
-                    ${t.tipo !== 'principal' ? `
-                        <button class="btn btn-secondary" onclick="Monedero.eliminarTarjeta('${t.id}')">Eliminar</button>
-                    ` : ''}
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     },
 
     init() {
@@ -202,7 +215,6 @@ const Monedero = {
     },
 
     async mostrarTransferencia(origenId, tipoOrigen) {
-        // Recopilar todos los destinos posibles
         const destinos = [];
         
         FinanzasApp.data.monederos.forEach(m => {
@@ -247,7 +259,6 @@ const Monedero = {
         
         if (!origen) return;
         
-        // Crear opciones para el select usando índices
         const opciones = destinos.map((d, index) => ({
             value: index.toString(),
             label: `${d.tipo === 'monedero' ? '💰' : d.tipo === 'tarjeta' ? '💳' : '🏦'} ${d.nombre} (${FinanzasApp.formatCurrency(d.saldo)})`
@@ -280,7 +291,6 @@ const Monedero = {
         if (origen.saldo >= cantidad) {
             origen.saldo -= cantidad;
             
-            // Sumar al destino según su tipo
             if (destino.tipo === 'monedero') {
                 const dest = FinanzasApp.data.monederos.find(m => m.id === destino.id);
                 if (dest) dest.saldo += cantidad;
