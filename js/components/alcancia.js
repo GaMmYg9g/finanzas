@@ -3,8 +3,8 @@ const Alcancia = {
         return `
             <div class="alcancia-view">
                 <div class="card">
-                    <h3 class="section-title">Mis alcancías</h3>
-                    <button class="btn btn-primary" id="nuevaAlcancia">+ Nueva alcancía</button>
+                    <h3 class="section-title"><i class="fas fa-piggy-bank"></i> Mis alcancías</h3>
+                    <button class="btn btn-primary" id="nuevaAlcancia"><i class="fas fa-plus-circle"></i> Nueva alcancía</button>
                 </div>
 
                 <div id="listaAlcancia">
@@ -20,7 +20,7 @@ const Alcancia = {
         if (alcancias.length === 0) {
             return `
                 <div class="card">
-                    <p class="empty-state">No hay alcancías creadas. Crea una para empezar a ahorrar.</p>
+                    <p class="empty-state"><i class="fas fa-info-circle"></i> No hay alcancías creadas. Crea una para empezar a ahorrar.</p>
                 </div>
             `;
         }
@@ -31,8 +31,8 @@ const Alcancia = {
                 <div class="card" data-alcancia-id="${a.id}">
                     <div class="alcancia-header">
                         <div>
-                            <h4 class="alcancia-nombre">${a.nombre}</h4>
-                            <span class="alcancia-subtipo">Alcancía de ahorro</span>
+                            <h4 class="alcancia-nombre"><i class="fas fa-piggy-bank"></i> ${a.nombre}</h4>
+                            <span class="alcancia-subtipo"><i class="fas fa-coins"></i> Alcancía de ahorro</span>
                         </div>
                         <div class="alcancia-total">
                             <span class="alcancia-cantidad">${FinanzasApp.formatCurrency(a.saldo)}</span>
@@ -42,7 +42,7 @@ const Alcancia = {
                     
                     <div class="alcancia-objetivos-section">
                         <div class="section-header">
-                            <h5 class="section-subtitle">Objetivos</h5>
+                            <h5 class="section-subtitle"><i class="fas fa-bullseye"></i> Objetivos</h5>
                             <span class="objetivos-count">${a.objetivos.length} ${a.objetivos.length === 1 ? 'objetivo' : 'objetivos'}</span>
                         </div>
                         
@@ -53,7 +53,7 @@ const Alcancia = {
                                         return `
                                             <div class="objetivo-retirado-item">
                                                 <div class="objetivo-retirado-header">
-                                                    <span class="objetivo-retirado-nombre">${o.nombre}</span>
+                                                    <span class="objetivo-retirado-nombre"><i class="fas fa-undo-alt"></i> ${o.nombre}</span>
                                                     <span class="objetivo-retirado-badge">Retirado</span>
                                                 </div>
                                                 <div class="objetivo-retirado-monto">
@@ -69,7 +69,7 @@ const Alcancia = {
                                     return `
                                         <div class="objetivo-item ${completado ? 'objetivo-completado-item' : ''}">
                                             <div class="objetivo-header">
-                                                <span class="objetivo-nombre">${o.nombre}</span>
+                                                <span class="objetivo-nombre"><i class="fas fa-flag"></i> ${o.nombre}</span>
                                             </div>
                                             <div class="objetivo-meta">
                                                 ${FinanzasApp.formatCurrency(Math.min(a.saldo, o.meta))} / ${FinanzasApp.formatCurrency(o.meta)}
@@ -81,39 +81,45 @@ const Alcancia = {
                                                 <span class="progress-porcentaje">${progreso.toFixed(0)}%</span>
                                             </div>
                                             <div class="objetivo-actions-bottom">
-                                                <button class="btn-icon-small" onclick="Alcancia.editarObjetivo('${a.id}', '${o.id}')">Editar</button>
-                                                <button class="btn-icon-small" onclick="Alcancia.eliminarObjetivo('${a.id}', '${o.id}')">Eliminar</button>
+                                                <button class="btn-icon-small" onclick="Alcancia.editarObjetivo('${a.id}', '${o.id}')"><i class="fas fa-edit"></i> Editar</button>
+                                                <button class="btn-icon-small" onclick="Alcancia.eliminarObjetivo('${a.id}', '${o.id}')"><i class="fas fa-trash-alt"></i> Eliminar</button>
                                             </div>
-                                            ${completado ? '<span class="objetivo-completado-badge">✓ Completado</span>' : ''}
+                                            ${completado ? '<span class="objetivo-completado-badge"><i class="fas fa-check-circle"></i> Completado</span>' : ''}
                                         </div>
                                     `;
                                 }).join('')}
                             </div>
                         ` : `
-                            <p class="empty-state">No hay objetivos creados</p>
+                            <p class="empty-state"><i class="fas fa-info-circle"></i> No hay objetivos creados</p>
                         `}
                     </div>
                     
                     <div class="alcancia-actions">
                         <div class="actions-group">
                             <button class="action-btn" onclick="Alcancia.mostrarFormIngreso('${a.id}')">
-                                <span class="action-text">+ Ingresar</span>
+                                <i class="fas fa-plus-circle"></i>
+                                <span class="action-text">Ingresar</span>
                             </button>
                             <button class="action-btn" onclick="Alcancia.mostrarFormGasto('${a.id}')">
-                                <span class="action-text">- Retirar</span>
+                                <i class="fas fa-minus-circle"></i>
+                                <span class="action-text">Retirar</span>
                             </button>
                             <button class="action-btn" onclick="Alcancia.mostrarFormObjetivo('${a.id}')">
-                                <span class="action-text">+ Objetivo</span>
+                                <i class="fas fa-bullseye"></i>
+                                <span class="action-text">Objetivo</span>
                             </button>
                         </div>
                         <div class="actions-group">
                             <button class="action-btn action-btn-stats" onclick="Alcancia.mostrarEstadisticas('${a.id}')">
+                                <i class="fas fa-chart-bar"></i>
                                 <span class="action-text">Estadísticas</span>
                             </button>
                             <button class="action-btn action-btn-edit" onclick="Alcancia.editarAlcancia('${a.id}')">
+                                <i class="fas fa-edit"></i>
                                 <span class="action-text">Editar</span>
                             </button>
                             <button class="action-btn action-btn-delete" onclick="Alcancia.eliminarAlcancia('${a.id}')">
+                                <i class="fas fa-trash-alt"></i>
                                 <span class="action-text">Eliminar</span>
                             </button>
                         </div>
@@ -490,14 +496,14 @@ const Alcancia = {
         cancelBtn.textContent = 'Cerrar';
         confirmBtn.style.display = 'none';
         
-        title.textContent = `${alcancia.nombre} - Estadísticas`;
+        title.innerHTML = `<i class="fas fa-chart-bar"></i> ${alcancia.nombre} - Estadísticas`;
         
         const statsDiv = document.createElement('div');
         statsDiv.className = 'stats-container';
         statsDiv.innerHTML = `
             <div class="stats-card">
                 <div class="stats-row">
-                    <span class="stats-label">Saldo actual</span>
+                    <span class="stats-label"><i class="fas fa-coins" style="color:var(--success-color);"></i> Saldo actual</span>
                     <span class="stats-value positive">
                         ${FinanzasApp.formatCurrency(alcancia.saldo)} 
                         <span style="font-size:0.8rem; font-weight:400; color:var(--text-secondary);">
@@ -506,7 +512,7 @@ const Alcancia = {
                     </span>
                 </div>
                 <div class="stats-row">
-                    <span class="stats-label">Total acumulado</span>
+                    <span class="stats-label"><i class="fas fa-arrow-up"></i> Total acumulado</span>
                     <span class="stats-value">
                         ${FinanzasApp.formatCurrency(acumulado)} 
                         <span style="font-size:0.8rem; font-weight:400; color:var(--text-secondary);">
@@ -515,7 +521,7 @@ const Alcancia = {
                     </span>
                 </div>
                 <div class="stats-row">
-                    <span class="stats-label">Total retirado</span>
+                    <span class="stats-label"><i class="fas fa-arrow-down" style="color:var(--error-color);"></i> Total retirado</span>
                     <span class="stats-value negative">
                         ${FinanzasApp.formatCurrency(retirado)} 
                         <span style="font-size:0.8rem; font-weight:400; color:var(--text-secondary);">
@@ -525,19 +531,19 @@ const Alcancia = {
                 </div>
                 <div class="stats-divider"></div>
                 <div class="stats-row">
-                    <span class="stats-label">Total objetivos</span>
+                    <span class="stats-label"><i class="fas fa-bullseye"></i> Total objetivos</span>
                     <span class="stats-value">${alcancia.objetivos.length}</span>
                 </div>
                 <div class="stats-row">
-                    <span class="stats-label">Completados</span>
+                    <span class="stats-label"><i class="fas fa-check-circle" style="color:var(--success-color);"></i> Completados</span>
                     <span class="stats-value success">${objetivosCompletados}</span>
                 </div>
                 <div class="stats-row">
-                    <span class="stats-label">Retirados</span>
+                    <span class="stats-label"><i class="fas fa-undo-alt"></i> Retirados</span>
                     <span class="stats-value">${objetivosRetirados}</span>
                 </div>
                 <div class="stats-row">
-                    <span class="stats-label">Activos</span>
+                    <span class="stats-label"><i class="fas fa-play"></i> Activos</span>
                     <span class="stats-value">${objetivosActivos}</span>
                 </div>
             </div>
