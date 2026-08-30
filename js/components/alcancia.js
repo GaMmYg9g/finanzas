@@ -25,100 +25,102 @@ const Alcancia = {
             `;
         }
 
-        return alcancias.map(a => `
-            <div class="card" data-alcancia-id="${a.id}">
-                <div class="alcancia-header">
-                    <div>
-                        <h4 class="alcancia-nombre">${a.nombre}</h4>
-                        <span class="alcancia-subtipo">Alcancía de ahorro</span>
-                    </div>
-                    <div class="alcancia-total">
-                        <span class="alcancia-cantidad">${FinanzasApp.formatCurrency(a.saldo)}</span>
-                    </div>
-                </div>
-                
-                <div class="alcancia-objetivos-section">
-                    <div class="section-header">
-                        <h5 class="section-subtitle">Objetivos</h5>
-                        <span class="objetivos-count">${a.objetivos.length} ${a.objetivos.length === 1 ? 'objetivo' : 'objetivos'}</span>
+        return alcancias.map(a => {
+            const saldoUSD = FinanzasApp.formatUSD(a.saldo);
+            return `
+                <div class="card" data-alcancia-id="${a.id}">
+                    <div class="alcancia-header">
+                        <div>
+                            <h4 class="alcancia-nombre">${a.nombre}</h4>
+                            <span class="alcancia-subtipo">Alcancía de ahorro</span>
+                        </div>
+                        <div class="alcancia-total">
+                            <span class="alcancia-cantidad">${FinanzasApp.formatCurrency(a.saldo)}</span>
+                            <span class="alcancia-usd" style="font-size:0.9rem; color:var(--text-secondary);">${saldoUSD}</span>
+                        </div>
                     </div>
                     
-                    ${a.objetivos.length > 0 ? `
-                        <div class="objetivos-list">
-                            ${a.objetivos.map(o => {
-                                // Si el objetivo está retirado, mostrar tarjeta especial
-                                if (o.retirado) {
+                    <div class="alcancia-objetivos-section">
+                        <div class="section-header">
+                            <h5 class="section-subtitle">Objetivos</h5>
+                            <span class="objetivos-count">${a.objetivos.length} ${a.objetivos.length === 1 ? 'objetivo' : 'objetivos'}</span>
+                        </div>
+                        
+                        ${a.objetivos.length > 0 ? `
+                            <div class="objetivos-list">
+                                ${a.objetivos.map(o => {
+                                    if (o.retirado) {
+                                        return `
+                                            <div class="objetivo-retirado-item">
+                                                <div class="objetivo-retirado-header">
+                                                    <span class="objetivo-retirado-nombre">${o.nombre}</span>
+                                                    <span class="objetivo-retirado-badge">Retirado</span>
+                                                </div>
+                                                <div class="objetivo-retirado-monto">
+                                                    ${FinanzasApp.formatCurrency(o.meta)}
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                    
+                                    const completado = o.meta <= a.saldo;
+                                    const progreso = completado ? 100 : Math.min((a.saldo / o.meta) * 100, 100);
+                                    
                                     return `
-                                        <div class="objetivo-retirado-item">
-                                            <div class="objetivo-retirado-header">
-                                                <span class="objetivo-retirado-nombre">${o.nombre}</span>
-                                                <span class="objetivo-retirado-badge">Retirado</span>
+                                        <div class="objetivo-item ${completado ? 'objetivo-completado-item' : ''}">
+                                            <div class="objetivo-header">
+                                                <span class="objetivo-nombre">${o.nombre}</span>
                                             </div>
-                                            <div class="objetivo-retirado-monto">
-                                                ${FinanzasApp.formatCurrency(o.meta)}
+                                            <div class="objetivo-meta">
+                                                ${FinanzasApp.formatCurrency(Math.min(a.saldo, o.meta))} / ${FinanzasApp.formatCurrency(o.meta)}
                                             </div>
+                                            <div class="progress-container">
+                                                <div class="progress-bar">
+                                                    <div class="progress-fill" style="width: ${progreso}%"></div>
+                                                </div>
+                                                <span class="progress-porcentaje">${progreso.toFixed(0)}%</span>
+                                            </div>
+                                            <div class="objetivo-actions-bottom">
+                                                <button class="btn-icon-small" onclick="Alcancia.editarObjetivo('${a.id}', '${o.id}')">Editar</button>
+                                                <button class="btn-icon-small" onclick="Alcancia.eliminarObjetivo('${a.id}', '${o.id}')">Eliminar</button>
+                                            </div>
+                                            ${completado ? '<span class="objetivo-completado-badge">✓ Completado</span>' : ''}
                                         </div>
                                     `;
-                                }
-                                
-                                // Objetivo normal (completado o en progreso)
-                                const completado = o.meta <= a.saldo;
-                                const progreso = completado ? 100 : Math.min((a.saldo / o.meta) * 100, 100);
-                                
-                                return `
-                                    <div class="objetivo-item ${completado ? 'objetivo-completado-item' : ''}">
-                                        <div class="objetivo-header">
-                                            <span class="objetivo-nombre">${o.nombre}</span>
-                                        </div>
-                                        <div class="objetivo-meta">
-                                            ${FinanzasApp.formatCurrency(Math.min(a.saldo, o.meta))} / ${FinanzasApp.formatCurrency(o.meta)}
-                                        </div>
-                                        <div class="progress-container">
-                                            <div class="progress-bar">
-                                                <div class="progress-fill" style="width: ${progreso}%"></div>
-                                            </div>
-                                            <span class="progress-porcentaje">${progreso.toFixed(0)}%</span>
-                                        </div>
-                                        <div class="objetivo-actions-bottom">
-                                            <button class="btn-icon-small" onclick="Alcancia.editarObjetivo('${a.id}', '${o.id}')">Editar</button>
-                                            <button class="btn-icon-small" onclick="Alcancia.eliminarObjetivo('${a.id}', '${o.id}')">Eliminar</button>
-                                        </div>
-                                        ${completado ? '<span class="objetivo-completado-badge">✓ Completado</span>' : ''}
-                                    </div>
-                                `;
-                            }).join('')}
+                                }).join('')}
+                            </div>
+                        ` : `
+                            <p class="empty-state">No hay objetivos creados</p>
+                        `}
+                    </div>
+                    
+                    <div class="alcancia-actions">
+                        <div class="actions-group">
+                            <button class="action-btn" onclick="Alcancia.mostrarFormIngreso('${a.id}')">
+                                <span class="action-text">+ Ingresar</span>
+                            </button>
+                            <button class="action-btn" onclick="Alcancia.mostrarFormGasto('${a.id}')">
+                                <span class="action-text">- Retirar</span>
+                            </button>
+                            <button class="action-btn" onclick="Alcancia.mostrarFormObjetivo('${a.id}')">
+                                <span class="action-text">+ Objetivo</span>
+                            </button>
                         </div>
-                    ` : `
-                        <p class="empty-state">No hay objetivos creados</p>
-                    `}
-                </div>
-                
-                <div class="alcancia-actions">
-                    <div class="actions-group">
-                        <button class="action-btn" onclick="Alcancia.mostrarFormIngreso('${a.id}')">
-                            <span class="action-text">+ Ingresar</span>
-                        </button>
-                        <button class="action-btn" onclick="Alcancia.mostrarFormGasto('${a.id}')">
-                            <span class="action-text">- Retirar</span>
-                        </button>
-                        <button class="action-btn" onclick="Alcancia.mostrarFormObjetivo('${a.id}')">
-                            <span class="action-text">+ Objetivo</span>
-                        </button>
-                    </div>
-                    <div class="actions-group">
-                        <button class="action-btn action-btn-stats" onclick="Alcancia.mostrarEstadisticas('${a.id}')">
-                            <span class="action-text">Estadísticas</span>
-                        </button>
-                        <button class="action-btn action-btn-edit" onclick="Alcancia.editarAlcancia('${a.id}')">
-                            <span class="action-text">Editar</span>
-                        </button>
-                        <button class="action-btn action-btn-delete" onclick="Alcancia.eliminarAlcancia('${a.id}')">
-                            <span class="action-text">Eliminar</span>
-                        </button>
+                        <div class="actions-group">
+                            <button class="action-btn action-btn-stats" onclick="Alcancia.mostrarEstadisticas('${a.id}')">
+                                <span class="action-text">Estadísticas</span>
+                            </button>
+                            <button class="action-btn action-btn-edit" onclick="Alcancia.editarAlcancia('${a.id}')">
+                                <span class="action-text">Editar</span>
+                            </button>
+                            <button class="action-btn action-btn-delete" onclick="Alcancia.eliminarAlcancia('${a.id}')">
+                                <span class="action-text">Eliminar</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     },
 
     init() {
@@ -160,14 +162,12 @@ const Alcancia = {
         const alcancia = FinanzasApp.data.alcancias.find(a => a.id === id);
         if (!alcancia) return;
         
-        // Si la alcancía tiene dinero, preguntar qué hacer
         if (alcancia.saldo > 0) {
             const opciones = [
                 { value: 'monedero', label: '💰 Transferir a monedero' },
                 { value: 'tarjeta', label: '💳 Transferir a tarjeta' }
             ];
             
-            // Añadir otras alcancías como opciones (si hay más de una)
             const otrasAlcancias = FinanzasApp.data.alcancias.filter(a => a.id !== id);
             otrasAlcancias.forEach(a => {
                 opciones.push({
@@ -176,9 +176,7 @@ const Alcancia = {
                 });
             });
             
-            // Opción de eliminar el dinero (con advertencia)
             opciones.push({ value: 'eliminar', label: '❌ Eliminar el dinero (se perderá)' });
-            
             opciones.push({ value: 'cancelar', label: '↩️ Cancelar' });
             
             const seleccion = await FinanzasApp.showSelect(
@@ -187,10 +185,9 @@ const Alcancia = {
                 opciones
             );
             
-            if (!seleccion || seleccion === 'cancelar') return; // Usuario canceló
+            if (!seleccion || seleccion === 'cancelar') return;
             
             if (seleccion === 'monedero') {
-                // Transferir al monedero
                 const monederos = FinanzasApp.data.monederos;
                 if (monederos.length === 0) {
                     await FinanzasApp.showMessage('Error', 'No hay monederos disponibles', 'error');
@@ -218,7 +215,6 @@ const Alcancia = {
                 }
                 
             } else if (seleccion === 'tarjeta') {
-                // Transferir a tarjeta
                 const tarjetas = FinanzasApp.data.tarjetas;
                 if (tarjetas.length === 0) {
                     await FinanzasApp.showMessage('Error', 'No hay tarjetas disponibles', 'error');
@@ -246,7 +242,6 @@ const Alcancia = {
                 }
                 
             } else if (seleccion.startsWith('alcancia:')) {
-                // Transferir a otra alcancía
                 const alcanciaDestinoId = seleccion.split(':')[1];
                 const alcanciaDestino = FinanzasApp.data.alcancias.find(a => a.id === alcanciaDestinoId);
                 if (alcanciaDestino) {
@@ -258,18 +253,15 @@ const Alcancia = {
                 }
                 
             } else if (seleccion === 'eliminar') {
-                // Doble confirmación para eliminar el dinero
                 const confirmarEliminar = await FinanzasApp.showConfirm(
                     '⚠️ ¡ATENCIÓN! ⚠️', 
                     `¿Estás ABSOLUTAMENTE SEGURO de querer ELIMINAR ${FinanzasApp.formatCurrency(alcancia.saldo)}?\n\n¡Este dinero se perderá para siempre!`
                 );
                 
                 if (!confirmarEliminar) {
-                    // Si no confirma, volvemos a preguntar qué hacer
                     return this.eliminarAlcancia(id);
                 }
                 
-                // Segunda confirmación (por seguridad)
                 const confirmarEliminar2 = await FinanzasApp.showConfirm(
                     'Última oportunidad', 
                     `¿Realmente quieres perder ${FinanzasApp.formatCurrency(alcancia.saldo)}?`
@@ -284,13 +276,11 @@ const Alcancia = {
                     'warning');
             }
         } else {
-            // Si no tiene dinero, confirmar eliminación simple
             const confirmar = await FinanzasApp.showConfirm('Eliminar alcancía', 
                 `¿Estás seguro de eliminar la alcancía "${alcancia.nombre}"?`);
             if (!confirmar) return;
         }
         
-        // Finalmente, eliminar la alcancía
         FinanzasApp.data.alcancias = FinanzasApp.data.alcancias.filter(a => a.id !== id);
         
         await FinanzasApp.showMessage('🗑️ Alcancía eliminada', `La alcancía "${alcancia.nombre}" se ha eliminado correctamente.`, 'success');
@@ -308,7 +298,6 @@ const Alcancia = {
         const cantidad = parseFloat(cantidadStr);
         if (cantidad > 0) {
             alcancia.saldo += cantidad;
-            // Acumular el total de ingresos
             alcancia.acumulado = (alcancia.acumulado || 0) + cantidad;
             
             await FinanzasApp.showMessage('Dinero ingresado', 
@@ -325,12 +314,10 @@ const Alcancia = {
         const alcancia = FinanzasApp.data.alcancias.find(a => a.id === alcanciaId);
         if (!alcancia) return;
         
-        // Preparar opciones de justificación
         const opcionesJustificacion = [
             { value: 'sin_objetivo', label: 'Sin objetivo (retiro libre)' }
         ];
         
-        // Añadir objetivos completados como opciones (solo los que están completados y no retirados)
         const objetivosCompletados = alcancia.objetivos.filter(o => o.meta <= alcancia.saldo && !o.retirado);
         objetivosCompletados.forEach(o => {
             opcionesJustificacion.push({
@@ -339,7 +326,6 @@ const Alcancia = {
             });
         });
         
-        // Añadir opción "Otros"
         opcionesJustificacion.push({ value: 'otros', label: 'Otros (especificar motivo)' });
         
         const seleccion = await FinanzasApp.showSelect('Motivo del retiro', 'Selecciona una opción:', opcionesJustificacion);
@@ -370,7 +356,6 @@ const Alcancia = {
             cantidad = objetivo.meta;
             justificacion = `Retiro del objetivo: ${objetivo.nombre}`;
             
-            // Marcar el objetivo como retirado
             objetivo.retirado = true;
         }
         
@@ -434,7 +419,6 @@ const Alcancia = {
         const objetivo = alcancia.objetivos.find(o => o.id === objetivoId);
         if (!objetivo) return;
         
-        // Si el objetivo ya está completado o retirado, no permitir editar
         if (alcancia.saldo >= objetivo.meta || objetivo.retirado) {
             await FinanzasApp.showMessage('Objetivo no editable', 
                 'No puedes editar un objetivo que ya está completado o retirado.', 
@@ -486,43 +470,58 @@ const Alcancia = {
         const alcancia = FinanzasApp.data.alcancias.find(a => a.id === alcanciaId);
         if (!alcancia) return;
         
-        // Calcular estadísticas
         const acumulado = alcancia.acumulado || alcancia.saldo;
         const retirado = acumulado - alcancia.saldo;
         const objetivosCompletados = alcancia.objetivos.filter(o => o.meta <= alcancia.saldo).length;
         const objetivosRetirados = alcancia.objetivos.filter(o => o.retirado).length;
         const objetivosActivos = alcancia.objetivos.length - objetivosCompletados - objetivosRetirados;
         
-        // Crear modal personalizado para estadísticas
+        const saldoUSD = FinanzasApp.formatUSD(alcancia.saldo);
+        const acumuladoUSD = FinanzasApp.formatUSD(acumulado);
+        const retiradoUSD = FinanzasApp.formatUSD(retirado);
+        
         const modal = document.getElementById('customModal');
         const title = document.getElementById('modalTitle');
         const input = document.getElementById('modalInput');
         const cancelBtn = document.getElementById('modalCancel');
         const confirmBtn = document.getElementById('modalConfirm');
         
-        // Ocultar input y cambiar texto de botones
         input.style.display = 'none';
         cancelBtn.textContent = 'Cerrar';
         confirmBtn.style.display = 'none';
         
         title.textContent = `${alcancia.nombre} - Estadísticas`;
         
-        // Crear contenido de estadísticas
         const statsDiv = document.createElement('div');
         statsDiv.className = 'stats-container';
         statsDiv.innerHTML = `
             <div class="stats-card">
                 <div class="stats-row">
                     <span class="stats-label">Saldo actual</span>
-                    <span class="stats-value positive">${FinanzasApp.formatCurrency(alcancia.saldo)}</span>
+                    <span class="stats-value positive">
+                        ${FinanzasApp.formatCurrency(alcancia.saldo)} 
+                        <span style="font-size:0.8rem; font-weight:400; color:var(--text-secondary);">
+                            (${saldoUSD})
+                        </span>
+                    </span>
                 </div>
                 <div class="stats-row">
                     <span class="stats-label">Total acumulado</span>
-                    <span class="stats-value">${FinanzasApp.formatCurrency(acumulado)}</span>
+                    <span class="stats-value">
+                        ${FinanzasApp.formatCurrency(acumulado)} 
+                        <span style="font-size:0.8rem; font-weight:400; color:var(--text-secondary);">
+                            (${acumuladoUSD})
+                        </span>
+                    </span>
                 </div>
                 <div class="stats-row">
                     <span class="stats-label">Total retirado</span>
-                    <span class="stats-value negative">${FinanzasApp.formatCurrency(retirado)}</span>
+                    <span class="stats-value negative">
+                        ${FinanzasApp.formatCurrency(retirado)} 
+                        <span style="font-size:0.8rem; font-weight:400; color:var(--text-secondary);">
+                            (${retiradoUSD})
+                        </span>
+                    </span>
                 </div>
                 <div class="stats-divider"></div>
                 <div class="stats-row">
@@ -544,9 +543,7 @@ const Alcancia = {
             </div>
         `;
         
-        // Insertar antes de los botones
         modal.querySelector('.modal-content').insertBefore(statsDiv, modal.querySelector('.modal-buttons'));
-        
         modal.style.display = 'flex';
         
         const cleanup = () => {
