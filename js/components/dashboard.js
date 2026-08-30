@@ -15,26 +15,26 @@ const Dashboard = {
             return `
                 <div class="dashboard">
                     <div class="period-selector">
-                        <button class="period-btn ${this.currentPeriod === 'dia' ? 'active' : ''}" data-period="dia">Día</button>
-                        <button class="period-btn ${this.currentPeriod === 'mes' ? 'active' : ''}" data-period="mes">Mes</button>
-                        <button class="period-btn ${this.currentPeriod === 'año' ? 'active' : ''}" data-period="año">Año</button>
+                        <button class="period-btn ${this.currentPeriod === 'dia' ? 'active' : ''}" data-period="dia"><i class="fas fa-calendar-day"></i> Día</button>
+                        <button class="period-btn ${this.currentPeriod === 'mes' ? 'active' : ''}" data-period="mes"><i class="fas fa-calendar-alt"></i> Mes</button>
+                        <button class="period-btn ${this.currentPeriod === 'año' ? 'active' : ''}" data-period="año"><i class="fas fa-calendar"></i> Año</button>
                     </div>
 
                     <div class="resumen-cards">
                         <div class="resumen-item">
-                            <div class="resumen-label">Ingresos</div>
+                            <div class="resumen-label"><i class="fas fa-arrow-down" style="color:var(--success-color);"></i> Ingresos</div>
                             <div class="resumen-value ingresos" id="totalIngresos">0.00 $</div>
                         </div>
                         <div class="resumen-item">
-                            <div class="resumen-label">Gastos</div>
+                            <div class="resumen-label"><i class="fas fa-arrow-up" style="color:var(--error-color);"></i> Gastos</div>
                             <div class="resumen-value gastos" id="totalGastos">0.00 $</div>
                         </div>
                         <div class="resumen-item">
-                            <div class="resumen-label">Balance</div>
+                            <div class="resumen-label"><i class="fas fa-balance-scale"></i> Balance</div>
                             <div class="resumen-value balance" id="totalBalance">0.00 $</div>
                         </div>
                         <div class="resumen-item" style="background-color: var(--accent-color); border-color: var(--accent-color);">
-                            <div class="resumen-label" style="color: white; opacity: 0.9;">Total en USD</div>
+                            <div class="resumen-label" style="color: white; opacity: 0.9;"><i class="fas fa-dollar-sign"></i> Total en USD</div>
                             <div class="resumen-value" id="totalUSD" style="color: white; font-size: 1.4rem;">
                                 ${FinanzasApp.formatUSD(FinanzasApp.calcularTotalGeneral())}
                             </div>
@@ -42,21 +42,22 @@ const Dashboard = {
                     </div>
 
                     <div class="card">
-                        <h3 class="section-title">Resumen de deudas</h3>
+                        <h3 class="section-title"><i class="fas fa-hand-holding-usd"></i> Resumen de deudas</h3>
                         <div id="resumenDeudas">${this.renderResumenDeudas()}</div>
                     </div>
 
                     <div class="card">
-                        <h3 class="section-title">Resumen de préstamos</h3>
+                        <h3 class="section-title"><i class="fas fa-handshake"></i> Resumen de préstamos</h3>
                         <div id="resumenPrestamos">${this.renderResumenPrestamos()}</div>
                     </div>
 
                     <div class="card">
-                        <h3 class="section-title">Distribución por método</h3>
+                        <h3 class="section-title"><i class="fas fa-credit-card"></i> Distribución por método</h3>
                         <div id="resumenMetodos">${this.renderResumenMetodos()}</div>
                     </div>
 
                     <div class="card">
+                        <h3 class="section-title"><i class="fas fa-chart-line"></i> Evolución</h3>
                         <div class="chart-container">
                             <canvas id="dashboardChart"></canvas>
                         </div>
@@ -65,9 +66,9 @@ const Dashboard = {
                     ${this.currentPeriod === 'mes' ? `
                         <div class="card calendar-card">
                             <div class="calendar-header">
-                                <button class="calendar-nav" id="prevMonth">←</button>
-                                <h3>${this.getMonthName(month)} ${year}</h3>
-                                <button class="calendar-nav" id="nextMonth">→</button>
+                                <button class="calendar-nav" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                                <h3><i class="fas fa-calendar-alt"></i> ${this.getMonthName(month)} ${year}</h3>
+                                <button class="calendar-nav" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
                             </div>
                             
                             <div class="calendar-weekdays">
@@ -108,7 +109,7 @@ const Dashboard = {
 
                     <div class="card" id="movimientosDia" style="${this.currentPeriod === 'dia' ? 'display: block;' : 'display: none;'}">
                         <h3 class="section-title" id="movimientosDiaTitulo">
-                            ${this.currentPeriod === 'dia' ? 'Hoy' : 'Selecciona un día'}
+                            <i class="fas fa-clock"></i> ${this.currentPeriod === 'dia' ? 'Hoy' : 'Selecciona un día'}
                         </h3>
                         <ul class="movimientos-list" id="listaMovimientosDia">
                             ${this.currentPeriod === 'dia' ? this.renderMovimientosDia(new Date().toISOString().split('T')[0]) : ''}
@@ -116,19 +117,19 @@ const Dashboard = {
                     </div>
 
                     <div class="card" id="ultimosMovimientosCard" style="${this.currentPeriod !== 'dia' ? 'display: block;' : 'display: none;'}">
-                        <h3 class="section-title">Últimos movimientos</h3>
+                        <h3 class="section-title"><i class="fas fa-history"></i> Últimos movimientos</h3>
                         <ul class="movimientos-list" id="ultimosMovimientos">
                             ${this.renderUltimosMovimientos()}
                         </ul>
                     </div>
 
                     <div class="card">
-                        <h3 class="section-title">Progreso de alcancías</h3>
+                        <h3 class="section-title"><i class="fas fa-piggy-bank"></i> Progreso de alcancías</h3>
                         <div id="progresoAlcancia">${this.renderProgresoAlcancia()}</div>
                     </div>
 
                     <div class="card">
-                        <h3 class="section-title">Alertas</h3>
+                        <h3 class="section-title"><i class="fas fa-bell"></i> Alertas</h3>
                         <div class="alertas" id="alertas">${this.renderAlertas()}</div>
                     </div>
                 </div>
@@ -153,15 +154,15 @@ const Dashboard = {
             return `
                 <div class="stats-card">
                     <div class="stats-row">
-                        <span class="stats-label">Total deudas</span>
+                        <span class="stats-label"><i class="fas fa-coins"></i> Total deudas</span>
                         <span class="stats-value">${FinanzasApp.formatCurrency(totalDeudas)}</span>
                     </div>
                     <div class="stats-row">
-                        <span class="stats-label">Total pagado</span>
+                        <span class="stats-label"><i class="fas fa-check-circle" style="color:var(--success-color);"></i> Total pagado</span>
                         <span class="stats-value success">${FinanzasApp.formatCurrency(totalPagado)}</span>
                     </div>
                     <div class="stats-row">
-                        <span class="stats-label">Pendiente</span>
+                        <span class="stats-label"><i class="fas fa-exclamation-triangle" style="color:var(--warning-color);"></i> Pendiente</span>
                         <span class="stats-value warning">${FinanzasApp.formatCurrency(totalPendiente)}</span>
                     </div>
                 </div>
@@ -187,19 +188,19 @@ const Dashboard = {
             return `
                 <div class="stats-card">
                     <div class="stats-row">
-                        <span class="stats-label">Préstamos activos</span>
+                        <span class="stats-label"><i class="fas fa-hand-holding-usd"></i> Préstamos activos</span>
                         <span class="stats-value">${activos.length}</span>
                     </div>
                     <div class="stats-row">
-                        <span class="stats-label">Total prestado</span>
+                        <span class="stats-label"><i class="fas fa-coins"></i> Total prestado</span>
                         <span class="stats-value">${FinanzasApp.formatCurrency(totalPrestado)}</span>
                     </div>
                     <div class="stats-row">
-                        <span class="stats-label">Recuperado</span>
+                        <span class="stats-label"><i class="fas fa-check-circle" style="color:var(--success-color);"></i> Recuperado</span>
                         <span class="stats-value success">${FinanzasApp.formatCurrency(totalRecuperado)}</span>
                     </div>
                     <div class="stats-row">
-                        <span class="stats-label">Pendiente</span>
+                        <span class="stats-label"><i class="fas fa-exclamation-triangle" style="color:var(--warning-color);"></i> Pendiente</span>
                         <span class="stats-value warning">${FinanzasApp.formatCurrency(totalPendiente)}</span>
                     </div>
                 </div>
@@ -225,7 +226,7 @@ const Dashboard = {
             return Object.entries(metodos).map(([metodo, total]) => `
                 <div class="metodo-item">
                     <div class="metodo-header">
-                        <span class="metodo-nombre">${metodo}</span>
+                        <span class="metodo-nombre"><i class="fas fa-credit-card"></i> ${metodo}</span>
                         <span class="metodo-total positive">${FinanzasApp.formatCurrency(total)}</span>
                     </div>
                 </div>
@@ -330,7 +331,7 @@ const Dashboard = {
                 month: 'long', 
                 day: 'numeric' 
             });
-            document.getElementById('movimientosDiaTitulo').textContent = titulo;
+            document.getElementById('movimientosDiaTitulo').innerHTML = `<i class="fas fa-calendar-day"></i> ${titulo}`;
             
             document.getElementById('listaMovimientosDia').innerHTML = this.renderMovimientosDia(dateStr);
             this.updateResumen();
@@ -360,11 +361,11 @@ const Dashboard = {
             return movimientos.map(m => `
                 <li class="movimiento-item">
                     <div class="movimiento-icon ${m.tipo}">
-                        ${m.tipo === 'ingreso' ? 'I' : 'G'}
+                        <i class="fas ${m.tipo === 'ingreso' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
                     </div>
                     <div class="movimiento-info">
                         <div class="movimiento-concepto">${m.descripcion || (m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')}</div>
-                        <div class="movimiento-fecha">${FinanzasApp.formatDate(m.fecha)} · ${m.metodo || 'Efectivo'}</div>
+                        <div class="movimiento-fecha"><i class="far fa-calendar-alt"></i> ${FinanzasApp.formatDate(m.fecha)} · <i class="fas fa-credit-card"></i> ${m.metodo || 'Efectivo'}</div>
                     </div>
                     <div class="movimiento-cantidad ${m.tipo}">
                         ${m.tipo === 'ingreso' ? '+' : '-'} ${FinanzasApp.formatCurrency(m.cantidad || 0)}
@@ -641,11 +642,11 @@ const Dashboard = {
             return todos.map(m => `
                 <li class="movimiento-item">
                     <div class="movimiento-icon ${m.tipo}">
-                        ${m.tipo === 'ingreso' ? 'I' : 'G'}
+                        <i class="fas ${m.tipo === 'ingreso' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
                     </div>
                     <div class="movimiento-info">
                         <div class="movimiento-concepto">${m.descripcion || (m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')}</div>
-                        <div class="movimiento-fecha">${FinanzasApp.formatDate(m.fecha)} · ${m.metodo || 'Efectivo'}</div>
+                        <div class="movimiento-fecha"><i class="far fa-calendar-alt"></i> ${FinanzasApp.formatDate(m.fecha)} · <i class="fas fa-credit-card"></i> ${m.metodo || 'Efectivo'}</div>
                     </div>
                     <div class="movimiento-cantidad ${m.tipo}">
                         ${m.tipo === 'ingreso' ? '+' : '-'} ${FinanzasApp.formatCurrency(m.cantidad || 0)}
@@ -673,7 +674,7 @@ const Dashboard = {
                 return `
                     <div class="alcancia-progreso-item">
                         <div class="alcancia-header">
-                            <span class="alcancia-nombre">${a.nombre || 'Alcancía'}</span>
+                            <span class="alcancia-nombre"><i class="fas fa-piggy-bank"></i> ${a.nombre || 'Alcancía'}</span>
                             <span class="alcancia-meta">${FinanzasApp.formatCurrency(a.saldo || 0)}</span>
                         </div>
                         <div class="progress-bar">
@@ -747,7 +748,10 @@ const Dashboard = {
             }
 
             return alertas.map(a => `
-                <div class="alerta ${a.tipo}">${a.mensaje}</div>
+                <div class="alerta ${a.tipo}">
+                    <i class="fas ${a.tipo === 'success' ? 'fa-check-circle' : a.tipo === 'warning' ? 'fa-exclamation-circle' : a.tipo === 'error' ? 'fa-times-circle' : 'fa-info-circle'}"></i>
+                    ${a.mensaje}
+                </div>
             `).join('');
         } catch (error) {
             console.error('Error en renderAlertas:', error);
