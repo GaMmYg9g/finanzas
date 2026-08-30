@@ -125,7 +125,6 @@ const Prestamos = {
         const form = document.getElementById('formPrestamo');
         if (form) form.addEventListener('submit', (e) => { e.preventDefault(); this.crearPrestamo(); });
         
-        // Event listeners para los radio buttons
         document.querySelectorAll('input[name="origenPrestamo"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 this.actualizarOrigen(e.target.value);
@@ -175,7 +174,6 @@ const Prestamos = {
         
         let origenInfo = { tipo: origenSeleccionado, id: null, nombre: '' };
         
-        // Restar el dinero del origen seleccionado
         if (origenSeleccionado === 'monedero') {
             const id = document.getElementById('prestamoMonedero')?.value;
             if (!id) return FinanzasApp.showMessage('Error', 'Selecciona un monedero', 'error');
@@ -210,11 +208,9 @@ const Prestamos = {
             origenInfo = { tipo: 'alcancia', id, nombre: alcancia.nombre };
             
         } else if (origenSeleccionado === 'ingreso') {
-            // No se resta de ningún lado, es dinero nuevo
             origenInfo = { tipo: 'ingreso', id: null, nombre: 'Dinero nuevo' };
         }
         
-        // Crear el préstamo
         FinanzasApp.data.prestamos = FinanzasApp.data.prestamos || [];
         FinanzasApp.data.prestamos.push({
             id: Date.now().toString(),
@@ -284,7 +280,6 @@ const Prestamos = {
                 return FinanzasApp.showMessage('Error', 'Selecciona un destino', 'error');
             }
             
-            // Procesar el pago
             p.montoRecuperado = (p.montoRecuperado || 0) + cant;
             p.pagos.push({
                 fecha: new Date().toISOString().split('T')[0],
@@ -292,7 +287,6 @@ const Prestamos = {
                 destino: dest
             });
             
-            // Sumar al destino seleccionado
             if (dest !== 'ingreso') {
                 const [tipo, idDest] = dest.split('|');
                 if (tipo === 'monedero') {
