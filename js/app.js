@@ -12,7 +12,8 @@ const FinanzasApp = {
         config: {
             tiposIngreso: ['Salario', 'Transferencias'],
             tiposGasto: ['Renta'],
-            metodosPago: ['Efectivo', 'Tarjeta']
+            metodosPago: ['Efectivo', 'Tarjeta'],
+            tasaUSD: 0
         }
     },
 
@@ -77,7 +78,6 @@ const FinanzasApp = {
             });
         }
 
-        // Botón de reinicio
         const resetBtn = document.getElementById('resetData');
         if (resetBtn) {
             resetBtn.addEventListener('click', async () => {
@@ -110,7 +110,8 @@ const FinanzasApp = {
             ingresos: 'Ingresos',
             gastos: 'Gastos',
             deudas: 'Deudas',
-            prestamos: 'Préstamos'
+            prestamos: 'Préstamos',
+            divisas: 'Divisas'
         };
         
         const headerTitle = document.getElementById('headerTitle');
@@ -175,6 +176,13 @@ const FinanzasApp = {
                         if (Prestamos.init) Prestamos.init();
                     }
                     break;
+
+                case 'divisas':
+                    if (typeof Divisas !== 'undefined') {
+                        container.innerHTML = Divisas.render();
+                        if (Divisas.init) Divisas.init();
+                    }
+                    break;
             }
         } catch (error) {
             console.error('Error en renderView:', error);
@@ -182,15 +190,36 @@ const FinanzasApp = {
         }
     },
 
+    calcularTotalGeneral() {
+        const totalMonederos = this.data.monederos.reduce((s, m) => s + (m.saldo || 0), 0);
+        const totalTarjetas = this.data.tarjetas.reduce((s, t) => s + (t.saldo || 0), 0);
+        const totalAlcancia = this.data.alcancias.reduce((s, a) => s + (a.saldo || 0), 0);
+        return totalMonederos + totalTarjetas + totalAlcancia;
+    },
+
+    convertirCUPtoUSD(cantidadCUP) {
+        const tasa = this.data.config.tasaUSD || 0;
+        if (tasa <= 0) return null;
+        return cantidadCUP / tasa;
+    },
+
+    formatUSD(cantidadCUP) {
+        const usd = this.convertirCUPtoUSD(cantidadCUP);
+        if (usd === null) return '— USD';
+        return `${usd.toFixed(2)} USD`;
+    },
+
     updateTotalGeneral() {
-        const totalMonederos = (this.data.monederos || []).reduce((sum, m) => sum + (m.saldo || 0), 0);
-        const totalTarjetas = (this.data.tarjetas || []).reduce((sum, t) => sum + (t.saldo || 0), 0);
-        const totalAlcancia = (this.data.alcancias || []).reduce((sum, a) => sum + (a.saldo || 0), 0);
-        const total = totalMonederos + totalTarjetas + totalAlcancia;
+        const total = this.calcularTotalGeneral();
         
         const totalGeneral = document.getElementById('totalGeneral');
         if (totalGeneral) {
             totalGeneral.textContent = `${total.toFixed(2)} $`;
+        }
+        
+        const totalGeneralUSD = document.getElementById('totalGeneralUSD');
+        if (totalGeneralUSD) {
+            totalGeneralUSD.textContent = this.formatUSD(total);
         }
     },
 
@@ -226,6 +255,7 @@ const FinanzasApp = {
                 if (!this.data.config.metodosPago) this.data.config.metodosPago = ['Efectivo', 'Tarjeta'];
                 if (!this.data.config.tiposIngreso) this.data.config.tiposIngreso = ['Salario', 'Transferencias'];
                 if (!this.data.config.tiposGasto) this.data.config.tiposGasto = ['Renta'];
+                if (this.data.config.tasaUSD === undefined) this.data.config.tasaUSD = 0;
             } catch (e) {
                 console.warn('Error al cargar datos, usando datos por defecto');
                 this.data = this.getDefaultData();
@@ -251,7 +281,8 @@ const FinanzasApp = {
             config: {
                 tiposIngreso: ['Salario', 'Transferencias'],
                 tiposGasto: ['Renta'],
-                metodosPago: ['Efectivo', 'Tarjeta']
+                metodosPago: ['Efectivo', 'Tarjeta'],
+                tasaUSD: 0
             }
         };
     },
