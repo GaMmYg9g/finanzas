@@ -6,7 +6,6 @@
 }
 
 :root {
-    /* Modo claro (por defecto) */
     --bg-primary: #ffffff;
     --bg-secondary: #ffffff;
     --text-primary: #1a1a1a;
@@ -54,7 +53,6 @@ body {
     width: 100%;
 }
 
-/* Header */
 .header {
     background-color: var(--header-bg);
     padding: 1rem;
@@ -87,12 +85,15 @@ body {
     color: var(--text-primary);
 }
 
+.header-title i {
+    margin-right: 0.5rem;
+}
+
 .total-general {
     font-weight: 600;
     color: var(--accent-color);
 }
 
-/* Menú lateral - Base para móvil */
 .side-menu {
     position: fixed;
     top: 0;
@@ -112,7 +113,6 @@ body {
     left: 0;
 }
 
-/* Overlay para móvil */
 .menu-overlay {
     position: fixed;
     top: 0;
@@ -128,7 +128,6 @@ body {
     display: block;
 }
 
-/* Header del menú */
 .menu-header {
     padding: 1.5rem 1rem;
     display: flex;
@@ -143,6 +142,10 @@ body {
     color: var(--text-primary);
 }
 
+.menu-header h2 i {
+    margin-right: 0.5rem;
+}
+
 .close-menu {
     background: none;
     border: none;
@@ -152,7 +155,6 @@ body {
     display: block;
 }
 
-/* Navegación del menú */
 .menu-nav {
     flex: 1;
     padding: 1rem 0;
@@ -170,6 +172,12 @@ body {
     border-left: 3px solid transparent;
 }
 
+.menu-item i {
+    width: 1.5rem;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+
 .menu-item:hover {
     background-color: var(--hover-bg);
 }
@@ -180,7 +188,6 @@ body {
     font-weight: 600;
 }
 
-/* Footer del menú */
 .menu-footer {
     padding: 1rem;
     border-top: 1px solid var(--border-color);
@@ -198,6 +205,10 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     text-align: center;
+}
+
+.theme-toggle i, .reset-button i {
+    margin-right: 0.3rem;
 }
 
 .theme-toggle {
@@ -228,7 +239,6 @@ body {
     background-color: #e04e4e;
 }
 
-/* Contenido principal */
 .main-content {
     padding: 1rem;
     max-width: 800px;
@@ -236,7 +246,6 @@ body {
     width: 100%;
 }
 
-/* Tarjetas y elementos comunes */
 .card {
     background-color: var(--card-bg);
     border-radius: 12px;
@@ -256,6 +265,10 @@ body {
     text-transform: uppercase;
 }
 
+.section-title i {
+    margin-right: 0.5rem;
+}
+
 .section-subtitle {
     font-size: 0.9rem;
     font-weight: 600;
@@ -265,7 +278,10 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Dashboard */
+.section-subtitle i {
+    margin-right: 0.5rem;
+}
+
 .period-selector {
     display: flex;
     gap: 0.5rem;
@@ -287,6 +303,10 @@ body {
     min-width: 60px;
 }
 
+.period-btn i {
+    margin-right: 0.3rem;
+}
+
 .period-btn.active {
     background-color: var(--accent-color);
     color: white;
@@ -296,7 +316,7 @@ body {
 
 .resumen-cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.8rem;
     margin-bottom: 1.5rem;
 }
@@ -315,6 +335,11 @@ body {
     font-weight: 500;
 }
 
+.resumen-label i {
+    margin-right: 0.3rem;
+    font-size: 0.9rem;
+}
+
 .resumen-value {
     font-size: 1.2rem;
     font-weight: 700;
@@ -326,7 +351,6 @@ body {
 .resumen-value.gastos { color: var(--error-color); }
 .resumen-value.balance { color: var(--text-primary); }
 
-/* Lista de movimientos */
 .movimientos-list {
     list-style: none;
 }
@@ -358,6 +382,10 @@ body {
     flex-shrink: 0;
 }
 
+.movimiento-icon i {
+    font-size: 1.2rem;
+}
+
 .movimiento-icon.ingreso { 
     background-color: rgba(37, 211, 102, 0.1);
     color: var(--success-color);
@@ -383,6 +411,10 @@ body {
 .movimiento-fecha {
     font-size: 0.8rem;
     color: var(--text-secondary);
+}
+
+.movimiento-fecha i, .movimiento-metodo i {
+    margin-right: 0.2rem;
 }
 
 .movimiento-cantidad {
@@ -414,13 +446,16 @@ body {
     white-space: nowrap;
 }
 
+.btn-icon i {
+    margin-right: 0.2rem;
+}
+
 .btn-icon:hover {
     background-color: var(--hover-bg);
     color: var(--text-primary);
     border-color: var(--accent-color);
 }
 
-/* Progreso alcancías */
 .alcancia-progreso-item {
     margin-bottom: 1rem;
 }
@@ -435,6 +470,10 @@ body {
 .alcancia-nombre {
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.alcancia-nombre i {
+    margin-right: 0.3rem;
 }
 
 .alcancia-meta {
@@ -470,6 +509,10 @@ body {
     border: 1px solid var(--border-color);
 }
 
+.alerta i {
+    margin-right: 0.5rem;
+}
+
 .alerta.warning {
     background-color: rgba(255, 193, 7, 0.1);
     border-color: var(--warning-color);
@@ -494,7 +537,6 @@ body {
     color: var(--info-color);
 }
 
-/* Formularios y grupos de destino */
 .form-group {
     margin-bottom: 1.2rem;
     width: 100%;
@@ -508,6 +550,10 @@ body {
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.3px;
+}
+
+.form-label i {
+    margin-right: 0.3rem;
 }
 
 .form-input {
@@ -544,6 +590,10 @@ body {
     letter-spacing: 0.5px;
 }
 
+.btn-primary i {
+    margin-right: 0.3rem;
+}
+
 .btn-primary:hover {
     opacity: 0.9;
     transform: translateY(-1px);
@@ -554,7 +604,6 @@ body {
     transform: translateY(0);
 }
 
-/* Estilos mejorados para selects */
 select, .select-limpio, .destino-select {
     appearance: none;
     -webkit-appearance: none;
@@ -587,7 +636,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
 }
 
-/* Estilos para grupo de destinos/orígenes tipo radio - VERSIÓN DEFINITIVA */
 .destino-group {
     margin-bottom: 1.5rem;
     padding: 1rem;
@@ -605,6 +653,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     margin-bottom: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.destino-titulo i {
+    margin-right: 0.3rem;
 }
 
 .destino-opcion {
@@ -652,6 +704,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     text-overflow: ellipsis;
 }
 
+.destino-label i {
+    margin-right: 0.3rem;
+}
+
 .destino-select {
     width: 100%;
     margin-top: 0.3rem;
@@ -689,7 +745,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     word-wrap: break-word;
 }
 
-/* Versión para tablets y escritorio */
 @media (min-width: 768px) {
     .destino-opcion {
         flex-direction: row;
@@ -709,7 +764,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     }
 }
 
-/* Versión para móvil */
 @media (max-width: 767px) {
     .destino-opcion {
         padding: 0.8rem;
@@ -720,7 +774,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     }
 }
 
-/* Para pantallas muy pequeñas */
 @media (max-width: 480px) {
     .destino-radio-wrapper {
         flex-wrap: wrap;
@@ -732,7 +785,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     }
 }
 
-/* Estilos para selects limpios (sin saldos) */
 .select-limpio {
     background-color: var(--bg-primary);
     border: 1px solid var(--border-color);
@@ -757,7 +809,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     padding: 0.5rem;
 }
 
-/* Alcancía - Acciones en dos filas de 3 */
 .alcancia-actions {
     display: flex;
     flex-direction: column;
@@ -793,6 +844,11 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     text-align: center;
 }
 
+.action-btn i {
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+}
+
 .action-btn:hover {
     background-color: var(--hover-bg);
     transform: translateY(-1px);
@@ -823,7 +879,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--error-color);
 }
 
-/* Responsive para pantallas muy pequeñas */
 @media (max-width: 360px) {
     .action-text {
         font-size: 0.7rem;
@@ -841,10 +896,18 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--text-primary);
 }
 
+.alcancia-nombre i {
+    margin-right: 0.3rem;
+}
+
 .alcancia-subtipo {
     font-size: 0.8rem;
     color: var(--text-secondary);
     font-weight: 500;
+}
+
+.alcancia-subtipo i {
+    margin-right: 0.2rem;
 }
 
 .alcancia-cantidad {
@@ -854,7 +917,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     line-height: 1.2;
 }
 
-/* Objetivos en alcancía */
 .alcancia-objetivos-section {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
@@ -908,6 +970,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
 .objetivo-nombre {
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.objetivo-nombre i {
+    margin-right: 0.3rem;
 }
 
 .objetivo-meta {
@@ -967,6 +1033,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     text-align: center;
 }
 
+.objetivo-actions-bottom .btn-icon-small i {
+    margin-right: 0.2rem;
+}
+
 .objetivo-actions-bottom .btn-icon-small:hover {
     background-color: var(--hover-bg);
     color: var(--text-primary);
@@ -984,7 +1054,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     border-radius: 12px;
 }
 
-/* Estilos para objetivos retirados */
+.objetivo-completado-badge i {
+    margin-right: 0.2rem;
+}
+
 .objetivo-retirado-item {
     background-color: var(--hover-bg);
     border-left: 4px solid var(--text-secondary);
@@ -1007,6 +1080,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     font-weight: 600;
     color: var(--text-primary);
     font-size: 1rem;
+}
+
+.objetivo-retirado-nombre i {
+    margin-right: 0.3rem;
 }
 
 .objetivo-retirado-badge {
@@ -1036,7 +1113,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: #111b21;
 }
 
-/* Calendario */
 .calendar-card {
     padding: 1rem;
     overflow-x: auto;
@@ -1055,6 +1131,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--text-primary);
 }
 
+.calendar-header h3 i {
+    margin-right: 0.3rem;
+}
+
 .calendar-nav {
     background: none;
     border: 1px solid var(--border-color);
@@ -1069,6 +1149,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+}
+
+.calendar-nav i {
+    font-size: 1rem;
 }
 
 .calendar-nav:hover {
@@ -1187,7 +1271,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     background-color: var(--error-color);
 }
 
-/* Gráfico */
 .chart-container {
     position: relative;
     height: 200px;
@@ -1195,7 +1278,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     margin: 0.5rem 0;
 }
 
-/* Modal personalizado */
 .modal {
     position: fixed;
     top: 0;
@@ -1226,6 +1308,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--text-primary);
     font-size: 1.1rem;
     font-weight: 600;
+}
+
+.modal-title i {
+    margin-right: 0.5rem;
 }
 
 .modal-input {
@@ -1259,6 +1345,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+}
+
+.modal-btn i {
+    margin-right: 0.3rem;
 }
 
 .modal-btn.confirm {
@@ -1303,7 +1393,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--text-primary);
 }
 
-/* Estilos para la tarjeta de estadísticas */
 .stats-container {
     padding: 1rem 0;
 }
@@ -1327,6 +1416,12 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     font-size: 0.9rem;
     color: var(--text-secondary);
     font-weight: 500;
+}
+
+.stats-label i {
+    margin-right: 0.3rem;
+    width: 1.2rem;
+    text-align: center;
 }
 
 .stats-value {
@@ -1357,7 +1452,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     margin: 0.5rem 0;
 }
 
-/* Toast messages */
 .toast-message {
     position: fixed;
     bottom: 20px;
@@ -1418,7 +1512,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     border-left: 4px solid var(--info-color);
 }
 
-/* Detalle del día */
 .detalle-header {
     display: flex;
     justify-content: space-between;
@@ -1432,7 +1525,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--text-primary);
 }
 
-/* Categorías en gastos */
+.detalle-header h3 i {
+    margin-right: 0.3rem;
+}
+
 .categoria-item {
     margin-bottom: 1rem;
 }
@@ -1449,12 +1545,15 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--text-primary);
 }
 
+.categoria-nombre i {
+    margin-right: 0.3rem;
+}
+
 .categoria-total {
     color: var(--text-secondary);
     font-weight: 500;
 }
 
-/* Monedero y Tarjetas */
 .monedero-header {
     display: flex;
     justify-content: space-between;
@@ -1472,6 +1571,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     align-items: center;
     gap: 0.5rem;
     flex-wrap: wrap;
+}
+
+.monedero-header h4 i {
+    margin-right: 0.3rem;
 }
 
 .monedero-saldo {
@@ -1493,7 +1596,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     font-weight: 500;
 }
 
-/* Estilos para métodos de pago */
 .metodo-item {
     padding: 0.5rem 0;
     border-bottom: 1px solid var(--border-color);
@@ -1514,6 +1616,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--text-primary);
 }
 
+.metodo-nombre i {
+    margin-right: 0.3rem;
+}
+
 .metodo-total {
     color: var(--text-primary);
 }
@@ -1526,7 +1632,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--error-color);
 }
 
-/* Estilos para deudas */
 .deuda-item {
     margin-bottom: 1rem;
     border-left: 4px solid var(--info-color);
@@ -1550,6 +1655,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.deuda-header h4 i {
+    margin-right: 0.3rem;
 }
 
 .deuda-estado {
@@ -1584,16 +1693,28 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     gap: 0.5rem;
 }
 
+.deuda-montos i {
+    margin-right: 0.2rem;
+}
+
 .deuda-pendiente {
     font-weight: 600;
     color: var(--error-color);
     margin-bottom: 0.5rem;
 }
 
+.deuda-pendiente i {
+    margin-right: 0.2rem;
+}
+
 .deuda-fechaLimite {
     font-size: 0.8rem;
     color: var(--text-secondary);
     margin-top: 0.3rem;
+}
+
+.deuda-fechaLimite i {
+    margin-right: 0.2rem;
 }
 
 .deuda-actions {
@@ -1608,7 +1729,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     min-width: 70px;
 }
 
-/* Estilos para el modal de pago de deuda */
+.deuda-actions .btn i {
+    margin-right: 0.3rem;
+}
+
 #pagoDeudaContenido {
     margin-bottom: 1rem;
 }
@@ -1618,11 +1742,14 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     font-weight: 500;
 }
 
+#pagoDeudaContenido p i {
+    margin-right: 0.3rem;
+}
+
 #pagoDeudaContenido .form-group {
     margin-bottom: 1rem;
 }
 
-/* Botón de reinicio */
 .reset-button {
     width: 100%;
     padding: 1rem;
@@ -1650,7 +1777,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     background-color: #e04e4e;
 }
 
-/* Mejora para botones de edición */
 .monedero-actions .btn-secondary {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -1665,6 +1791,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     text-align: center;
 }
 
+.monedero-actions .btn-secondary i {
+    margin-right: 0.3rem;
+}
+
 .monedero-actions .btn-secondary:hover {
     background-color: var(--hover-bg);
     border-color: var(--accent-color);
@@ -1672,13 +1802,11 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     color: var(--accent-color);
 }
 
-/* Hover específico para botón de editar */
 .monedero-actions .btn-secondary[onclick*="editar"]:hover {
     border-color: var(--info-color);
     color: var(--info-color);
 }
 
-/* Estilos para préstamos */
 .prestamo-item {
     margin-bottom: 1rem;
     border-left: 4px solid #9c27b0;
@@ -1702,6 +1830,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.prestamo-header h4 i {
+    margin-right: 0.3rem;
 }
 
 .prestamo-estado {
@@ -1731,10 +1863,18 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     gap: 0.5rem;
 }
 
+.prestamo-montos i {
+    margin-right: 0.2rem;
+}
+
 .prestamo-pendiente {
     font-weight: 600;
     color: #9c27b0;
     margin-bottom: 0.5rem;
+}
+
+.prestamo-pendiente i {
+    margin-right: 0.2rem;
 }
 
 .prestamo-origen {
@@ -1743,10 +1883,18 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     margin-top: 0.3rem;
 }
 
+.prestamo-origen i {
+    margin-right: 0.2rem;
+}
+
 .prestamo-fechaLimite {
     font-size: 0.8rem;
     color: var(--text-secondary);
     margin-top: 0.3rem;
+}
+
+.prestamo-fechaLimite i {
+    margin-right: 0.2rem;
 }
 
 .prestamo-actions {
@@ -1761,7 +1909,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     min-width: 70px;
 }
 
-/* Estilos para el botón Transferir en monedero/tarjetas */
+.prestamo-actions .btn i {
+    margin-right: 0.3rem;
+}
+
 .monedero-actions .btn-secondary {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -1776,6 +1927,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     text-align: center;
 }
 
+.monedero-actions .btn-secondary i {
+    margin-right: 0.3rem;
+}
+
 .monedero-actions .btn-secondary:hover {
     background-color: var(--hover-bg);
     border-color: var(--accent-color);
@@ -1787,7 +1942,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     transform: translateY(0);
 }
 
-/* Responsive para móvil */
 @media (max-width: 480px) {
     .monedero-actions .btn-secondary {
         padding: 0.5rem 0.8rem;
@@ -1833,7 +1987,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     }
 }
 
-/* Si quieres que todos los botones secundarios tengan el mismo estilo */
 .btn-secondary {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -1846,13 +1999,16 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     transition: all 0.2s;
 }
 
+.btn-secondary i {
+    margin-right: 0.3rem;
+}
+
 .btn-secondary:hover {
     background-color: var(--hover-bg);
     border-color: var(--accent-color);
     color: var(--accent-color);
 }
 
-/* Selector de fecha personalizado */
 .fecha-selector {
     width: 100%;
     margin-bottom: 0.5rem;
@@ -1878,7 +2034,7 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     background-color: var(--hover-bg);
 }
 
-.fecha-icono {
+.fecha-icono i {
     font-size: 1.2rem;
 }
 
@@ -1893,7 +2049,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     font-weight: 500;
 }
 
-/* Calendario desplegable personalizado */
 .calendario-popup {
     position: fixed;
     top: 50%;
@@ -2010,6 +2165,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     transition: all 0.2s;
 }
 
+.calendario-popup-btn i {
+    margin-right: 0.3rem;
+}
+
 .calendario-popup-btn.cancelar {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -2029,7 +2188,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     opacity: 0.9;
 }
 
-/* ===== VERSIÓN PARA ESCRITORIO (pantallas grandes) ===== */
 @media (min-width: 1024px) {
     .app-container {
         display: flex;
@@ -2073,7 +2231,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     }
 }
 
-/* ===== VERSIÓN PARA TABLET (pantallas medianas) ===== */
 @media (min-width: 768px) and (max-width: 1023px) {
     .app-container {
         margin-left: 0;
@@ -2097,7 +2254,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     }
 }
 
-/* ===== VERSIÓN PARA MÓVIL (pantallas pequeñas) ===== */
 @media (max-width: 767px) {
     .side-menu {
         width: 280px;
@@ -2118,6 +2274,7 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     
     .resumen-cards {
         gap: 0.5rem;
+        grid-template-columns: repeat(2, 1fr);
     }
     
     .resumen-item {
@@ -2129,7 +2286,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     }
 }
 
-/* Ajustes para pantallas muy pequeñas */
 @media (max-width: 480px) {
     .movimiento-item {
         flex-direction: column;
@@ -2169,7 +2325,6 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     }
 }
 
-/* Versión de la app en el menú */
 .menu-version {
     padding: 0.8rem 1rem;
     text-align: center;
@@ -2186,17 +2341,10 @@ select:focus, .select-limpio:focus, .destino-select:focus {
     letter-spacing: 0.5px;
 }
 
-.version-text::before {
-    content: "⚡";
+.version-text i {
     margin-right: 4px;
-    font-size: 0.9rem;
 }
 
-[data-theme="dark"] .version-text::before {
-    opacity: 0.8;
-}
-
-/* Responsive */
 @media (max-width: 767px) {
     .menu-version {
         padding: 0.6rem 1rem;
