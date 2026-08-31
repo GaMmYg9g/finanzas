@@ -22,15 +22,15 @@ const Dashboard = {
 
                     <div class="resumen-cards">
                         <div class="resumen-item">
-                            <div class="resumen-label"><i class="fas fa-arrow-down" style="color:var(--success-color);"></i> Ingresos</div>
+                            <div class="resumen-label"><i class="fas fa-arrow-down" style="color:var(--success-color);"></i> Ingresos (Propios)</div>
                             <div class="resumen-value ingresos" id="totalIngresos">0.00 $</div>
                         </div>
                         <div class="resumen-item">
-                            <div class="resumen-label"><i class="fas fa-arrow-up" style="color:var(--error-color);"></i> Gastos</div>
+                            <div class="resumen-label"><i class="fas fa-arrow-up" style="color:var(--error-color);"></i> Gastos (Propios)</div>
                             <div class="resumen-value gastos" id="totalGastos">0.00 $</div>
                         </div>
                         <div class="resumen-item">
-                            <div class="resumen-label"><i class="fas fa-balance-scale"></i> Balance</div>
+                            <div class="resumen-label"><i class="fas fa-balance-scale"></i> Balance (Propio)</div>
                             <div class="resumen-value balance" id="totalBalance">0.00 $</div>
                         </div>
                         <div class="resumen-item" style="background-color: var(--accent-color); border-color: var(--accent-color);">
@@ -88,8 +88,8 @@ const Dashboard = {
                                 ${Array.from({ length: daysInMonth }, (_, i) => {
                                     const day = i + 1;
                                     const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                                    const ingresos = this.getDayTotal(dateStr, 'ingreso');
-                                    const gastos = this.getDayTotal(dateStr, 'gasto');
+                                    const ingresos = this.getDayTotalPropios(dateStr, 'ingreso');
+                                    const gastos = this.getDayTotalPropios(dateStr, 'gasto');
                                     const balance = (ingresos || 0) - (gastos || 0);
                                     
                                     return `
@@ -144,6 +144,119 @@ const Dashboard = {
         } catch (error) {
             console.error('Error en Dashboard.render():', error);
             return '<div class="card"><p class="empty-state">Error al cargar el dashboard</p></div>';
+        }
+    },
+
+    // --- NUEVO: Obtener total del día SOLO para elementos propios ---
+    getDayTotalPropios(dateStr, tipo) {
+        try {
+            let total = 0;
+            
+            if (tipo === 'ingreso') {
+                (FinanzasApp.data.ingresos || []).forEach(i => {
+                    if (i.fecha !== dateStr) return;
+                    // Verificar si el destino es propio
+                    let esPropio = false;
+                    if (i.monederoId) {
+                        const m = FinanzasApp.data.monederos.find(m => m.id === i.monederoId);
+                        if (m && m.propio !== false) esPropio = true;
+                    } else if (i.tarjetaId) {
+                        const t = FinanzasApp.data.tarjetas.find(t => t.id === i.tarjetaId);
+                        if (t && t.propio !== false) esPropio = true;
+                    } else if (i.alcanciaId) {
+                        // Alcancías siempre son propias
+                        esPropio = true;
+                    } else if (i.deudaId || i.prestamoId) {
+                        // Pagos de deudas/préstamos no afectan ingresos personales
+                        esPropio = false;
+                    }
+                    if (esPropio) total += (i.cantidad || 0);
+                });
+            } else {
+                (FinanzasApp.data.gastos || []).forEach(g => {
+                    if (g.fecha !== dateStr) return;
+                    let esPropio = false;
+                    if (g.monederoId) {
+                        const m = FinanzasApp.data.monederos.find(m => m.id === g.monederoId);
+                        if (m && m.propio !== false) esPropio = true;
+                    } else if (g.tarjetaId) {
+                        const t = FinanzasApp.data.tarjetas.find(t => t.id === g.tarjetaId);
+                        if (t && t.propio !== false) esPropio = true;
+                    } else if (g.alcanciaId) {
+                        esPropio = true;
+                    }
+                    if (esPropio) total += (g.cantidad || 0);
+                });
+            }
+            return total;
+        } catch (error) {
+            console.error('Error en getDayTotalPropios:', error);
+            return 0;
+        }
+    },
+
+    // --- NUEVO: Calcular totales de ingresos y gastos SOLO para elementos propios ---
+    calcularTotalesPropios() {
+        try {
+            const now = new Date();
+            let fechaInicio;
+            
+            switch(this.currentPeriod) {
+                case 'dia':
+                    fechaInicio = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    break;
+                case 'mes':
+                    fechaInicio = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'año':
+                    fechaInicio = new Date(now.getFullYear(), 0, 1);
+                    break;
+                default:
+                    fechaInicio = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            }
+            
+            const fechaInicioStr = `${fechaInicio.getFullYear()}-${String(fechaInicio.getMonth()+1).padStart(2,'0')}-${String(fechaInicio.getDate()).padStart(2,'0')}`;
+            
+            let ingresosPropios = 0;
+            let gastosPropios = 0;
+            
+            // Ingresos - solo los que van a monederos/tarjetas/alcancías propias
+            (FinanzasApp.data.ingresos || []).forEach(i => {
+                if (!i.fecha || i.fecha < fechaInicioStr) return;
+                let esPropio = false;
+                if (i.monederoId) {
+                    const m = FinanzasApp.data.monederos.find(m => m.id === i.monederoId);
+                    if (m && m.propio !== false) esPropio = true;
+                } else if (i.tarjetaId) {
+                    const t = FinanzasApp.data.tarjetas.find(t => t.id === i.tarjetaId);
+                    if (t && t.propio !== false) esPropio = true;
+                } else if (i.alcanciaId) {
+                    esPropio = true;
+                }
+                // Los ingresos a deudas/préstamos no son ingresos personales
+                if (esPropio) ingresosPropios += (i.cantidad || 0);
+            });
+            
+            // Gastos - solo los que salen de monederos/tarjetas/alcancías propias
+            (FinanzasApp.data.gastos || []).forEach(g => {
+                if (!g.fecha || g.fecha < fechaInicioStr) return;
+                let esPropio = false;
+                if (g.monederoId) {
+                    const m = FinanzasApp.data.monederos.find(m => m.id === g.monederoId);
+                    if (m && m.propio !== false) esPropio = true;
+                } else if (g.tarjetaId) {
+                    const t = FinanzasApp.data.tarjetas.find(t => t.id === g.tarjetaId);
+                    if (t && t.propio !== false) esPropio = true;
+                } else if (g.alcanciaId) {
+                    esPropio = true;
+                }
+                if (esPropio) gastosPropios += (g.cantidad || 0);
+            });
+            
+            return { ingresos: ingresosPropios, gastos: gastosPropios };
+        } catch (error) {
+            console.error('Error en calcularTotalesPropios:', error);
+            return { ingresos: 0, gastos: 0 };
         }
     },
 
@@ -248,9 +361,22 @@ const Dashboard = {
             
             configMetodos.forEach(m => metodos[m] = 0);
             
+            // Solo ingresos a elementos propios
             (FinanzasApp.data.ingresos || []).forEach(i => {
-                const metodo = i.metodo || 'Efectivo';
-                metodos[metodo] = (metodos[metodo] || 0) + (i.cantidad || 0);
+                let esPropio = false;
+                if (i.monederoId) {
+                    const m = FinanzasApp.data.monederos.find(m => m.id === i.monederoId);
+                    if (m && m.propio !== false) esPropio = true;
+                } else if (i.tarjetaId) {
+                    const t = FinanzasApp.data.tarjetas.find(t => t.id === i.tarjetaId);
+                    if (t && t.propio !== false) esPropio = true;
+                } else if (i.alcanciaId) {
+                    esPropio = true;
+                }
+                if (esPropio) {
+                    const metodo = i.metodo || 'Efectivo';
+                    metodos[metodo] = (metodos[metodo] || 0) + (i.cantidad || 0);
+                }
             });
             
             return Object.entries(metodos).map(([metodo, total]) => `
@@ -322,21 +448,44 @@ const Dashboard = {
         return months[month] || '';
     },
 
-    getDayTotal(dateStr, tipo) {
+    getDayTotalPropios(dateStr, tipo) {
         try {
+            let total = 0;
+            
             if (tipo === 'ingreso') {
-                if (!FinanzasApp.data.ingresos) return 0;
-                return FinanzasApp.data.ingresos
-                    .filter(i => i && i.fecha === dateStr)
-                    .reduce((sum, i) => sum + (i.cantidad || 0), 0);
+                (FinanzasApp.data.ingresos || []).forEach(i => {
+                    if (i.fecha !== dateStr) return;
+                    let esPropio = false;
+                    if (i.monederoId) {
+                        const m = FinanzasApp.data.monederos.find(m => m.id === i.monederoId);
+                        if (m && m.propio !== false) esPropio = true;
+                    } else if (i.tarjetaId) {
+                        const t = FinanzasApp.data.tarjetas.find(t => t.id === i.tarjetaId);
+                        if (t && t.propio !== false) esPropio = true;
+                    } else if (i.alcanciaId) {
+                        esPropio = true;
+                    }
+                    if (esPropio) total += (i.cantidad || 0);
+                });
             } else {
-                if (!FinanzasApp.data.gastos) return 0;
-                return FinanzasApp.data.gastos
-                    .filter(g => g && g.fecha === dateStr)
-                    .reduce((sum, g) => sum + (g.cantidad || 0), 0);
+                (FinanzasApp.data.gastos || []).forEach(g => {
+                    if (g.fecha !== dateStr) return;
+                    let esPropio = false;
+                    if (g.monederoId) {
+                        const m = FinanzasApp.data.monederos.find(m => m.id === g.monederoId);
+                        if (m && m.propio !== false) esPropio = true;
+                    } else if (g.tarjetaId) {
+                        const t = FinanzasApp.data.tarjetas.find(t => t.id === g.tarjetaId);
+                        if (t && t.propio !== false) esPropio = true;
+                    } else if (g.alcanciaId) {
+                        esPropio = true;
+                    }
+                    if (esPropio) total += (g.cantidad || 0);
+                });
             }
+            return total;
         } catch (error) {
-            console.error('Error en getDayTotal:', error);
+            console.error('Error en getDayTotalPropios:', error);
             return 0;
         }
     },
@@ -388,20 +537,33 @@ const Dashboard = {
                 return '<li class="movimiento-item">No hay movimientos este día</li>';
             }
             
-            return movimientos.map(m => `
-                <li class="movimiento-item">
-                    <div class="movimiento-icon ${m.tipo}">
-                        <i class="fas ${m.tipo === 'ingreso' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
-                    </div>
-                    <div class="movimiento-info">
-                        <div class="movimiento-concepto">${m.descripcion || (m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')}</div>
-                        <div class="movimiento-fecha"><i class="far fa-calendar-alt"></i> ${FinanzasApp.formatDate(m.fecha)} · <i class="fas fa-credit-card"></i> ${m.metodo || 'Efectivo'}</div>
-                    </div>
-                    <div class="movimiento-cantidad ${m.tipo}">
-                        ${m.tipo === 'ingreso' ? '+' : '-'} ${FinanzasApp.formatCurrency(m.cantidad || 0)}
-                    </div>
-                </li>
-            `).join('');
+            return movimientos.map(m => {
+                // Mostrar un indicador si es de terceros
+                let esPropio = true;
+                if (m.monederoId) {
+                    const mon = FinanzasApp.data.monederos.find(mo => mo.id === m.monederoId);
+                    if (mon && mon.propio === false) esPropio = false;
+                } else if (m.tarjetaId) {
+                    const tar = FinanzasApp.data.tarjetas.find(t => t.id === m.tarjetaId);
+                    if (tar && tar.propio === false) esPropio = false;
+                }
+                const badge = esPropio ? '' : '<span style="font-size:0.6rem; background:var(--info-color); color:white; padding:2px 6px; border-radius:10px; margin-left:6px;">Terceros</span>';
+                
+                return `
+                    <li class="movimiento-item">
+                        <div class="movimiento-icon ${m.tipo}">
+                            <i class="fas ${m.tipo === 'ingreso' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                        </div>
+                        <div class="movimiento-info">
+                            <div class="movimiento-concepto">${m.descripcion || (m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')} ${badge}</div>
+                            <div class="movimiento-fecha"><i class="far fa-calendar-alt"></i> ${FinanzasApp.formatDate(m.fecha)} · <i class="fas fa-credit-card"></i> ${m.metodo || 'Efectivo'}</div>
+                        </div>
+                        <div class="movimiento-cantidad ${m.tipo}">
+                            ${m.tipo === 'ingreso' ? '+' : '-'} ${FinanzasApp.formatCurrency(m.cantidad || 0)}
+                        </div>
+                    </li>
+                `;
+            }).join('');
         } catch (error) {
             console.error('Error en renderMovimientosDia:', error);
             return '<li class="movimiento-item">Error al cargar movimientos</li>';
@@ -417,7 +579,7 @@ const Dashboard = {
                 this.chart.destroy();
             }
             
-            const { labels, ingresosData, gastosData } = this.getChartData();
+            const { labels, ingresosData, gastosData } = this.getChartDataPropios();
             
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             
@@ -427,7 +589,7 @@ const Dashboard = {
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Ingresos',
+                            label: 'Ingresos (Propios)',
                             data: ingresosData,
                             borderColor: isDark ? '#4cd964' : '#25D366',
                             backgroundColor: isDark ? 'rgba(76, 217, 100, 0.1)' : 'rgba(37, 211, 102, 0.1)',
@@ -435,7 +597,7 @@ const Dashboard = {
                             fill: true
                         },
                         {
-                            label: 'Gastos',
+                            label: 'Gastos (Propios)',
                             data: gastosData,
                             borderColor: isDark ? '#ff5e5e' : '#f15c5c',
                             backgroundColor: isDark ? 'rgba(255, 94, 94, 0.1)' : 'rgba(241, 92, 92, 0.1)',
@@ -496,12 +658,26 @@ const Dashboard = {
         }
     },
 
-    getChartData() {
+    getChartDataPropios() {
         try {
             const now = new Date();
             let labels = [];
             let ingresosData = [];
             let gastosData = [];
+            
+            // Función para verificar si un ingreso/gasto es propio
+            const esPropio = (item) => {
+                if (item.monederoId) {
+                    const m = FinanzasApp.data.monederos.find(mo => mo.id === item.monederoId);
+                    return m && m.propio !== false;
+                } else if (item.tarjetaId) {
+                    const t = FinanzasApp.data.tarjetas.find(ta => ta.id === item.tarjetaId);
+                    return t && t.propio !== false;
+                } else if (item.alcanciaId) {
+                    return true;
+                }
+                return false;
+            };
             
             switch(this.currentPeriod) {
                 case 'dia':
@@ -514,19 +690,22 @@ const Dashboard = {
                         const horaFin = new Date(now);
                         horaFin.setHours(hour + 2, 0, 0, 0);
                         
-                        const ingresos = (FinanzasApp.data.ingresos || [])
-                            .filter(i => {
-                                const fecha = new Date(i.fecha + 'T' + (i.hora || '12:00:00'));
-                                return fecha >= horaInicio && fecha < horaFin;
-                            })
-                            .reduce((sum, i) => sum + (i.cantidad || 0), 0);
+                        let ingresos = 0;
+                        let gastos = 0;
                         
-                        const gastos = (FinanzasApp.data.gastos || [])
-                            .filter(g => {
-                                const fecha = new Date(g.fecha + 'T' + (g.hora || '12:00:00'));
-                                return fecha >= horaInicio && fecha < horaFin;
-                            })
-                            .reduce((sum, g) => sum + (g.cantidad || 0), 0);
+                        (FinanzasApp.data.ingresos || []).forEach(i => {
+                            const fecha = new Date(i.fecha + 'T' + (i.hora || '12:00:00'));
+                            if (fecha >= horaInicio && fecha < horaFin && esPropio(i)) {
+                                ingresos += (i.cantidad || 0);
+                            }
+                        });
+                        
+                        (FinanzasApp.data.gastos || []).forEach(g => {
+                            const fecha = new Date(g.fecha + 'T' + (g.hora || '12:00:00'));
+                            if (fecha >= horaInicio && fecha < horaFin && esPropio(g)) {
+                                gastos += (g.cantidad || 0);
+                            }
+                        });
                         
                         ingresosData.push(ingresos);
                         gastosData.push(gastos);
@@ -541,13 +720,20 @@ const Dashboard = {
                         
                         labels.push(date.getDate().toString());
                         
-                        const ingresos = (FinanzasApp.data.ingresos || [])
-                            .filter(i => i && i.fecha === dateStr)
-                            .reduce((sum, i) => sum + (i.cantidad || 0), 0);
+                        let ingresos = 0;
+                        let gastos = 0;
                         
-                        const gastos = (FinanzasApp.data.gastos || [])
-                            .filter(g => g && g.fecha === dateStr)
-                            .reduce((sum, g) => sum + (g.cantidad || 0), 0);
+                        (FinanzasApp.data.ingresos || []).forEach(i => {
+                            if (i.fecha === dateStr && esPropio(i)) {
+                                ingresos += (i.cantidad || 0);
+                            }
+                        });
+                        
+                        (FinanzasApp.data.gastos || []).forEach(g => {
+                            if (g.fecha === dateStr && esPropio(g)) {
+                                gastos += (g.cantidad || 0);
+                            }
+                        });
                         
                         ingresosData.push(ingresos);
                         gastosData.push(gastos);
@@ -563,13 +749,20 @@ const Dashboard = {
                         const month = date.getMonth() + 1;
                         const monthStr = `${year}-${String(month).padStart(2,'0')}`;
                         
-                        const ingresos = (FinanzasApp.data.ingresos || [])
-                            .filter(i => i && i.fecha && i.fecha.startsWith(monthStr))
-                            .reduce((sum, i) => sum + (i.cantidad || 0), 0);
+                        let ingresos = 0;
+                        let gastos = 0;
                         
-                        const gastos = (FinanzasApp.data.gastos || [])
-                            .filter(g => g && g.fecha && g.fecha.startsWith(monthStr))
-                            .reduce((sum, g) => sum + (g.cantidad || 0), 0);
+                        (FinanzasApp.data.ingresos || []).forEach(i => {
+                            if (i.fecha && i.fecha.startsWith(monthStr) && esPropio(i)) {
+                                ingresos += (i.cantidad || 0);
+                            }
+                        });
+                        
+                        (FinanzasApp.data.gastos || []).forEach(g => {
+                            if (g.fecha && g.fecha.startsWith(monthStr) && esPropio(g)) {
+                                gastos += (g.cantidad || 0);
+                            }
+                        });
                         
                         ingresosData.push(ingresos);
                         gastosData.push(gastos);
@@ -579,14 +772,15 @@ const Dashboard = {
             
             return { labels, ingresosData, gastosData };
         } catch (error) {
-            console.error('Error en getChartData:', error);
+            console.error('Error en getChartDataPropios:', error);
             return { labels: [], ingresosData: [], gastosData: [] };
         }
     },
 
     updateResumen() {
         try {
-            const { ingresos, gastos } = this.calcularTotales();
+            // Usar el nuevo método que filtra por propios
+            const { ingresos, gastos } = this.calcularTotalesPropios();
             
             document.getElementById('totalIngresos').textContent = FinanzasApp.formatCurrency(ingresos || 0);
             document.getElementById('totalGastos').textContent = FinanzasApp.formatCurrency(gastos || 0);
@@ -622,41 +816,8 @@ const Dashboard = {
         }
     },
 
-    calcularTotales() {
-        try {
-            const now = new Date();
-            let fechaInicio;
-            
-            switch(this.currentPeriod) {
-                case 'dia':
-                    fechaInicio = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                    break;
-                case 'mes':
-                    fechaInicio = new Date(now.getFullYear(), now.getMonth(), 1);
-                    break;
-                case 'año':
-                    fechaInicio = new Date(now.getFullYear(), 0, 1);
-                    break;
-                default:
-                    fechaInicio = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            }
-            
-            const fechaInicioStr = `${fechaInicio.getFullYear()}-${String(fechaInicio.getMonth()+1).padStart(2,'0')}-${String(fechaInicio.getDate()).padStart(2,'0')}`;
-            
-            const ingresos = (FinanzasApp.data.ingresos || [])
-                .filter(i => i && i.fecha && i.fecha >= fechaInicioStr)
-                .reduce((sum, i) => sum + (i.cantidad || 0), 0);
-            
-            const gastos = (FinanzasApp.data.gastos || [])
-                .filter(g => g && g.fecha && g.fecha >= fechaInicioStr)
-                .reduce((sum, g) => sum + (g.cantidad || 0), 0);
-            
-            return { ingresos, gastos };
-        } catch (error) {
-            console.error('Error en calcularTotales:', error);
-            return { ingresos: 0, gastos: 0 };
-        }
-    },
+    // --- Método para los gráficos (ya no se usa el anterior) ---
+    // getChartData() ha sido reemplazado por getChartDataPropios()
 
     renderUltimosMovimientos() {
         try {
@@ -672,20 +833,32 @@ const Dashboard = {
                 return '<li class="movimiento-item">No hay movimientos recientes</li>';
             }
 
-            return todos.map(m => `
-                <li class="movimiento-item">
-                    <div class="movimiento-icon ${m.tipo}">
-                        <i class="fas ${m.tipo === 'ingreso' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
-                    </div>
-                    <div class="movimiento-info">
-                        <div class="movimiento-concepto">${m.descripcion || (m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')}</div>
-                        <div class="movimiento-fecha"><i class="far fa-calendar-alt"></i> ${FinanzasApp.formatDate(m.fecha)} · <i class="fas fa-credit-card"></i> ${m.metodo || 'Efectivo'}</div>
-                    </div>
-                    <div class="movimiento-cantidad ${m.tipo}">
-                        ${m.tipo === 'ingreso' ? '+' : '-'} ${FinanzasApp.formatCurrency(m.cantidad || 0)}
-                    </div>
-                </li>
-            `).join('');
+            return todos.map(m => {
+                let esPropio = true;
+                if (m.monederoId) {
+                    const mon = FinanzasApp.data.monederos.find(mo => mo.id === m.monederoId);
+                    if (mon && mon.propio === false) esPropio = false;
+                } else if (m.tarjetaId) {
+                    const tar = FinanzasApp.data.tarjetas.find(t => t.id === m.tarjetaId);
+                    if (tar && tar.propio === false) esPropio = false;
+                }
+                const badge = esPropio ? '' : '<span style="font-size:0.6rem; background:var(--info-color); color:white; padding:2px 6px; border-radius:10px; margin-left:6px;">Terceros</span>';
+                
+                return `
+                    <li class="movimiento-item">
+                        <div class="movimiento-icon ${m.tipo}">
+                            <i class="fas ${m.tipo === 'ingreso' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                        </div>
+                        <div class="movimiento-info">
+                            <div class="movimiento-concepto">${m.descripcion || (m.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')} ${badge}</div>
+                            <div class="movimiento-fecha"><i class="far fa-calendar-alt"></i> ${FinanzasApp.formatDate(m.fecha)} · <i class="fas fa-credit-card"></i> ${m.metodo || 'Efectivo'}</div>
+                        </div>
+                        <div class="movimiento-cantidad ${m.tipo}">
+                            ${m.tipo === 'ingreso' ? '+' : '-'} ${FinanzasApp.formatCurrency(m.cantidad || 0)}
+                        </div>
+                    </li>
+                `;
+            }).join('');
         } catch (error) {
             console.error('Error en renderUltimosMovimientos:', error);
             return '<li class="movimiento-item">Error al cargar movimientos</li>';
