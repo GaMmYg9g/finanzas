@@ -8,35 +8,22 @@ const Monedero = {
                 </div>
 
                 <div class="card">
-                    <h3 class="section-title"><i class="fas fa-credit-card"></i> Mis tarjetas</h3>
-                    <button class="btn btn-primary" id="nuevaTarjeta"><i class="fas fa-plus-circle"></i> Nueva tarjeta</button>
-                </div>
-
-                <div class="card">
-                    <h3 class="section-title"><i class="fas fa-calculator"></i> Total general</h3>
+                    <h3 class="section-title"><i class="fas fa-calculator"></i> Total en efectivo</h3>
                     <div class="resumen-value balance" id="totalGeneralMonedero">
-                        ${this.calcularTotalGeneral()}
+                        ${this.calcularTotalMonederos()}
                     </div>
                 </div>
 
                 <div id="listaMonederos">
-                    <h4 class="section-subtitle"><i class="fas fa-wallet"></i> Monederos</h4>
+                    <h4 class="section-subtitle"><i class="fas fa-wallet"></i> Mis monederos</h4>
                     ${this.renderMonederos()}
-                </div>
-
-                <div id="listaTarjetas">
-                    <h4 class="section-subtitle"><i class="fas fa-credit-card"></i> Tarjetas</h4>
-                    ${this.renderTarjetas()}
                 </div>
             </div>
         `;
     },
 
-    calcularTotalGeneral() {
-        const totalMonederos = FinanzasApp.data.monederos.reduce((sum, m) => sum + (m.saldo || 0), 0);
-        const totalTarjetas = FinanzasApp.data.tarjetas.reduce((sum, t) => sum + (t.saldo || 0), 0);
-        const totalAlcancia = FinanzasApp.data.alcancias.reduce((sum, a) => sum + (a.saldo || 0), 0);
-        const total = totalMonederos + totalTarjetas + totalAlcancia;
+    calcularTotalMonederos() {
+        const total = FinanzasApp.data.monederos.reduce((sum, m) => sum + (m.saldo || 0), 0);
         return FinanzasApp.formatCurrency(total);
     },
 
@@ -79,56 +66,9 @@ const Monedero = {
         }).join('');
     },
 
-    renderTarjetas() {
-        if (!FinanzasApp.data.tarjetas) {
-            FinanzasApp.data.tarjetas = [];
-        }
-        
-        const tarjetas = FinanzasApp.data.tarjetas;
-        
-        if (tarjetas.length === 0) {
-            return '<p class="empty-state"><i class="fas fa-info-circle"></i> No hay tarjetas creadas.</p>';
-        }
-
-        return tarjetas.map(t => {
-            const saldoUSD = FinanzasApp.formatUSD(t.saldo);
-            return `
-                <div class="card" data-tarjeta-id="${t.id}">
-                    <div class="monedero-header">
-                        <h4>
-                            <i class="fas fa-credit-card"></i> ${t.nombre}
-                            ${t.tipo === 'principal' ? '<span class="text-secondary">(Principal)</span>' : ''}
-                        </h4>
-                        <span class="monedero-saldo">
-                            ${FinanzasApp.formatCurrency(t.saldo)}
-                            <span style="font-size:0.8rem; font-weight:400; color:var(--text-secondary);">${saldoUSD}</span>
-                        </span>
-                    </div>
-                    
-                    <div class="monedero-actions">
-                        <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${t.id}', 'tarjeta')">
-                            <i class="fas fa-exchange-alt"></i> Transferir
-                        </button>
-                        <button class="btn btn-secondary" onclick="Monedero.editarTarjeta('${t.id}')">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        ${t.tipo !== 'principal' ? `
-                            <button class="btn btn-secondary" onclick="Monedero.eliminarTarjeta('${t.id}')">
-                                <i class="fas fa-trash-alt"></i> Eliminar
-                            </button>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        }).join('');
-    },
-
     init() {
         document.getElementById('nuevoMonedero').addEventListener('click', () => {
             this.mostrarFormNuevoMonedero();
-        });
-        document.getElementById('nuevaTarjeta').addEventListener('click', () => {
-            this.mostrarFormNuevaTarjeta();
         });
     },
 
@@ -147,21 +87,6 @@ const Monedero = {
         }
     },
 
-    async mostrarFormNuevaTarjeta() {
-        const nombre = await FinanzasApp.showPrompt('Nueva tarjeta', 'Nombre de la tarjeta:', 'text');
-        if (nombre && nombre.trim()) {
-            FinanzasApp.data.tarjetas.push({
-                id: 't' + Date.now().toString(),
-                nombre: nombre.trim(),
-                saldo: 0,
-                tipo: 'secundario'
-            });
-            await FinanzasApp.showMessage('Tarjeta creada', `La tarjeta "${nombre}" se ha creado correctamente.`, 'success');
-            FinanzasApp.saveData();
-            this.actualizarVista();
-        }
-    },
-
     async editarMonedero(id) {
         const monedero = FinanzasApp.data.monederos.find(m => m.id === id);
         if (!monedero) return;
@@ -170,19 +95,6 @@ const Monedero = {
         if (nuevoNombre && nuevoNombre.trim() && nuevoNombre !== monedero.nombre) {
             monedero.nombre = nuevoNombre.trim();
             await FinanzasApp.showMessage('Nombre actualizado', 'El nombre del monedero se ha actualizado correctamente.', 'success');
-            FinanzasApp.saveData();
-            this.actualizarVista();
-        }
-    },
-
-    async editarTarjeta(id) {
-        const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === id);
-        if (!tarjeta) return;
-        
-        const nuevoNombre = await FinanzasApp.showPrompt('Editar tarjeta', 'Nuevo nombre:', 'text', tarjeta.nombre);
-        if (nuevoNombre && nuevoNombre.trim() && nuevoNombre !== tarjeta.nombre) {
-            tarjeta.nombre = nuevoNombre.trim();
-            await FinanzasApp.showMessage('Nombre actualizado', 'El nombre de la tarjeta se ha actualizado correctamente.', 'success');
             FinanzasApp.saveData();
             this.actualizarVista();
         }
@@ -207,30 +119,12 @@ const Monedero = {
         this.actualizarVista();
     },
 
-    async eliminarTarjeta(id) {
-        const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === id);
-        if (!tarjeta) return;
-        
-        if (tarjeta.saldo > 0) {
-            const confirmar = await FinanzasApp.showConfirm('Eliminar tarjeta', 
-                `La tarjeta tiene ${FinanzasApp.formatCurrency(tarjeta.saldo)}.\n\n¿Estás seguro de eliminarla? El dinero se perderá.`);
-            if (!confirmar) return;
-        } else {
-            const confirmar = await FinanzasApp.showConfirm('Eliminar tarjeta', 
-                `¿Estás seguro de eliminar la tarjeta "${tarjeta.nombre}"?`);
-            if (!confirmar) return;
-        }
-        
-        FinanzasApp.data.tarjetas = FinanzasApp.data.tarjetas.filter(t => t.id !== id);
-        FinanzasApp.saveData();
-        this.actualizarVista();
-    },
-
     async mostrarTransferencia(origenId, tipoOrigen) {
+        // Destinos: otros monederos, tarjetas y alcancías
         const destinos = [];
         
         FinanzasApp.data.monederos.forEach(m => {
-            if (!(tipoOrigen === 'monedero' && m.id === origenId)) {
+            if (m.id !== origenId) {
                 destinos.push({
                     id: m.id,
                     tipo: 'monedero',
@@ -241,14 +135,12 @@ const Monedero = {
         });
         
         FinanzasApp.data.tarjetas.forEach(t => {
-            if (!(tipoOrigen === 'tarjeta' && t.id === origenId)) {
-                destinos.push({
-                    id: t.id,
-                    tipo: 'tarjeta',
-                    nombre: t.nombre,
-                    saldo: t.saldo
-                });
-            }
+            destinos.push({
+                id: t.id,
+                tipo: 'tarjeta',
+                nombre: t.nombre,
+                saldo: t.saldo
+            });
         });
         
         FinanzasApp.data.alcancias.forEach(a => {
@@ -265,10 +157,7 @@ const Monedero = {
             return;
         }
         
-        const origen = tipoOrigen === 'monedero' 
-            ? FinanzasApp.data.monederos.find(m => m.id === origenId)
-            : FinanzasApp.data.tarjetas.find(t => t.id === origenId);
-        
+        const origen = FinanzasApp.data.monederos.find(m => m.id === origenId);
         if (!origen) return;
         
         const opciones = destinos.map((d, index) => ({
@@ -316,7 +205,7 @@ const Monedero = {
             
             FinanzasApp.saveData();
             await FinanzasApp.showMessage('Transferencia completada', 
-                `Se han transferido ${FinanzasApp.formatCurrency(cantidad)}.`, 
+                `Se han transferido ${FinanzasApp.formatCurrency(cantidad)} de "${origen.nombre}" a "${destino.nombre}".`, 
                 'success');
             this.actualizarVista();
         } else {
