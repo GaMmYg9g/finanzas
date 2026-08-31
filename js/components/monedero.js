@@ -36,6 +36,8 @@ const Monedero = {
 
         return monederos.map(m => {
             const saldoUSD = FinanzasApp.formatUSD(m.saldo);
+            const esPropio = m.propio !== false;
+            
             return `
                 <div class="card" data-monedero-id="${m.id}">
                     <div class="monedero-header">
@@ -52,6 +54,16 @@ const Monedero = {
                         <button class="btn btn-secondary" onclick="Monedero.mostrarTransferencia('${m.id}', 'monedero')">
                             <i class="fas fa-exchange-alt"></i> Transferir
                         </button>
+                        
+                        <div class="switch-container">
+                            <span class="switch-label ${!esPropio ? 'active' : ''}">Terceros</span>
+                            <label class="switch">
+                                <input type="checkbox" ${esPropio ? 'checked' : ''} onchange="Monedero.togglePropiedad('${m.id}')">
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="switch-label ${esPropio ? 'active' : ''}">Propio</span>
+                        </div>
+                        
                         <button class="btn btn-secondary" onclick="Monedero.editarMonedero('${m.id}')">
                             <i class="fas fa-edit"></i> Editar
                         </button>
@@ -79,7 +91,8 @@ const Monedero = {
                 id: 'm' + Date.now().toString(),
                 nombre: nombre.trim(),
                 saldo: 0,
-                tipo: 'secundario'
+                tipo: 'secundario',
+                propio: true
             });
             await FinanzasApp.showMessage('Monedero creado', `El monedero "${nombre}" se ha creado correctamente.`, 'success');
             FinanzasApp.saveData();
@@ -119,8 +132,24 @@ const Monedero = {
         this.actualizarVista();
     },
 
+    async togglePropiedad(id) {
+        const monedero = FinanzasApp.data.monederos.find(m => m.id === id);
+        if (!monedero) return;
+        
+        const nuevoEstado = !monedero.propio;
+        const mensaje = nuevoEstado ? 'propio' : 'de terceros';
+        monedero.propio = nuevoEstado;
+        FinanzasApp.saveData();
+        this.actualizarVista();
+        FinanzasApp.updateTotalGeneral();
+        FinanzasApp.showMessage(
+            'Propiedad actualizada',
+            `"${monedero.nombre}" ahora es ${mensaje}.`,
+            'success'
+        );
+    },
+
     async mostrarTransferencia(origenId, tipoOrigen) {
-        // Destinos: otros monederos, tarjetas y alcancías
         const destinos = [];
         
         FinanzasApp.data.monederos.forEach(m => {
