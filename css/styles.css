@@ -2354,3 +2354,111 @@ select:focus, .select-limpio:focus, .destino-select:focus {
         font-size: 0.75rem;
     }
 }
+/* ===== SWITCH PERSONALIZADO ===== */
+.switch-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0.5rem;
+}
+
+.switch-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    opacity: 0.4;
+    transition: opacity 0.3s, color 0.3s;
+    user-select: none;
+}
+
+.switch-label.active {
+    opacity: 1;
+    color: var(--text-primary);
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: 0.3s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .slider {
+    background-color: var(--accent-color);
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px var(--accent-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(18px);
+}
+
+/* Modo oscuro */
+[data-theme="dark"] .slider {
+    background-color: #3a4a55;
+}
+
+[data-theme="dark"] .slider:before {
+    background-color: #e2e8f0;
+}
+
+[data-theme="dark"] input:checked + .slider {
+    background-color: var(--accent-color);
+}
+
+/* Responsive para el switch */
+@media (max-width: 600px) {
+    .switch-container {
+        margin: 0.25rem 0;
+    }
+    .switch {
+        width: 34px;
+        height: 18px;
+    }
+    .slider:before {
+        height: 12px;
+        width: 12px;
+        left: 3px;
+        bottom: 3px;
+    }
+    input:checked + .slider:before {
+        transform: translateX(16px);
+    }
+    .switch-label {
+        font-size: 0.65rem;
+    }
+}
