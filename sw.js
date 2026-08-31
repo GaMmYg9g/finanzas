@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finanzas-v8'; // Versión aumentada para forzar actualización
+const CACHE_NAME = 'finanzas-v9'; // Versión aumentada para forzar actualización
 const urlsToCache = [
     '.',
     './index.html',
