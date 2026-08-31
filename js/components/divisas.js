@@ -1,6 +1,9 @@
 const Divisas = {
     render() {
         const tasa = FinanzasApp.data.config.tasaUSD || 0;
+        const { totalPropio, totalTerceros } = FinanzasApp.calcularTotalesPorPropiedad();
+        const totalGeneral = totalPropio + totalTerceros;
+        
         return `
             <div class="divisas-view">
                 <div class="card">
@@ -20,11 +23,20 @@ const Divisas = {
                     <div class="stats-card">
                         <div class="stats-row">
                             <span class="stats-label"><i class="fas fa-coins"></i> Total general (CUP)</span>
-                            <span class="stats-value" id="previewTotalCUP">${FinanzasApp.formatCurrency(FinanzasApp.calcularTotalGeneral())}</span>
+                            <span class="stats-value" id="previewTotalCUP">${FinanzasApp.formatCurrency(totalGeneral)}</span>
                         </div>
                         <div class="stats-row">
                             <span class="stats-label"><i class="fas fa-dollar-sign"></i> Total general (USD)</span>
-                            <span class="stats-value" id="previewTotalUSD">${FinanzasApp.formatUSD(FinanzasApp.calcularTotalGeneral())}</span>
+                            <span class="stats-value" id="previewTotalUSD">${FinanzasApp.formatUSD(totalGeneral)}</span>
+                        </div>
+                        <div class="stats-divider"></div>
+                        <div class="stats-row">
+                            <span class="stats-label"><i class="fas fa-user" style="color:var(--success-color);"></i> Total propio (USD)</span>
+                            <span class="stats-value" style="color:var(--success-color);">${FinanzasApp.formatUSD(totalPropio)}</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="stats-label"><i class="fas fa-user-friends" style="color:var(--info-color);"></i> Total terceros (USD)</span>
+                            <span class="stats-value" style="color:var(--info-color);">${FinanzasApp.formatUSD(totalTerceros)}</span>
                         </div>
                     </div>
                 </div>
