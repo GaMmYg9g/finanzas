@@ -36,8 +36,15 @@ const Dashboard = {
                         <div class="resumen-item" style="background-color: var(--accent-color); border-color: var(--accent-color);">
                             <div class="resumen-label" style="color: white; opacity: 0.9;"><i class="fas fa-dollar-sign"></i> Total en USD</div>
                             <div class="resumen-value" id="totalUSD" style="color: white; font-size: 1.4rem;">
-                                ${FinanzasApp.formatUSD(FinanzasApp.calcularTotalGeneral())}
+                                ${FinanzasApp.formatUSD(FinanzasApp.calcularTotalesPorPropiedad().totalPropio)}
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="section-title"><i class="fas fa-users"></i> Resumen por propiedad</h3>
+                        <div id="resumenPropiedad">
+                            ${this.renderResumenPropiedad()}
                         </div>
                     </div>
 
@@ -138,6 +145,29 @@ const Dashboard = {
             console.error('Error en Dashboard.render():', error);
             return '<div class="card"><p class="empty-state">Error al cargar el dashboard</p></div>';
         }
+    },
+
+    renderResumenPropiedad() {
+        const { totalPropio, totalTerceros } = FinanzasApp.calcularTotalesPorPropiedad();
+        const totalGeneral = totalPropio + totalTerceros;
+        
+        return `
+            <div class="stats-card">
+                <div class="stats-row">
+                    <span class="stats-label"><i class="fas fa-user" style="color:var(--success-color);"></i> Total propio</span>
+                    <span class="stats-value">${FinanzasApp.formatCurrency(totalPropio)}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label"><i class="fas fa-user-friends" style="color:var(--info-color);"></i> Total de terceros</span>
+                    <span class="stats-value">${FinanzasApp.formatCurrency(totalTerceros)}</span>
+                </div>
+                <div class="stats-divider"></div>
+                <div class="stats-row">
+                    <span class="stats-label"><i class="fas fa-coins"></i> Total general</span>
+                    <span class="stats-value">${FinanzasApp.formatCurrency(totalGeneral)}</span>
+                </div>
+            </div>
+        `;
     },
 
     renderResumenDeudas() {
@@ -562,10 +592,13 @@ const Dashboard = {
             document.getElementById('totalGastos').textContent = FinanzasApp.formatCurrency(gastos || 0);
             document.getElementById('totalBalance').textContent = FinanzasApp.formatCurrency((ingresos || 0) - (gastos || 0));
             
-            const totalGeneral = FinanzasApp.calcularTotalGeneral();
-            const totalUSD = document.getElementById('totalUSD');
-            if (totalUSD) {
-                totalUSD.textContent = FinanzasApp.formatUSD(totalGeneral);
+            const { totalPropio } = FinanzasApp.calcularTotalesPorPropiedad();
+            document.getElementById('totalUSD').textContent = FinanzasApp.formatUSD(totalPropio);
+            
+            // Actualizar resumen de propiedad
+            const resumenPropiedad = document.getElementById('resumenPropiedad');
+            if (resumenPropiedad) {
+                resumenPropiedad.innerHTML = this.renderResumenPropiedad();
             }
             
             const resumenDeudas = document.getElementById('resumenDeudas');
