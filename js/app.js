@@ -107,6 +107,7 @@ const FinanzasApp = {
             dashboard: '<i class="fas fa-chart-pie"></i> Resumen',
             alcancia: '<i class="fas fa-piggy-bank"></i> Alcancía',
             monedero: '<i class="fas fa-coins"></i> Monedero',
+            tarjetas: '<i class="fas fa-credit-card"></i> Tarjetas',
             ingresos: '<i class="fas fa-arrow-down"></i> Ingresos',
             gastos: '<i class="fas fa-arrow-up"></i> Gastos',
             deudas: '<i class="fas fa-hand-holding-usd"></i> Deudas',
@@ -146,6 +147,13 @@ const FinanzasApp = {
                     if (typeof Monedero !== 'undefined') {
                         container.innerHTML = Monedero.render();
                         if (Monedero.init) Monedero.init();
+                    }
+                    break;
+                    
+                case 'tarjetas':
+                    if (typeof Tarjetas !== 'undefined') {
+                        container.innerHTML = Tarjetas.render();
+                        if (Tarjetas.init) Tarjetas.init();
                     }
                     break;
                     
@@ -336,10 +344,12 @@ const FinanzasApp = {
             const toast = document.createElement('div');
             toast.className = `toast-message toast-${tipo}`;
             
-            const icono = tipo === 'success' ? '✓' : tipo === 'error' ? '✗' : tipo === 'warning' ? '!' : 'i';
+            const icono = tipo === 'success' ? 'fa-check-circle' : 
+                          tipo === 'error' ? 'fa-times-circle' : 
+                          tipo === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
             
             toast.innerHTML = `
-                <div class="toast-icon" style="font-weight: 700; font-size: 1.2rem;">${icono}</div>
+                <div class="toast-icon"><i class="fas ${icono}"></i></div>
                 <div class="toast-content">
                     <div class="toast-title">${titulo}</div>
                     <div class="toast-text">${mensaje}</div>
