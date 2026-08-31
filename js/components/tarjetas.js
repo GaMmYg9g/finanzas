@@ -36,6 +36,8 @@ const Tarjetas = {
 
         return tarjetas.map(t => {
             const saldoUSD = FinanzasApp.formatUSD(t.saldo);
+            const esPropio = t.propio !== false;
+            
             return `
                 <div class="card" data-tarjeta-id="${t.id}">
                     <div class="monedero-header">
@@ -53,6 +55,16 @@ const Tarjetas = {
                         <button class="btn btn-secondary" onclick="Tarjetas.mostrarTransferencia('${t.id}', 'tarjeta')">
                             <i class="fas fa-exchange-alt"></i> Transferir
                         </button>
+                        
+                        <div class="switch-container">
+                            <span class="switch-label ${!esPropio ? 'active' : ''}">Terceros</span>
+                            <label class="switch">
+                                <input type="checkbox" ${esPropio ? 'checked' : ''} onchange="Tarjetas.togglePropiedad('${t.id}')">
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="switch-label ${esPropio ? 'active' : ''}">Propio</span>
+                        </div>
+                        
                         <button class="btn btn-secondary" onclick="Tarjetas.editarTarjeta('${t.id}')">
                             <i class="fas fa-edit"></i> Editar
                         </button>
@@ -80,7 +92,8 @@ const Tarjetas = {
                 id: 't' + Date.now().toString(),
                 nombre: nombre.trim(),
                 saldo: 0,
-                tipo: 'secundario'
+                tipo: 'secundario',
+                propio: true
             });
             await FinanzasApp.showMessage('Tarjeta creada', `La tarjeta "${nombre}" se ha creado correctamente.`, 'success');
             FinanzasApp.saveData();
@@ -120,8 +133,24 @@ const Tarjetas = {
         this.actualizarVista();
     },
 
+    async togglePropiedad(id) {
+        const tarjeta = FinanzasApp.data.tarjetas.find(t => t.id === id);
+        if (!tarjeta) return;
+        
+        const nuevoEstado = !tarjeta.propio;
+        const mensaje = nuevoEstado ? 'propia' : 'de terceros';
+        tarjeta.propio = nuevoEstado;
+        FinanzasApp.saveData();
+        this.actualizarVista();
+        FinanzasApp.updateTotalGeneral();
+        FinanzasApp.showMessage(
+            'Propiedad actualizada',
+            `"${tarjeta.nombre}" ahora es ${mensaje}.`,
+            'success'
+        );
+    },
+
     async mostrarTransferencia(origenId, tipoOrigen) {
-        // Destinos: monederos, otras tarjetas y alcancías
         const destinos = [];
         
         FinanzasApp.data.monederos.forEach(m => {
