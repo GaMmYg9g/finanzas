@@ -198,6 +198,29 @@ const FinanzasApp = {
         }
     },
 
+    calcularTotalesPorPropiedad() {
+        let totalPropio = 0;
+        let totalTerceros = 0;
+        
+        this.data.monederos.forEach(m => {
+            const saldo = m.saldo || 0;
+            if (m.propio) totalPropio += saldo;
+            else totalTerceros += saldo;
+        });
+        
+        this.data.tarjetas.forEach(t => {
+            const saldo = t.saldo || 0;
+            if (t.propio) totalPropio += saldo;
+            else totalTerceros += saldo;
+        });
+        
+        this.data.alcancias.forEach(a => {
+            totalPropio += (a.saldo || 0);
+        });
+        
+        return { totalPropio, totalTerceros };
+    },
+
     calcularTotalGeneral() {
         const totalMonederos = this.data.monederos.reduce((s, m) => s + (m.saldo || 0), 0);
         const totalTarjetas = this.data.tarjetas.reduce((s, t) => s + (t.saldo || 0), 0);
@@ -218,16 +241,17 @@ const FinanzasApp = {
     },
 
     updateTotalGeneral() {
-        const total = this.calcularTotalGeneral();
+        // Solo mostramos el total de fondos PROPIOS en el header
+        const { totalPropio } = this.calcularTotalesPorPropiedad();
         
         const totalGeneral = document.getElementById('totalGeneral');
         if (totalGeneral) {
-            totalGeneral.textContent = `${total.toFixed(2)} $`;
+            totalGeneral.textContent = `${totalPropio.toFixed(2)} $`;
         }
         
         const totalGeneralUSD = document.getElementById('totalGeneralUSD');
         if (totalGeneralUSD) {
-            totalGeneralUSD.textContent = this.formatUSD(total);
+            totalGeneralUSD.textContent = this.formatUSD(totalPropio);
         }
     },
 
@@ -264,6 +288,13 @@ const FinanzasApp = {
                 if (!this.data.config.tiposIngreso) this.data.config.tiposIngreso = ['Salario', 'Transferencias'];
                 if (!this.data.config.tiposGasto) this.data.config.tiposGasto = ['Renta'];
                 if (this.data.config.tasaUSD === undefined) this.data.config.tasaUSD = 0;
+                
+                this.data.monederos.forEach(m => {
+                    if (m.propio === undefined) m.propio = true;
+                });
+                this.data.tarjetas.forEach(t => {
+                    if (t.propio === undefined) t.propio = true;
+                });
             } catch (e) {
                 console.warn('Error al cargar datos, usando datos por defecto');
                 this.data = this.getDefaultData();
@@ -276,10 +307,10 @@ const FinanzasApp = {
     getDefaultData() {
         return {
             monederos: [
-                { id: 'm1', nombre: 'Mi monedero', saldo: 0, tipo: 'principal' }
+                { id: 'm1', nombre: 'Mi monedero', saldo: 0, tipo: 'principal', propio: true }
             ],
             tarjetas: [
-                { id: 't1', nombre: 'Mi tarjeta', saldo: 0, tipo: 'principal' }
+                { id: 't1', nombre: 'Mi tarjeta', saldo: 0, tipo: 'principal', propio: true }
             ],
             alcancias: [],
             deudas: [],
